@@ -15,8 +15,9 @@ public class AlunoService {
         this.quizQuestaoDAO = quizQuestaoDAO;
     }
 
-    void buscarHistoricoQuizzes(long idAluno) {
-//        alunoDao.<>
+    public void buscarHistoricoQuizzes(long idAluno) {
     }
-    void buscarRespostasQuiz(long idAluno, long idQuiz) {}
+    
+    public void buscarRespostasQuiz(long idAluno, long idQuiz) {
+    }
 }

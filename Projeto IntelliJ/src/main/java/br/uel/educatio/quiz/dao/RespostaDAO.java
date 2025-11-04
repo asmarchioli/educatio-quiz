@@ -100,12 +100,4 @@ public class RespostaDAO {
         String sql = "DELETE FROM resposta WHERE id_resposta = ?";
         jdbcTemplate.update(sql, id);
     }
-
-
-    public List< findQuizzesFeitos(long idAluno) {
-        String sql = "SELECT  FROM quiz_questao as qq LEFT JOIN  WHERE id_aluno = ?";
-         = jdbcTemplate.query(sql, new Object[]{idAluno}, rowMapper);
-        return Optional.ofNullable(professor);
-        return
-    }
 }

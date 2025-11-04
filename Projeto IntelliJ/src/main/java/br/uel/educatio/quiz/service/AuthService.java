@@ -35,7 +35,7 @@ public class AuthService {
         professorDAO.save(professor);
     }
 
-    public static Optional<?> autenticarUsuario(String email, String senha) {
+    public Optional<?> autenticarUsuario(String email, String senha) {
         Optional<Aluno> aluno = alunoDAO.findByEmail(email);
         if (aluno.isPresent() && aluno.get().getSenha().equals(senha)) {
             return aluno;

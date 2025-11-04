@@ -1,5 +1,6 @@
 package br.uel.educatio.quiz.controller;
 
+import br.uel.educatio.quiz.service.AlunoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,21 +13,7 @@ public class AlunoController {
 
     @Autowired
     public AlunoController(AlunoService alunoService) {
-        this.alunoService = alunoService;
-    }
-
-    @GetMapping("/buscarQuizzes")
-    public void BuscarHistoricoQuizzes(Long id_aluno){
-        model.attribute("historicoQuizzes", service.buscarRespostasQuiz(id_aluno, id_quiz));
-        return "page";
-
-    }
-
-
-    @GetMapping("/buscarRespostas")
-    public void BuscarRespostasQuiz(long id_quiz, long id_aluno){
-        model.attribute("historicoQuizzes", service.buscarRespostasQuiz(id_aluno, id_quiz));
-        return "page";
+        this.service = alunoService;
     }
 
 }

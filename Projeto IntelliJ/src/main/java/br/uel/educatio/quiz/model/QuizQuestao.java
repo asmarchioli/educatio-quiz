@@ -14,10 +14,10 @@ import lombok.Setter;
 public class QuizQuestao {
 
     @NotNull(message = "O ID da questão é obrigatório.")
-    private long id_questao;
+    private Long id_questao;
 
     @NotNull(message = "O ID do quiz é obrigatório.")
-    private long id_quiz;
+    private Long id_quiz;
 
     @NotNull(message = "A pontuação da questão é obrigatória.")
     @PositiveOrZero(message = "A pontuação não pode ser negativa.")

@@ -6,6 +6,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -14,11 +17,13 @@ public class ProfessorDAO {
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    // MELHOR PRÁTICA: Injeção por construtor (do Arquivo 2)
     public ProfessorDAO(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
+    // RowMapper (do Arquivo 2, é idêntico ao 1)
     private final RowMapper<Professor> rowMapper = (rs, rowNum) -> {
         Professor professor = new Professor();
         professor.setId_professor(rs.getLong("id_professor"));
@@ -31,6 +36,8 @@ public class ProfessorDAO {
         professor.setArea(rs.getLong("area")); // Armazena o ID da área
         return professor;
     };
+
+    // --- Métodos modernos (mantidos do Arquivo 2) ---
 
     public List<Professor> findAll() {
         String sql = "SELECT * FROM professor ORDER BY nome";
@@ -48,9 +55,11 @@ public class ProfessorDAO {
     }
 
     public Professor save(Professor professor) {
-        if (professor.getId_professor() == 0) {
-            // INSERIR: usa RETURNING
-            String sql = "INSERT INTO professor (nome, email, senha, instituicao_ensino, descricao_profissional, lattes, area) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id_professor";
+        // Verifica se o ID é nulo ou igual a zero para decidir entre INSERT e UPDATE
+        if (professor.getId_professor() == null || professor.getId_professor() == 0) {
+            // INSERIR: usa RETURNING para obter o novo ID
+            String sql = "INSERT INTO professor (nome, email, senha, instituicao_ensino, descricao_profissional, lattes, area) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id_professor";
             Long newId = jdbcTemplate.queryForObject(sql, new Object[]{
                     professor.getNome(),
                     professor.getEmail(),
@@ -58,12 +67,13 @@ public class ProfessorDAO {
                     professor.getInstituicao_ensino(),
                     professor.getDescricao_profissional(),
                     professor.getLattes(),
-                    professor.getArea() // Passa o ID da área (long)
+                    professor.getArea()
             }, Long.class);
             professor.setId_professor(newId != null ? newId : 0L);
         } else {
-            // ATUALIZAR
-            String sql = "UPDATE professor SET nome = ?, email = ?, senha = ?, instituicao_ensino = ?, descricao_profissional = ?, lattes = ?, area = ? WHERE id_professor = ?";
+            // ATUALIZAR: atualiza os dados existentes
+            String sql = "UPDATE professor SET nome = ?, email = ?, senha = ?, instituicao_ensino = ?, " +
+                    "descricao_profissional = ?, lattes = ?, area = ? WHERE id_professor = ?";
             jdbcTemplate.update(sql,
                     professor.getNome(),
                     professor.getEmail(),
@@ -76,6 +86,7 @@ public class ProfessorDAO {
         }
         return professor;
     }
+
 
     public void deleteById(long id) {
         String sql = "DELETE FROM professor WHERE id_professor = ?";
@@ -117,5 +128,13 @@ public class ProfessorDAO {
 
         // Executa a query
         return namedParameterJdbcTemplate.query(sql, params, rowMapper);
+    }
+
+    // --- Método útil (adicionado do Arquivo 1) ---
+
+    public boolean emailJaExiste(String email) {
+        String sql = "SELECT COUNT(*) FROM professor WHERE email = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{email}, Integer.class);
+        return count != null && count > 0;
     }
 }

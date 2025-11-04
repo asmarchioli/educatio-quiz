@@ -6,14 +6,18 @@ import br.uel.educatio.quiz.model.enums.Exibicao;
 import br.uel.educatio.quiz.model.enums.TipoQuestao;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
 public class Questao {
-    private long id_questao;
+    private Long id_questao;
 
     @NotBlank(message="O enunciado não pode estar em branco.")
     private String enunciado;
@@ -31,9 +35,13 @@ public class Questao {
     private Dificuldade nivel_dificuldade;
 
     @NotNull
-    private long area;
+    private Long area;
 
     @NotNull
-    private long professor_criador;
+    private Long professor_criador;
+
+    //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
+    private int pontuacao;
+    private List<Alternativa> alternativas;
 
 }

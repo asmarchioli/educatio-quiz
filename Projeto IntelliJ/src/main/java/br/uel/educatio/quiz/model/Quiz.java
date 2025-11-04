@@ -10,8 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Quiz {
 
-    private long id_quiz;
+    private Long id_quiz;
 
     @NotBlank(message = "O título do quiz é obrigatório.")
     @Size(max = 255, message = "O título deve ter no máximo 255 caracteres.")
@@ -38,13 +38,16 @@ public class Quiz {
     private Escolaridade nivel_educacional;
 
     @NotNull(message = "O professor criador é obrigatório.")
-    private long professor_criador;
+    private Long professor_criador;
 
     @NotNull(message = "A área é obrigatória.")
-    private long area;
+    private Long area;
 
     @NotNull(message = "A data de criação é obrigatória.")
     @FutureOrPresent(message = "A data de criação não pode ser no passado.")
     private LocalDate data_criacao;
+
+    //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
+    private List<Questao> questoes;
 
 }

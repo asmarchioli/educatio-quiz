@@ -14,16 +14,16 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Resposta {
 
-    private long id_resposta;
+    private Long id_resposta;
 
     @NotNull(message = "O ID da questão é obrigatório.")
-    private long id_questao;
+    private Long id_questao;
 
     @NotNull(message = "O ID do quiz é obrigatório.")
-    private long id_quiz;
+    private Long id_quiz;
 
     @NotNull(message = "O ID do aluno é obrigatório.")
-    private long id_aluno;
+    private Long id_aluno;
 
     @NotNull(message = "O número da tentativa é obrigatório.")
     @PositiveOrZero(message = "O número da tentativa não pode ser negativo.")
@@ -36,5 +36,12 @@ public class Resposta {
     @NotNull(message = "É obrigatório indicar se o aluno acertou ('S' ou 'N').")
     @Pattern(regexp = "[SNsn]", message = "O indicador de acerto deve ser 'S' ou 'N'.")
     private char flg_acertou;
+
+    // -----------------------------------------------------------------
+    // CAMPOS PARA ARMAZENAR A RESPOSTA DO ALUNO NO BANCO
+    // (Mapeados pelas colunas do ALTER TABLE)
+    // -----------------------------------------------------------------
+    private String resposta_aluno_texto; // Para 'Preencher Lacuna'
+    private Integer resposta_aluno_num;  // Para 'Multipla Escolha' e 'V/F'
 
 }

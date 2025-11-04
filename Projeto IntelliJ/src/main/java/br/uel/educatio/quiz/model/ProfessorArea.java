@@ -13,9 +13,9 @@ import lombok.Setter;
 public class ProfessorArea {
 
     @NotNull(message = "O ID do professor é obrigatório.")
-    private long id_professor;
+    private Long id_professor;
 
     @NotNull(message = "O ID da área é obrigatório.")
-    private long id_area;
+    private Long id_area;
 
 }

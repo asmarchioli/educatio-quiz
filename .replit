@@ -37,10 +37,6 @@ externalPort = 80
 localPort = 35729
 externalPort = 3000
 
-[[ports]]
-localPort = 46795
-externalPort = 3001
-
 [deployment]
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd 'Projeto IntelliJ' && ./mvnw spring-boot:run"]

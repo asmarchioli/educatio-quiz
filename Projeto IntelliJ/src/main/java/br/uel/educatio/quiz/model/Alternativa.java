@@ -16,10 +16,10 @@ import lombok.Setter;
 public class Alternativa {
 
     @NotNull(message = "O ID da questão é obrigatório.")
-    private long id_questao;
+    private Long id_questao;
 
     @NotNull(message = "O número da alternativa é obrigatório.")
-    private long num_alternativa;
+    private Long num_alternativa;
 
     @NotBlank(message = "O texto da alternativa não pode estar em branco.")
     @Size(max = 255, message = "O texto da alternativa deve ter no máximo 255 caracteres.")
@@ -28,4 +28,6 @@ public class Alternativa {
     @NotNull(message = "É obrigatório indicar se a alternativa é correta ('S' ou 'N').")
     @Pattern(regexp = "[SN]", message = "O indicador de correção deve ser 'S' ou 'N'.")
     private char flg_eh_correta;
+
+
 }

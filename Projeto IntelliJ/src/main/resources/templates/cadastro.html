@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Educatio Quiz</title>
+    <style>
+        :root {
+            --bg-color: #0e1116;
+            --card-color: #1a1f27;
+            --accent: #00c26e;
+            --accent-hover: #00a65d;
+            --text-light: #f5f5f5;
+            --text-muted: #9da5b4;
+            --radius: 16px;
+            --shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-color);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #2a2f36;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: #12161d;
+            border: 2px solid #2a2f36;
+            border-radius: var(--radius);
+            color: var(--text-light);
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .checkbox-group {
+            border: 1px solid #2a2f36;
+            border-radius: var(--radius);
+            padding: 0.8rem;
+            max-height: 180px;
+            overflow-y: auto;
+            background: #12161d;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .alert-danger {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff6666;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>📝 Cadastro</h2>
+
+        <div class="tabs">
+        <button class="tab" th:classappend="${(tipoErro == null || tipoErro == 'aluno') ? 'active' : ''}" onclick="switchTab('aluno')">Sou Aluno</button>
+        <button class="tab" th:classappend="${tipoErro == 'professor' ? 'active' : ''}" onclick="switchTab('professor')">Sou Professor</button>
+    </div>
+
+
+
+    <!-- ALUNO -->
+    <div id="aluno-tab" class="tab-content" th:classappend="${(tipoErro == null || tipoErro == 'aluno') ? 'active' : ''}">
+        <form action="/cadastro/aluno" method="post" th:object="${aluno}">
+            <div class="form-group">
+                <label>Nome Completo:</label>
+                <input type="text" th:field="*{nome}" required>
+            </div>
+            <div class="form-group">
+                <label>E-mail:</label>
+                <input type="email" th:field="*{email}" required>
+                <span style="color: #ff6666; font-size: 0.8rem; margin-top: 5px; display: block;"
+                      th:if="${#fields.hasErrors('email')}"
+                      th:errors="*{email}"></span>
+            </div>
+            <div class="form-group">
+                <label>Senha:</label>
+                <input type="password" th:field="*{senha}" required>
+                <span style="color: #ff6666; font-size: 0.8rem; margin-top: 5px; display: block;"
+                      th:if="${#fields.hasErrors('senha')}"
+                      th:errors="*{senha}"></span>
+            </div>
+            <div class="form-group">
+                <label>Nível Educacional:</label>
+                <select th:field="*{nivel_educacional}" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="esc : ${escolaridades}" th:value="${esc.name()}" th:text="${esc}"></option>
+                </select>
+            </div>
+            <button class="btn">Cadastrar como Aluno</button>
+        </form>
+    </div>
+
+    <!-- PROFESSOR -->
+    <div id="professor-tab" class="tab-content" th:classappend="${tipoErro == 'professor' ? 'active' : ''}">
+        <form action="/cadastro/professor" method="post" th:object="${professor}">
+            <div class="form-group">
+                <label>Nome Completo:</label>
+                <input type="text" th:field="*{nome}" required>
+            </div>
+            <div class="form-group">
+                <label>E-mail:</label>
+                <input type="email" th:field="*{email}" required>
+                <span style="color: #ff6666; font-size: 0.8rem; margin-top: 5px; display: block;"
+                      th:if="${#fields.hasErrors('email')}"
+                      th:errors="*{email}"></span>
+            </div>
+            <div class="form-group">
+                <label>Senha:</label>
+                <input type="password" th:field="*{senha}" required>
+                <div class="form-group">
+                    <label>Senha:</label>
+                    <input type="password" th:field="*{senha}" required>
+                    <span style="color: #ff6666; font-size: 0.8rem; margin-top: 5px; display: block;"
+                          th:if="${#fields.hasErrors('senha')}"
+                          th:errors="*{senha}"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Instituição de Ensino:</label>
+                <input type="text" th:field="*{instituicao_ensino}" required>
+            </div>
+            <div class="form-group">
+                <label>Descrição Profissional:</label>
+                <textarea th:field="*{descricao_profissional}" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Área Principal:</label>
+                <select th:field="*{area}" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="area : ${areas}" th:value="${area.idArea}" th:text="${area.nomeArea}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Áreas Adicionais:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item" th:each="area : ${areas}">
+                        <input type="checkbox" name="areasAdicionais" th:value="${area.idArea}">
+                        <label th:text="${area.nomeArea}"></label>
+                    </div>
+                </div>
+            </div>
+            <button class="btn">Cadastrar como Professor</button>
+        </form>
+    </div>
+
+    <div class="link">
+        <p>Já tem uma conta? <a href="/login">Faça login aqui</a></p>
+        <a href="/">← Voltar para início</a>
+    </div>
+</div>
+
+<script>
+    function switchTab(tipo) {
+        document.querySelectorAll('.tab, .tab-content').forEach(el => {
+            el.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        document.getElementById(tipo + '-tab').classList.add('active');
+    }
+</script>
+</body>
+</html>

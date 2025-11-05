@@ -18,6 +18,6 @@ public class WebConfig implements WebMvcConfigurer {
         // Intercepta tudo, exceto as rotas que o próprio interceptor libera
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/", "/cadastro/**", "/css/**", "/js/**", "/error");
+                .excludePathPatterns("/login", "/cadastro", "/cadastro/aluno", "/cadastro/professor", "/css/**", "/js/**", "/error");
     }
 }

@@ -46,8 +46,10 @@ public class CadastroController {
         if (result.hasErrors()) {
             model.addAttribute("professor", new Professor());
             model.addAttribute("escolaridades", Escolaridade.values());
+            model.addAttribute("senha", "");
             model.addAttribute("areas", areaService.listarTodas());
             model.addAttribute("tipoErro", "aluno");
+            System.out.println("opa bl");
             return "cadastro";
         }
 
@@ -57,9 +59,11 @@ public class CadastroController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("professor", new Professor());
             model.addAttribute("escolaridades", Escolaridade.values());
+            model.addAttribute("senha", "");
             model.addAttribute("areas", areaService.listarTodas());
-            result.rejectValue("email", "error.aluno", e.getMessage());
+            model.addAttribute("erro", e.getMessage());
             model.addAttribute("tipoErro", "aluno");
+            System.out.println("opa bl");
             return "cadastro";
         }
     }
@@ -67,11 +71,13 @@ public class CadastroController {
     @PostMapping("/professor")
     public String cadastrarProfessor(
             @Valid @ModelAttribute("professor") Professor professor,
-            @RequestParam(required = false) List<Long> areasAdicionais,
             BindingResult result,
+            @RequestParam(required = false) List<Long> areasAdicionais,
             Model model) {
+        System.out.println("opa bl");
 
         if (result.hasErrors()) {
+            System.out.println("opa bl");
             model.addAttribute("aluno", new Aluno());
             model.addAttribute("escolaridades", Escolaridade.values());
             model.addAttribute("areas", areaService.listarTodas());
@@ -86,7 +92,7 @@ public class CadastroController {
             model.addAttribute("aluno", new Aluno());
             model.addAttribute("escolaridades", Escolaridade.values());
             model.addAttribute("areas", areaService.listarTodas());
-            result.rejectValue("email", "error.professor", e.getMessage());
+            model.addAttribute("erro", e.getMessage());
             model.addAttribute("tipoErro", "professor");
             return "cadastro";
         }

@@ -27,12 +27,20 @@ public class ProfessorController {
     public String home(HttpSession session, Model model) {
         Professor professor = (Professor) session.getAttribute("usuarioLogado");
 
+        model.addAttribute("professor", professor);
+        return "professor/home";
+
+    }
+    @GetMapping("/criar_quiz")
+    public String criar_quiz(HttpSession session, Model model) {
+        Professor professor = (Professor) session.getAttribute("usuarioLogado");
+
         if (professor == null) {
             return "redirect:/login";
         }
 
         model.addAttribute("professor", professor);
-        return "professor/home";
+        return "professor/criar_quiz";
     }
 
     /////////////////////////////////////////

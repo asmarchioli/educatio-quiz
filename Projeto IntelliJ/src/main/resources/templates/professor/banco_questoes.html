@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar quiz</title>
+    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h1>🎓 Educatio Quiz - Professor</h1>
+    <div>
+        <span th:text="${professor.nome}"></span>
+        <a href="/logout" class="btn-logout">Sair</a>
+    </div>
+</nav>
+<div class="container">
+    <div class="cards">
+        <div class="card">
+        <!-- Mensagem se não houver resultados -->
+            <div th:if="${#lists.isEmpty(questoes)}" class=" m-auto alert alert-info" style="" role="alert">
+                <h3>Não foram encontrados questões no Banco</h3>
+            </div>
+
+            <!-- Tabela -->
+            <div th:if= "${not #lists.isEmpty(questoes)}" class="table-responsive">
+                <table class = "table table-sm align-middle">
+
+                    <!--Cabeçalho da tabela-->
+                    <thead>
+                    <tr>
+                        <th scope = "col">tipo_questao</th>
+                        <th scope = "col">enunciado</th>
+                        <th scope = "col">nivel_educacional</th>
+                        <th scope = "col">nivel_dificuldade</th>
+
+                        <th scope = "col">Ações</th>
+                    </tr>
+                    </thead>
+
+                    <!-- Corpo de dados da tabela -->
+                    <tbody class="table-group-divider">
+                    <tr th:if="${questoes}" th:each="questao : ${questoes}">
+                        <td th:text="${questao.tipo_questao}"></td>
+                        <td th:text="${questao.enunciado}" ></td>
+                        <td th:text="${questao.nivel_educacional}"></td>
+                        <td th:text="${questao.nivel_dificuldade}"></td>
+                        <td>
+            <!--                <a th:href="@{}"-->
+            <!--                   class="btn btn-sm me-1"-->
+            <!--                   style = "background-color:#16213e; color: #ffffff">-->
+            <!--                    Editar-->
+            <!--                </a>-->
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div> <!-- Fecha o bloco de código da tabela-->
+        </div> <!-- Fecha o Card -->
+    </div>
+</div>
+</body>
+</html>

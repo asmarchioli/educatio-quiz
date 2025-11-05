@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar quiz</title>
+    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h1>🎓 Educatio Quiz - Professor</h1>
+    <div>
+        <span th:text="${professor.nome}"></span>
+        <a href="/logout" class="btn-logout">Sair</a>
+    </div>
+</nav>
+<div>
+<!--    <<form action="/login" method="post">-->
+<!--        <div class="form-group">-->
+<!--        <label for="tipoUsuario">Você é:</label>-->
+<!--        <select id="tipoUsuario" name="tipoUsuario" required>-->
+<!--            <option value="">Selecione...</option>-->
+<!--            <option value="aluno">Aluno</option>-->
+<!--            <option value="professor">Professor</option>-->
+<!--        </select>-->
+<!--     </div>-->
+
+<!--    <div class="form-group">-->
+<!--        <label for="email">E-mail:</label>-->
+<!--        <input type="email" id="email" name="email" required>-->
+<!--    </div>-->
+
+<!--    <div class="form-group">-->
+<!--        <label for="senha">Senha:</label>-->
+<!--        <input type="password" id="senha" name="senha" required>-->
+<!--    </div>-->
+
+<!--    <button type="submit" class="btn">Entrar</button>-->
+<!--</form>-->
+</div>
+<div class="container">
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🔎</div>
+            <h3>Buscar Questões</h3>
+            <p>Busque questões no banco de questões da Educatio Quiz</p>
+            <a href="/banco_questoes" class="card-btn">Buscar</a>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">➕</div>
+            <h3>Adicione sua questão</h3>
+            <p>Adicione questões as quais você criou</p>
+            <a th:href="@{/questao/listarPorProfessor/{id}(id=${professor.id_professor})}" class="card-btn"></a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

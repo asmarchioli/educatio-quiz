@@ -1,5 +1,6 @@
 package br.uel.educatio.quiz.config;
 
+import br.uel.educatio.quiz.model.Professor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -15,7 +16,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession(false);
 
         // Permite acesso a páginas públicas (login, cadastro, assets)
-        if (uri.equals("/") || uri.equals("/login") || uri.equals("/cadastro") || uri.startsWith("/css/") || uri.startsWith("/js/")) {
+        if (uri.equals("/login") || uri.equals("/cadastro") || uri.startsWith("/css/") || uri.startsWith("/js/") || uri.equals("/cadastro/aluno") || uri.equals("/cadastro/professor")) {
             return true;
         }
 
@@ -24,6 +25,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.sendRedirect("/login");
             return false;
         }
+
+        Professor professor = (Professor) session.getAttribute("usuarioLogado");
+        request.setAttribute("professor", professor);
+        //Isso permite que o professor sempre seja passado entre os breakpoints independente do controller
 
         // Usuário está logado, permite o acesso
         return true;

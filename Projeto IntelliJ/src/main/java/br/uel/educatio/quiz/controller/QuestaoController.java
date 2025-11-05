@@ -18,10 +18,13 @@ public class QuestaoController {
         this.service = service;
     }
 
-    @GetMapping("/listarPorProfessores/{id}")
-    public String listarQuestoesPorProfessor(@PathVariable("id") long id_professor, Model model) {
-        model.addAttribute("QuestoesProfessor", service.listarQuestoesPorProf(id_professor));
-        return "pageficticia";
+    @GetMapping("/listarPorProfessor/{id}")
+    public String listarQuestoesPorProfessor(
+            @PathVariable("id") long id, // Note que mudei o nome da variável local para 'id'
+            Model model
+    ) {
+        model.addAttribute("questoes", service.listarQuestoesPorProf(id));
+        return "professor/banco_questoes";
     }
 
     @GetMapping("/listar")

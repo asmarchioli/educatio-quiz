@@ -20,7 +20,6 @@ public class AlternativaDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // RowMapper para Alternativa (COM A CORREÇÃO DE NULO)
     private static final class AlternativaRowMapper implements RowMapper<Alternativa> {
         @Override
         public Alternativa mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -29,8 +28,7 @@ public class AlternativaDAO {
             alt.setNum_alternativa(rs.getLong("num_alternativa"));
             alt.setTexto_alternativa(rs.getString("texto_alternativa"));
 
-            // *** CORREÇÃO APLICADA AQUI ***
-            // Verifica se o valor do banco não é nulo antes de pegar o charAt(0)
+            // A correção de bug
             String flag = rs.getString("flg_eh_correta");
             if (flag != null && !flag.isEmpty()) {
                 alt.setFlg_eh_correta(flag.charAt(0));
@@ -40,33 +38,21 @@ public class AlternativaDAO {
         }
     }
 
-    // --- Métodos que SÓ existiam no seu Arquivo 1 ---
-
-    // Busca todas as alternativas de uma questão
-    public List<Alternativa> findAlternativasByQuestaoId(Long questaoId) {
-        String sql = "SELECT * FROM ALTERNATIVA WHERE id_questao = ?";
-        return jdbcTemplate.query(sql, new Object[]{questaoId}, new AlternativaRowMapper());
-    }
-
-    // Busca a alternativa correta para uma questão (para correção)
-    public Alternativa findAlternativaCorreta(Long questaoId) {
-        // Para "Preencher Lacuna", a "alternativa" é a própria resposta correta
-        String sql = "SELECT * FROM ALTERNATIVA WHERE id_questao = ? AND flg_eh_correta = 'S'";
-        try {
-            return jdbcTemplate.queryForObject(sql, new Object[]{questaoId}, new AlternativaRowMapper());
-        } catch (Exception e) {
-            return null; // Nenhuma correta encontrada
-        }
-    }
-
-    // --- Métodos que existiam em AMBOS os arquivos ---
-
-    public List<Alternativa> findByIdQuestao(long idQuestao) {
+    public List<Alternativa> findByQuestaoId(long idQuestao) {
         String sql = "SELECT * FROM alternativa WHERE id_questao = ? ORDER BY num_alternativa";
-        // Usa a nova instância do RowMapper
+        // Usa o RowMapper seguro
         return jdbcTemplate.query(sql, new Object[]{idQuestao}, new AlternativaRowMapper());
     }
 
+
+    public Optional<Alternativa> findAlternativaCorreta(long idQuestao) {
+        String sql = "SELECT * FROM alternativa WHERE id_questao = ? AND flg_eh_correta = 'S'";
+        // Usa o RowMapper seguro
+        List<Alternativa> alternativas = jdbcTemplate.query(sql, new Object[]{idQuestao}, new AlternativaRowMapper());
+        return alternativas.isEmpty() ? Optional.empty() : Optional.of(alternativas.get(0));
+    }
+
+ 
     public Optional<Alternativa> findById(long idQuestao, int numAlternativa) {
         String sql = "SELECT * FROM alternativa WHERE id_questao = ? AND num_alternativa = ?";
         try {
@@ -97,7 +83,7 @@ public class AlternativaDAO {
         );
     }
 
-    public void deleteById(long idQuestao, int numAlternativa) {
+public void deleteById(long idQuestao, int numAlternativa) {
         String sql = "DELETE FROM alternativa WHERE id_questao = ? AND num_alternativa = ?";
         jdbcTemplate.update(sql, idQuestao, numAlternativa);
     }
@@ -107,4 +93,3 @@ public class AlternativaDAO {
         jdbcTemplate.update(sql, idQuestao);
     }
 }
-// A chave '}' extra foi removida daqui.

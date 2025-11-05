@@ -6,16 +6,12 @@ import br.uel.educatio.quiz.model.enums.Exibicao;
 import br.uel.educatio.quiz.model.enums.TipoQuestao;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import java.util.List;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Setter
-@Getter
 public class Questao {
     private Long id_questao;
 

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Revisar Quiz</title>
+    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <style>
+        .questao-card-revisao {
+            background: var(--card-color);
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+        
+        .questao-card-revisao.correta {
+            border-color: #00c26e;
+        }
+        
+        .questao-card-revisao.errada {
+            border-color: #dc2626;
+        }
+        
+        .questao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .questao-numero {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.correta {
+            background: rgba(0, 194, 110, 0.2);
+            color: #00c26e;
+        }
+        
+        .status-badge.errada {
+            background: rgba(220, 38, 38, 0.2);
+            color: #dc2626;
+        }
+        
+        .questao-enunciado {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+        
+        .alternativa-item-revisao {
+            background: #161b22;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alternativa-item-revisao.correta {
+            background: rgba(0, 194, 110, 0.1);
+            border: 1px solid #00c26e;
+        }
+        
+        .alternativa-item-revisao.selecionada-errada {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid #dc2626;
+        }
+        
+        .resposta-texto {
+            background: #161b22;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+        
+        .resposta-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>📚 Revisão do Quiz</h1>
+        <div>
+            <span th:text="${aluno.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="welcome">
+            <h2 th:text="${quiz.titulo}" style="color: var(--accent);"></h2>
+            <p>Revisão de Respostas</p>
+        </div>
+        
+        <div th:each="questao, qStat : ${quiz.questoes}">
+            <div class="questao-card-revisao" th:classappend="${respostas[qStat.index].flg_acertou == 'S'} ? 'correta' : 'errada'">
+                <div class="questao-header">
+                    <span class="questao-numero" th:text="'Questão ' + (${qStat.index} + 1)"></span>
+                    <span class="status-badge" 
+                          th:classappend="${respostas[qStat.index].flg_acertou == 'S'} ? 'correta' : 'errada'"
+                          th:text="${respostas[qStat.index].flg_acertou == 'S'} ? '✓ Correta' : '✗ Errada'">
+                    </span>
+                </div>
+                
+                <p class="questao-enunciado" th:text="${questao.enunciado}"></p>
+                
+                <div th:if="${questao.tipo_questao.toString() != 'Preencher Lacuna'}">
+                    <div th:each="alt : ${questao.alternativas}">
+                        <div class="alternativa-item-revisao"
+                             th:classappend="${alt.flg_eh_correta == 'S'} ? 'correta' : (${respostas[qStat.index].resposta_aluno_num == alt.num_alternativa} ? 'selecionada-errada' : '')">
+                            <span th:text="${alt.texto_alternativa}"></span>
+                            <span th:if="${alt.flg_eh_correta == 'S'}"> ✓ Resposta Correta</span>
+                            <span th:if="${respostas[qStat.index].resposta_aluno_num == alt.num_alternativa and alt.flg_eh_correta == 'N'}"> ✗ Sua Resposta</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${questao.tipo_questao.toString() == 'Preencher Lacuna'}">
+                    <div class="resposta-texto">
+                        <div class="resposta-label">Sua resposta:</div>
+                        <div th:text="${respostas[qStat.index].resposta_aluno_texto}"></div>
+                    </div>
+                    <div class="resposta-texto correta" style="margin-top: 0.5rem;">
+                        <div class="resposta-label">Resposta correta:</div>
+                        <div th:text="${questao.alternativas[0].texto_alternativa}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/aluno/historico" style="color: var(--accent); text-decoration: none; font-weight: 600;">← Voltar ao Histórico</a>
+        </div>
+    </div>
+</body>
+</html>

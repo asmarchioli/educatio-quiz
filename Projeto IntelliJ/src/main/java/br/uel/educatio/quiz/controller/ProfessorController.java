@@ -22,15 +22,40 @@ public class ProfessorController {
         this.quizService = quizService;
     }
 
-    // --- Método essencial (só existe no Arquivo 1) ---
+    // @GetMapping("/home")
+    // public String home(@RequestAttribute("professor") Professor professorLogado, HttpSession session, Model model) {
+
+    //     model.addAttribute("professor", professorLogado);
+    //     return "professor/home";
+
+    // }
+
+    // @GetMapping("/home")
+    // public String home(HttpSession session, Model model) {
+    //     Professor professor = (Professor) session.getAttribute("usuarioLogado");
+
+    //     model.addAttribute("professor", professor);
+    //     return "professor/home";
+
+    // }
+
+    // XANDY: Depois tenta fazer assim ó:
+
     @GetMapping("/home")
-    public String home(HttpSession session, Model model) {
+    public String home(HttpSession session, Model model,
+                      @RequestAttribute("professor") Professor professorLogado ) {
         Professor professor = (Professor) session.getAttribute("usuarioLogado");
 
-        model.addAttribute("professor", professor);
-        return "professor/home";
+        if (professor == null) {
+            return "redirect:/login";
+        }
 
+        model.addAttribute("professor", professorLogado);
+        return "professor/home";
     }
+
+    
+    
     @GetMapping("/criar_quiz")
     public String criar_quiz(HttpSession session, Model model) {
         Professor professor = (Professor) session.getAttribute("usuarioLogado");
@@ -42,6 +67,9 @@ public class ProfessorController {
         model.addAttribute("professor", professor);
         return "professor/criar_quiz";
     }
+
+    
+    
 
     /////////////////////////////////////////
     // --- Métodos idênticos (comuns a ambos) ---

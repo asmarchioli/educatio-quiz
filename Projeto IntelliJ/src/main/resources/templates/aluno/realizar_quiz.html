@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Realizar Quiz</title>
+    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <style>
+        .questao-card {
+            background: var(--card-color);
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .questao-numero {
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .questao-enunciado {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+
+        .alternativas {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .alternativa-item {
+            background: #161b22;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .alternativa-item:hover {
+            background: #1d232d;
+            transform: translateX(4px);
+        }
+
+        .alternativa-item input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 0.75rem;
+            background: #12161d;
+            border: 2px solid #2a2f36;
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 2rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>📝 Realizando Quiz</h1>
+        <div>
+            <span th:text="${aluno.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome">
+            <h2 th:text="${quiz.titulo}" style="color: var(--accent);"></h2>
+            <p th:text="${quiz.descricao}"></p>
+        </div>
+
+        <form th:action="@{/aluno/quizzes/{id}/submeter(id=${quiz.id_quiz})}" method="post">
+            <div class="questao-card" th:each="questao, stat : ${quiz.questoes}">
+                <div class="questao-numero" th:text="'Questão ' + (${stat.index} + 1) + ' - ' + ${questao.pontuacao} + ' pontos'"></div>
+                <p class="questao-enunciado" th:text="${questao.enunciado}"></p>
+
+                <div th:if="${questao.tipo_questao.toString() == 'Multipla Escolha' or questao.tipo_questao.toString() == 'Verdadeiro ou Falso'}">
+                    <div class="alternativas">
+                        <label class="alternativa-item" th:each="alt : ${questao.alternativas}">
+                            <input type="radio" 
+                                   th:name="'questao_' + ${questao.id_questao}" 
+                                   th:value="${alt.num_alternativa}" 
+                                   required>
+                            <span th:text="${alt.texto_alternativa}"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div th:if="${questao.tipo_questao.toString() == 'Preencher Lacuna'}">
+                    <input type="text" 
+                           class="input-text" 
+                           th:name="'questao_' + ${questao.id_questao}" 
+                           placeholder="Digite sua resposta" 
+                           required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Finalizar Quiz</button>
+        </form>
+    </div>
+</body>
+</html>

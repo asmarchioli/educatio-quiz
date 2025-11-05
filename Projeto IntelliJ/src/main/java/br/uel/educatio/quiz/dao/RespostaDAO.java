@@ -2,14 +2,14 @@ package br.uel.educatio.quiz.dao;
 
 import br.uel.educatio.quiz.model.Resposta;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter; // Importado do Arquivo 2
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement; // Importado do Arquivo 2
-import java.sql.SQLException; // Importado do Arquivo 2
-import java.sql.Types; // Importado do Arquivo 2
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +22,6 @@ public class RespostaDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // --- RowMapper CORRIGIDO (Mesclando campos dos dois arquivos) ---
     private final RowMapper<Resposta> rowMapper = (rs, rowNum) -> {
         Resposta r = new Resposta();
         r.setId_resposta(rs.getLong("id_resposta"));
@@ -32,23 +31,22 @@ public class RespostaDAO {
         r.setTentativa(rs.getInt("tentativa"));
         r.setPontuacao_aluno(rs.getInt("pontuacao_aluno"));
 
+        // Correção de bug (não presente no Arquivo 2)
         String flag = rs.getString("flg_acertou");
         if (flag != null && !flag.isEmpty()) {
             r.setFlg_acertou(flag.charAt(0));
         }
 
-        // --- CORREÇÃO (Campos que só existiam no saveBatch) ---
         r.setResposta_aluno_texto(rs.getString("resposta_aluno_texto"));
         int respostaNum = rs.getInt("resposta_aluno_num");
+        // Correção para números nulos
         if (!rs.wasNull()) {
             r.setResposta_aluno_num(respostaNum);
         }
-        // --- Fim da Correção ---
 
         return r;
     };
 
-    // --- Métodos de Busca (do Arquivo 1) ---
     public Optional<Resposta> findById(long id) {
         String sql = "SELECT * FROM resposta WHERE id_resposta = ?";
         try {
@@ -74,9 +72,7 @@ public class RespostaDAO {
         }
     }
 
-    // --- Método 'save' singular (CORRIGIDO do Arquivo 1) ---
     public Resposta save(Resposta resposta) {
-        // SQL CORRIGIDO: Adicionado os campos de resposta do aluno
         String sql = "INSERT INTO resposta (id_questao, id_quiz, id_aluno, tentativa, pontuacao_aluno, flg_acertou, resposta_aluno_texto, resposta_aluno_num)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_resposta";
         Long newId = jdbcTemplate.queryForObject(sql, new Object[]{
@@ -86,22 +82,18 @@ public class RespostaDAO {
                 resposta.getTentativa(),
                 resposta.getPontuacao_aluno(),
                 String.valueOf(resposta.getFlg_acertou()),
-                // --- CORREÇÃO (Campos que só existiam no saveBatch) ---
                 resposta.getResposta_aluno_texto(),
                 resposta.getResposta_aluno_num()
-                // --- Fim da Correção ---
         }, Long.class);
         resposta.setId_resposta(newId != null ? newId : 0L);
         return resposta;
     }
 
-    // --- Método 'saveBatch' (Adicionado do Arquivo 2) ---
     public void saveBatch(List<Resposta> respostas) {
         String sql = "INSERT INTO RESPOSTA (id_questao, id_quiz, id_aluno, tentativa, pontuacao_aluno, flg_acertou, resposta_aluno_texto, resposta_aluno_num)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // TODO: A lógica de tentativa provavelmente deveria vir do Service
-        final int TENTATIVA_ATUAL = 1;
+        final int TENTATIVA_ATUAL = 1; // Lógica de tentativa
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -110,11 +102,10 @@ public class RespostaDAO {
                 ps.setLong(1, r.getId_questao());
                 ps.setLong(2, r.getId_quiz());
                 ps.setLong(3, r.getId_aluno());
-                ps.setInt(4, TENTATIVA_ATUAL); // Usando a lógica de tentativa
+                ps.setInt(4, TENTATIVA_ATUAL); 
                 ps.setInt(5, r.getPontuacao_aluno());
                 ps.setString(6, String.valueOf(r.getFlg_acertou()));
 
-                // Lida com os dois tipos de resposta (texto ou número da alternativa)
                 if (r.getResposta_aluno_texto() != null) {
                     ps.setString(7, r.getResposta_aluno_texto());
                 } else {
@@ -135,9 +126,26 @@ public class RespostaDAO {
         });
     }
 
-    // --- Método Delete (do Arquivo 1) ---
     public void deleteById(long id) {
         String sql = "DELETE FROM resposta WHERE id_resposta = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    public boolean alunoJaRealizouQuiz(long idAluno, long idQuiz) {
+        String sql = "SELECT COUNT(*) FROM resposta WHERE id_aluno = ? AND id_quiz = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz}, Integer.class);
+        return count != null && count > 0;
+    }
+
+    public int calcularPontuacaoTotal(long idAluno, long idQuiz) {
+        String sql = "SELECT COALESCE(SUM(pontuacao_aluno), 0) FROM resposta WHERE id_aluno = ? AND id_quiz = ?";
+        Integer total = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz}, Integer.class);
+        return total != null ? total : 0;
+    }
+
+    public int contarAcertos(long idAluno, long idQuiz) {
+        String sql = "SELECT COUNT(*) FROM resposta WHERE id_aluno = ? AND id_quiz = ? AND flg_acertou = 'S'";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz}, Integer.class);
+        return count != null ? count : 0;
     }
 }

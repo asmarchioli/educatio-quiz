@@ -2,6 +2,7 @@ package br.uel.educatio.quiz.controller;
 
 import br.uel.educatio.quiz.model.Aluno;
 import br.uel.educatio.quiz.model.Professor;
+import br.uel.educatio.quiz.model.Usuario;
 import br.uel.educatio.quiz.service.AuthService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +43,12 @@ public class AuthController {
             return "login";
         }
 
+        session.setAttribute("usuarioLogado", (Usuario) usuario);
+
         if (usuario instanceof Aluno) {
-            session.setAttribute("usuarioLogado", usuario);
             session.setAttribute("tipoUsuario", "aluno");
             return "redirect:/aluno/home";
         } else if (usuario instanceof Professor) {
-            session.setAttribute("usuarioLogado", usuario);
             session.setAttribute("tipoUsuario", "professor");
             return "redirect:/professor/home";
         }
@@ -59,6 +60,6 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/";
+        return "redirect:/login?logout=sucesso";
     }
 }

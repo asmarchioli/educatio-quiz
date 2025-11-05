@@ -1,12 +1,13 @@
 package br.uel.educatio.quiz.service;
 
-import br.uel.educatio.quiz.dao.AlternativaDAO;
+import br.uel.educatio.quiz.dao.AlternativaDAO; // Importado do Arquivo 1
 import br.uel.educatio.quiz.dao.QuestaoDAO;
 import br.uel.educatio.quiz.dao.QuizDAO;
 import br.uel.educatio.quiz.model.Questao;
 import br.uel.educatio.quiz.model.Quiz;
+import org.springframework.beans.factory.annotation.Autowired; // Importado do Arquivo 2
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional; // Importado do Arquivo 1
 
 import java.util.List;
 import java.util.Optional;
@@ -16,52 +17,73 @@ public class QuizService {
 
     private final QuizDAO quizDAO;
     private final QuestaoDAO questaoDAO;
-    private final AlternativaDAO alternativaDAO;
+    private final AlternativaDAO alternativaDAO; // Vindo do Arquivo 1
 
+
+    @Autowired // Adicionado para consistência
     public QuizService(QuizDAO quizDAO, QuestaoDAO questaoDAO, AlternativaDAO alternativaDAO) {
         this.quizDAO = quizDAO;
         this.questaoDAO = questaoDAO;
         this.alternativaDAO = alternativaDAO;
     }
 
-    // Busca quizzes para a home do Aluno
-    public List<Quiz> getPublicQuizzes() {
-        // CORREÇÃO: Método já estava correto
-        return quizDAO.findPublicQuizzes();
+
+    public List<Quiz> buscarQuizzesPublicosPorNivel(String nivelEducacional) {
+        return quizDAO.findQuizzesPublicosPorNivel(nivelEducacional);
     }
 
-    // Busca quizzes para a home do Professor
-    public List<Quiz> getQuizzesByProfessor(Long professorId) {
-        // CORREÇÃO: Usando o método DAO moderno
-        return quizDAO.findByProfessorCriador(professorId);
+
+    public Optional<Quiz> buscarPorPin(String pin) {
+        // Nota: Este método (do Arquivo 2) usa quizDAO.findByPin(pin)
+        return quizDAO.findByPin(pin);
     }
 
-    // Busca um quiz por PIN
-    public Optional<Quiz> getQuizByPin(String pin) {
-        // CORREÇÃO: Usando o método DAO moderno
-        return quizDAO.findByPinAcesso(pin);
-    }
-
-    // Monta o Quiz completo para a página de realização
-    public Optional<Quiz> getFullQuizForTaking(Long quizId) {
-        Optional<Quiz> quizOpt = quizDAO.findById(quizId);
+    /**
+     * *** O MÉTODO MAIS IMPORTANTE DA MESCLAGEM ***
+     * Assinatura (Vinda do Arquivo 2)
+     * Implementação (Adaptada do Arquivo 1)
+     *
+     * Motivo: O AlunoController chama 'buscarPorId' e espera um 'Optional'.
+     * A implementação original do Arquivo 2 era INCOMPLETA (não buscava as alternativas).
+     * A implementação do Arquivo 1 (do método 'getFullQuizForTaking') estava CORRETA.
+     *
+     * Este método mesclado usa a assinatura do Arquivo 2 com a lógica correta do Arquivo 1.
+     */
+    public Optional<Quiz> buscarPorId(long id) {
+        Optional<Quiz> quizOpt = quizDAO.findById(id);
         if (quizOpt.isEmpty()) {
             return Optional.empty();
         }
 
         Quiz quiz = quizOpt.get();
-        List<Questao> questoes = questaoDAO.findQuestoesByQuizId(quizId);
+        // Usa 'findQuestoesDoQuiz' (dos DAOs mesclados)
+        List<Questao> questoes = questaoDAO.findQuestoesDoQuiz(id);
 
+        // Lógica crucial (vinda do Arquivo 1) para adicionar alternativas
         for (Questao questao : questoes) {
             if (questao.getTipo_questao() != br.uel.educatio.quiz.model.enums.TipoQuestao.PREENCHER_LACUNA) {
-                questao.setAlternativas(alternativaDAO.findAlternativasByQuestaoId(questao.getId_questao()));
+                // Usa 'findByQuestaoId' (dos DAOs mesclados)
+                questao.setAlternativas(alternativaDAO.findByQuestaoId(questao.getId_questao()));
             }
         }
         quiz.setQuestoes(questoes);
         return Optional.of(quiz);
     }
 
-    // --- Métodos usados pelo seu QuizController (já estavam corretos) ---
+    public int calcularPontuacaoMaxima(long idQuiz) {
+        List<Questao> questoes = questaoDAO.findQuestoesDoQuiz(idQuiz);
+        return questoes.stream()
+                       .mapToInt(Questao::getPontuacao)
+                       .sum();
+    }
+
+
+    public int contarQuestoes(long idQuiz) {
+        return questaoDAO.findQuestoesDoQuiz(idQuiz).size();
+    }
+
+
+    // --- Métodos Mantidos do Arquivo 1 (Para o Professor/Admin Controller) ---
 
     @Transactional
     public List<String> listarQuizAreas(long id_quiz){
@@ -78,6 +100,7 @@ public class QuizService {
         quizDAO.deleteById(id);
     }
 
+
     @Transactional
     public Quiz buscarPorPin(String pin){
         Optional<Quiz> quizOpt = quizDAO.findByPinAcesso(pin);
@@ -86,6 +109,7 @@ public class QuizService {
         }
         return quizOpt.get();
     }
+
 
     @Transactional
     public Quiz buscarPorId(long id){
@@ -98,13 +122,24 @@ public class QuizService {
 
     @Transactional
     public List<Quiz> buscarPorProfessorCriador(long id_prof){
-        List<Quiz> quiz = quizDAO.findByProfessorCriador(id_prof);
-        // Remover a exceção para lista vazia é uma boa prática
-        return quiz;
+        return quizDAO.findByProfessorCriador(id_prof);
     }
 
     @Transactional
     public void criar(Quiz quiz) throws RuntimeException {
         quizDAO.save(quiz);
+    }
+
+    // Métodos de 'get' que também estavam no Arquivo 1
+    public List<Quiz> getPublicQuizzes() {
+        return quizDAO.findPublicQuizzes();
+    }
+
+    public List<Quiz> getQuizzesByProfessor(Long professorId) {
+        return quizDAO.findByProfessorCriador(professorId);
+    }
+
+    public Optional<Quiz> getQuizByPin(String pin) {
+        return quizDAO.findByPinAcesso(pin);
     }
 }

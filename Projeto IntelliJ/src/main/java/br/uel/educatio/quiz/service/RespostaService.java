@@ -1,86 +1,87 @@
 package br.uel.educatio.quiz.service;
 
 import br.uel.educatio.quiz.dao.AlternativaDAO;
-import br.uel.educatio.quiz.dao.QuestaoDAO;
 import br.uel.educatio.quiz.dao.RespostaDAO;
 import br.uel.educatio.quiz.model.Alternativa;
-import br.uel.educatio.quiz.model.Questao;
 import br.uel.educatio.quiz.model.Resposta;
+import br.uel.educatio.quiz.model.enums.TipoQuestao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.ArrayList; // Importado para o 'saveBatch'
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class RespostaService {
 
     private final RespostaDAO respostaDAO;
     private final AlternativaDAO alternativaDAO;
-    private final QuestaoDAO questaoDAO; // Para buscar pontuação
 
-    public RespostaService(RespostaDAO respostaDAO, AlternativaDAO alternativaDAO, QuestaoDAO questaoDAO) {
+    @Autowired
+    public RespostaService(RespostaDAO respostaDAO, AlternativaDAO alternativaDAO) {
         this.respostaDAO = respostaDAO;
         this.alternativaDAO = alternativaDAO;
-        this.questaoDAO = questaoDAO;
     }
 
-    public void processAndSaveRespostas(Map<String, String> submittedAnswers, Long quizId, Long alunoId) {
+    @Transactional
+    public void salvarRespostas(long idAluno, long idQuiz, List<Resposta> respostas, List<Integer> pontuacoesQuestoes, List<TipoQuestao> tiposQuestoes) {
+
+        // Lista para acumular as respostas antes de salvar em lote
         List<Resposta> respostasParaSalvar = new ArrayList<>();
 
-        // Precisamos das questões para saber a pontuação de cada uma
-        // (O campo 'pontuacao' transiente será preenchido pelo QuestaoDAO)
-        List<Questao> questoesDoQuiz = questaoDAO.findQuestoesByQuizId(quizId);
+        for (int i = 0; i < respostas.size(); i++) {
+            Resposta resposta = respostas.get(i);
+            resposta.setId_aluno(idAluno);
+            resposta.setId_quiz(idQuiz);
+            resposta.setTentativa(1); // Define a tentativa
 
-        for (Questao questao : questoesDoQuiz) {
-            Long questaoId = questao.getId_questao();
-            // O name do input no HTML será "q-{{questao.id_questao}}"
-            String respostaAluno = submittedAnswers.get("q-" + questaoId);
+            // Lógica de verificação (vinda do Arquivo 2)
+            boolean acertou = verificarResposta(resposta, tiposQuestoes.get(i));
+            resposta.setFlg_acertou(acertou ? 'S' : 'N');
+            resposta.setPontuacao_aluno(acertou ? pontuacoesQuestoes.get(i) : 0);
 
-            if (respostaAluno == null || respostaAluno.isBlank()) {
-                continue; // Aluno não respondeu esta questão
-            }
-
-            Alternativa correta = alternativaDAO.findAlternativaCorreta(questaoId);
-            if (correta == null) continue; // Questão sem gabarito, pula
-
-            Resposta r = new Resposta();
-            r.setId_questao(questaoId);
-            r.setId_quiz(quizId);
-            r.setId_aluno(alunoId);
-
-            boolean acertou = false;
-
-            if (questao.getTipo_questao() == br.uel.educatio.quiz.model.enums.TipoQuestao.PREENCHER_LACUNA) {
-                // Compara a resposta (String)
-                acertou = respostaAluno.trim().equalsIgnoreCase(correta.getTexto_alternativa().trim());
-                r.setResposta_aluno_texto(respostaAluno);
-            } else {
-                // Compara a alternativa (Número)
-                try {
-                    // O valor da alternativa vem como Long (num_alternativa)
-                    long numResposta = Long.parseLong(respostaAluno);
-                    acertou = (numResposta == correta.getNum_alternativa());
-                    r.setResposta_aluno_num((int) numResposta); // Salva como int
-                } catch (NumberFormatException e) {
-                    // Resposta inválida
-                }
-            }
-
-            if (acertou) {
-                r.setFlg_acertou('S');
-                r.setPontuacao_aluno(questao.getPontuacao()); // Pega a pontuação transiente
-            } else {
-                r.setFlg_acertou('N');
-                r.setPontuacao_aluno(0);
-            }
-
-            respostasParaSalvar.add(r);
+            respostasParaSalvar.add(resposta);
         }
 
+        // Salva tudo de uma vez (Lógica do Arquivo 1)
         if (!respostasParaSalvar.isEmpty()) {
             respostaDAO.saveBatch(respostasParaSalvar);
         }
     }
-}
 
+ 
+    private boolean verificarResposta(Resposta resposta, TipoQuestao tipoQuestao) {
+        Optional<Alternativa> correta = alternativaDAO.findAlternativaCorreta(resposta.getId_questao());
+
+        if (correta.isEmpty()) return false;
+
+        if (tipoQuestao == TipoQuestao.PREENCHER_LACUNA) {
+            if (resposta.getResposta_aluno_texto() == null) return false;
+            return resposta.getResposta_aluno_texto().trim().equalsIgnoreCase(
+                correta.get().getTexto_alternativa().trim()
+            );
+        } else {
+            if (resposta.getResposta_aluno_num() == null) return false;
+            // Compara o número da alternativa (Integer) com o número da alternativa (Long)
+            return resposta.getResposta_aluno_num().equals(correta.get().getNum_alternativa().intValue());
+        }
+    }
+
+    public boolean alunoJaRealizouQuiz(long idAluno, long idQuiz) {
+        return respostaDAO.alunoJaRealizouQuiz(idAluno, idQuiz);
+    }
+
+    public List<Resposta> buscarRespostasDoAluno(long idAluno, long idQuiz) {
+        return respostaDAO.findByIdAlunoAndIdQuiz(idAluno, idQuiz);
+    }
+
+    public int calcularPontuacaoTotal(long idAluno, long idQuiz) {
+        return respostaDAO.calcularPontuacaoTotal(idAluno, idQuiz);
+    }
+
+    public int contarAcertos(long idAluno, long idQuiz) {
+        return respostaDAO.contarAcertos(idAluno, idQuiz);
+    }
+}

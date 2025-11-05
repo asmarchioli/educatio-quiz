@@ -30,16 +30,20 @@ public class QuizDAO {
         quiz.setTitulo(rs.getString("titulo"));
         quiz.setPin_acesso(rs.getString("pin_acesso"));
         quiz.setDescricao(rs.getString("descricao"));
-        quiz.setVisibilidade(Exibicao.fromString(rs.getString("visibilidade")));
-        quiz.setNivel_educacional(Escolaridade.fromString(rs.getString("nivel_educacional")));
+
+        String visibilidade = rs.getString("visibilidade");
+        if (visibilidade != null) {
+            quiz.setVisibilidade(Exibicao.fromString(visibilidade));
+        }
+
+        String escolaridade = rs.getString("nivel_educacional");
+        if (escolaridade != null) {
+            quiz.setNivel_educacional(Escolaridade.fromString(escolaridade));
+        }
+
         quiz.setProfessor_criador(rs.getLong("professor_criador"));
         quiz.setArea(rs.getLong("area"));
-
-        // Verificação de nulo
-        Date dataCriacaoSql = rs.getDate("data_criacao");
-        if (dataCriacaoSql != null) {
-            quiz.setData_criacao(dataCriacaoSql.toLocalDate());
-        }
+        quiz.setData_criacao(rs.getDate("data_criacao").toLocalDate());
         return quiz;
     };
 
@@ -121,6 +125,21 @@ public class QuizDAO {
         }
     }
 
+    public Optional<Quiz> findByPin(String pin) {
+        String sql = "SELECT * FROM quiz WHERE pin_acesso = ?";
+        try {
+            Quiz quiz = jdbcTemplate.queryForObject(sql, new Object[]{pin}, rowMapper);
+            return Optional.ofNullable(quiz);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public List<Quiz> findQuizzesPublicosPorNivel(String nivelEducacional) {
+        String sql = "SELECT * FROM quiz WHERE visibilidade = 'Público' AND nivel_educacional = CAST(? AS ESCOLARIDADE) ORDER BY data_criacao DESC";
+        return jdbcTemplate.query(sql, new Object[]{nivelEducacional}, rowMapper);
+    }
+
     public List<Quiz> findByProfessorCriador(long professorId) {
         String sql = "SELECT * FROM quiz WHERE professor_criador = ? ORDER BY data_criacao DESC";
         // Corrigindo a passagem de argumentos
@@ -128,10 +147,10 @@ public class QuizDAO {
     }
 
     public List<Quiz> findQuizzesFeitos(long idAluno) {
-        // Assumindo que os nomes das tabelas (TB_QUIZ, TB_RESPOSTA) estão corretos
-        String sql = "SELECT DISTINCT q.* FROM TB_QUIZ q " +
-                "JOIN TB_RESPOSTA r ON q.id_quiz = r.id_quiz " +
-                "WHERE r.id_aluno = ?";
+        String sql = "SELECT DISTINCT q.* FROM quiz q " +
+                     "INNER JOIN resposta r ON q.id_quiz = r.id_quiz " +
+                     "WHERE r.id_aluno = ? " +
+                     "ORDER BY q.data_criacao DESC";
         return jdbcTemplate.query(sql, new Object[]{idAluno}, rowMapper);
     }
 

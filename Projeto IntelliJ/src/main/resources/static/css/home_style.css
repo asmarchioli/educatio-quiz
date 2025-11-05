@@ -153,6 +153,7 @@ body {
     padding: 15px 20px;
     border-bottom: 1px solid #282828; /* Linha de separação discreta */
     vertical-align: middle;
+    background-color: #2acc1e;
 }
 
 /* Efeito de Hover nas Linhas (Interativo) */
@@ -163,7 +164,7 @@ body {
 
 /* Linhas Alternadas (Zebrar a tabela para melhor leitura) */
 .dark-table tbody tr:nth-child(even) {
-    background-color: #1f1f1f; /* Um tom ligeiramente diferente para linhas pares */
+    background-color: #2acc1e; /* Um tom ligeiramente diferente para linhas pares */
 }
 
 /* Última Linha (Remove a borda inferior para visual limpo) */

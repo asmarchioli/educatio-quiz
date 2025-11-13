@@ -65,7 +65,7 @@ public class QuizDAO {
     }
 
     public Quiz save(Quiz quiz) {
-        if (quiz.getId_quiz() == 0) {
+        if (quiz.getId_quiz() == null || quiz.getId_quiz() == 0) {
             // INSERIR
             String sql = "INSERT INTO quiz (titulo, pin_acesso, descricao, visibilidade, nivel_educacional," +
                     "professor_criador, area, data_criacao) VALUES" +

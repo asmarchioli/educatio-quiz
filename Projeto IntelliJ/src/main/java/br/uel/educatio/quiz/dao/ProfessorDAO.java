@@ -33,7 +33,6 @@ public class ProfessorDAO {
         professor.setInstituicao_ensino(rs.getString("instituicao_ensino"));
         professor.setDescricao_profissional(rs.getString("descricao_profissional"));
         professor.setLattes(rs.getString("lattes"));
-        professor.setArea(rs.getLong("area")); // Armazena o ID da área
         return professor;
     };
 
@@ -58,8 +57,8 @@ public class ProfessorDAO {
         // Verifica se o ID é nulo ou igual a zero para decidir entre INSERT e UPDATE
         if (professor.getId_professor() == null || professor.getId_professor() == 0) {
             // INSERIR: usa RETURNING para obter o novo ID
-            String sql = "INSERT INTO professor (nome, email, senha, instituicao_ensino, descricao_profissional, lattes, area) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id_professor";
+            String sql = "INSERT INTO professor (nome, email, senha, instituicao_ensino, descricao_profissional, lattes) " +
+                    "VALUES (?, ?, ?, ?, ?, ?) RETURNING id_professor";
             Long newId = jdbcTemplate.queryForObject(sql, new Object[]{
                     professor.getNome(),
                     professor.getEmail(),
@@ -67,13 +66,12 @@ public class ProfessorDAO {
                     professor.getInstituicao_ensino(),
                     professor.getDescricao_profissional(),
                     professor.getLattes(),
-                    professor.getArea()
             }, Long.class);
             professor.setId_professor(newId != null ? newId : 0L);
         } else {
             // ATUALIZAR: atualiza os dados existentes
             String sql = "UPDATE professor SET nome = ?, email = ?, senha = ?, instituicao_ensino = ?, " +
-                    "descricao_profissional = ?, lattes = ?, area = ? WHERE id_professor = ?";
+                    "descricao_profissional = ?, lattes = ? WHERE id_professor = ?";
             jdbcTemplate.update(sql,
                     professor.getNome(),
                     professor.getEmail(),
@@ -81,7 +79,6 @@ public class ProfessorDAO {
                     professor.getInstituicao_ensino(),
                     professor.getDescricao_profissional(),
                     professor.getLattes(),
-                    professor.getArea(),
                     professor.getId_professor());
         }
         return professor;

@@ -46,7 +46,11 @@ public class AlternativaDAO {
 
 
     public Optional<Alternativa> findAlternativaCorreta(long idQuestao) {
-        String sql = "SELECT * FROM alternativa WHERE id_questao = ? AND flg_eh_correta = 'S'";
+        //String sql = "SELECT * FROM alternativa WHERE id_questao = ? AND flg_eh_correta = 'S'";
+        String sql = "SELECT a.* FROM alternativa a " +
+            "JOIN questao q ON a.id_questao = q.id_questao " +
+            "WHERE a.id_questao = ? AND (UPPER(a.flg_eh_correta) = 'S' " +
+            "OR q.tipo_questao = 'Preencher Lacuna')";
         // Usa o RowMapper seguro
         List<Alternativa> alternativas = jdbcTemplate.query(sql, new Object[]{idQuestao}, new AlternativaRowMapper());
         return alternativas.isEmpty() ? Optional.empty() : Optional.of(alternativas.get(0));

@@ -71,8 +71,9 @@ public class QuestaoDAO {
         }
     }
 
+    //Usado em criar_questao.html
     public Questao save(Questao questao) {
-        if (questao.getId_questao() == 0) {
+        if (questao.getId_questao() == null || questao.getId_questao() == 0) {
             String sql = "INSERT INTO questao (enunciado, tipo_questao, visibilidade, nivel_educacional," +
                     "nivel_dificuldade, area, professor_criador) VALUES (?, CAST(? AS TIPOQUESTAO)," +
                     "CAST(? AS EXIBICAO), CAST(? AS ESCOLARIDADE), CAST(? AS DIFICULDADE), ?, ?) RETURNING id_questao";

@@ -1,13 +1,13 @@
 package br.uel.educatio.quiz.service;
 
-import br.uel.educatio.quiz.dao.AlternativaDAO; // Importado do Arquivo 1
+import br.uel.educatio.quiz.dao.AlternativaDAO;
 import br.uel.educatio.quiz.dao.QuestaoDAO;
 import br.uel.educatio.quiz.dao.QuizDAO;
 import br.uel.educatio.quiz.model.Questao;
 import br.uel.educatio.quiz.model.Quiz;
-import org.springframework.beans.factory.annotation.Autowired; // Importado do Arquivo 2
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Importado do Arquivo 1
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,37 +17,32 @@ public class QuizService {
 
     private final QuizDAO quizDAO;
     private final QuestaoDAO questaoDAO;
-    private final AlternativaDAO alternativaDAO; // Vindo do Arquivo 1
+    private final AlternativaDAO alternativaDAO;
 
 
-    @Autowired // Adicionado para consistência
+    @Autowired
     public QuizService(QuizDAO quizDAO, QuestaoDAO questaoDAO, AlternativaDAO alternativaDAO) {
         this.quizDAO = quizDAO;
         this.questaoDAO = questaoDAO;
         this.alternativaDAO = alternativaDAO;
     }
 
+    // ---
+    // MÉTODOS PARA O 'ALUNO' CONTROLLER (Retornam Optional)
+    // ---
 
     public List<Quiz> buscarQuizzesPublicosPorNivel(String nivelEducacional) {
         return quizDAO.findQuizzesPublicosPorNivel(nivelEducacional);
     }
 
-
     public Optional<Quiz> buscarPorPin(String pin) {
-        // Nota: Este método (do Arquivo 2) usa quizDAO.findByPin(pin)
+        // Método do Aluno usa o DAO 'findByPin'
         return quizDAO.findByPin(pin);
     }
 
     /**
-     * *** O MÉTODO MAIS IMPORTANTE DA MESCLAGEM ***
-     * Assinatura (Vinda do Arquivo 2)
-     * Implementação (Adaptada do Arquivo 1)
-     *
-     * Motivo: O AlunoController chama 'buscarPorId' e espera um 'Optional'.
-     * A implementação original do Arquivo 2 era INCOMPLETA (não buscava as alternativas).
-     * A implementação do Arquivo 1 (do método 'getFullQuizForTaking') estava CORRETA.
-     *
-     * Este método mesclado usa a assinatura do Arquivo 2 com a lógica correta do Arquivo 1.
+     * Busca o Quiz completo para o ALUNO realizar
+     * (com questões e alternativas)
      */
     public Optional<Quiz> buscarPorId(long id) {
         Optional<Quiz> quizOpt = quizDAO.findById(id);
@@ -56,13 +51,11 @@ public class QuizService {
         }
 
         Quiz quiz = quizOpt.get();
-        // Usa 'findQuestoesDoQuiz' (dos DAOs mesclados)
         List<Questao> questoes = questaoDAO.findQuestoesDoQuiz(id);
 
-        // Lógica crucial (vinda do Arquivo 1) para adicionar alternativas
+        // Adiciona as alternativas nas questões
         for (Questao questao : questoes) {
             if (questao.getTipo_questao() != br.uel.educatio.quiz.model.enums.TipoQuestao.PREENCHER_LACUNA) {
-                // Usa 'findByQuestaoId' (dos DAOs mesclados)
                 questao.setAlternativas(alternativaDAO.findByQuestaoId(questao.getId_questao()));
             }
         }
@@ -83,7 +76,9 @@ public class QuizService {
     }
 
 
-    // --- Métodos Mantidos do Arquivo 1 (Para o Professor/Admin Controller) ---
+    // ---
+    // MÉTODOS PARA O 'PROFESSOR/ADMIN' CONTROLLER (Lançam Exceção)
+    // ---
 
     @Transactional
     public List<String> listarQuizAreas(long id_quiz){
@@ -100,9 +95,13 @@ public class QuizService {
         quizDAO.deleteById(id);
     }
 
-
+    /**
+     * RENOMEADO: Busca um quiz para edição (Admin)
+     * (Não carrega alternativas, lança exceção se não achar)
+     */
     @Transactional
-    public Quiz buscarPorPin(String pin){
+    public Quiz buscarQuizParaEdicaoPorPin(String pin){
+        // Método do Admin usa o DAO 'findByPinAcesso'
         Optional<Quiz> quizOpt = quizDAO.findByPinAcesso(pin);
         if (quizOpt.isEmpty()) {
             throw new RuntimeException("Quiz não encontrado!");
@@ -110,9 +109,12 @@ public class QuizService {
         return quizOpt.get();
     }
 
-
+    /**
+     * RENOMEADO: Busca um quiz para edição (Admin)
+     * (Não carrega alternativas, lança exceção se não achar)
+     */
     @Transactional
-    public Quiz buscarPorId(long id){
+    public Quiz buscarQuizParaEdicao(long id){
         Optional<Quiz> quizOpt = quizDAO.findById(id);
         if (quizOpt.isEmpty()) {
             throw new RuntimeException("Quiz não encontrado!");
@@ -130,16 +132,7 @@ public class QuizService {
         quizDAO.save(quiz);
     }
 
-    // Métodos de 'get' que também estavam no Arquivo 1
     public List<Quiz> getPublicQuizzes() {
         return quizDAO.findPublicQuizzes();
-    }
-
-    public List<Quiz> getQuizzesByProfessor(Long professorId) {
-        return quizDAO.findByProfessorCriador(professorId);
-    }
-
-    public Optional<Quiz> getQuizByPin(String pin) {
-        return quizDAO.findByPinAcesso(pin);
     }
 }

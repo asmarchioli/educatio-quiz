@@ -94,7 +94,7 @@ public class ProfessorService {
     }
 
     @Transactional
-    public Professor atualizarPerfilProfessor(long idProfessor, Professor professorAtualizado) throws RuntimeException {
+    public Professor atualizarPerfilProfessor(Long idProfessor, Professor professorAtualizado) throws RuntimeException {
         Optional<Professor> professorOpt = professorDAO.findById(idProfessor);
         if (professorOpt.isEmpty()) {
             throw new RuntimeException("Professor não encontrado para atualização.");
@@ -124,7 +124,7 @@ public class ProfessorService {
         return professorDAO.findAll(); // Método DAO do Arquivo 2
     }
 
-    public Optional<Professor> buscarPorId(long id) {
+    public Optional<Professor> buscarPorId(Long id) {
         return professorDAO.findById(id); // Método DAO do Arquivo 2
     }
 
@@ -133,14 +133,14 @@ public class ProfessorService {
         return professorDAO.findByEmail(email);
     }
 
-    public boolean existePorId(long id) {
+    public boolean existePorId(Long id) {
         return professorDAO.existsById(id); // Do Arquivo 2
     }
 
     // --- Métodos de Exclusão (Lógica do Arquivo 2 é mais segura) ---
 
     @Transactional
-    public void deletarPorId(long id) throws RuntimeException {
+    public void deletarPorId(Long id) throws RuntimeException {
         if (!professorDAO.existsById(id)) {
             throw new RuntimeException("Professor não encontrado para exclusão.");
         }
@@ -154,19 +154,20 @@ public class ProfessorService {
     // --- Métodos de Áreas Mesclados (de ambos os arquivos) ---
 
     @Transactional
-    public void adicionarAreaProfessor(long idArea, long idProfessor) throws RuntimeException{
+    public void adicionarAreaProfessor(Long idArea, Long idProfessor) throws RuntimeException{
         // if (!professorDAO.existsById(idProfessor)) throw new RuntimeException("Professor não existe");
         // if (!areaDAO.existsById(idArea)) throw new RuntimeException("Área não existe");
         professorAreaDAO.addAreaToProfessor(idProfessor, idArea);
+        
     }
 
     @Transactional
-    public void removerAreaProfessor(long idProfessor, long idArea) {
+    public void removerAreaProfessor(Long idProfessor, Long idArea) {
         professorAreaDAO.removeAreaFromProfessor(idProfessor, idArea);
     }
 
     // Retorna List<String>
-    public List<String> listarAreasPorProfessor(long idProfessor) {
+    public List<String> listarAreasPorProfessor(Long idProfessor) {
         return professorAreaDAO.findAreasByProfessorId(idProfessor);
     }
 
@@ -175,7 +176,7 @@ public class ProfessorService {
         return professorAreaDAO.buscarAreasDoProfessor(idProfessor);
     }
 
-    public List<Professor> listarProfessoresPorArea(long idArea) {
+    public List<Professor> listarProfessoresPorArea(Long idArea) {
         List<Long> idsProfessores = professorAreaDAO.findProfessorIdsByAreaId(idArea);
         return professorDAO.findAllById(idsProfessores);
     }

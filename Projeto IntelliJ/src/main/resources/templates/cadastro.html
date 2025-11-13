@@ -10,7 +10,7 @@
 <div class="container">
     <h2>📝 Cadastro</h2>
 
-<!--    <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>-->
+   <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
 
     <div class="tabs">
         <button class="tab active" onclick="switchTab('aluno')">Sou Aluno</button>
@@ -23,17 +23,18 @@
             <div class="form-group">
                 <label>Nome Completo:</label>
                 <input type="text" th:field="*{nome}" required>
+                <span th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
             </div>
             <div class="form-group">
                 <label>E-mail:</label>
                 <input type="email" th:field="*{email}" required>
+                <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
             </div>
             <div class="form-group">
                 <label>Senha:</label>
                 <input type="password" th:field="*{senha}" required>
                 <span th:if="${#fields.hasErrors('senha')}"
-                      th:errors="*{senha}"
-                      class="text-danger">
+                      th:errors="*{senha}">
         </span>
             </div>
             <div class="form-group">
@@ -42,6 +43,8 @@
                     <option value="">Selecione...</option>
                     <option th:each="esc : ${escolaridades}" th:value="${esc.name()}" th:text="${esc}"></option>
                 </select>
+                <span th:if="${#fields.hasErrors('nivel_educacional')}" 
+                      th:errors="*{nivel_educacional}"></span>
             </div>
             <button class="btn">Cadastrar como Aluno</button>
         </form>
@@ -53,39 +56,44 @@
             <div class="form-group">
                 <label>Nome Completo:</label>
                 <input type="text" th:field="*{nome}" required>
+                <span th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
             </div>
             <div class="form-group">
                 <label>E-mail:</label>
                 <input type="email" th:field="*{email}" required>
+                <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
             </div>
             <div class="form-group">
                 <label>Senha:</label>
                 <input type="password" th:field="*{senha}" required>
                 <span th:if="${#fields.hasErrors('senha')}"
                       th:errors="*{senha}"
-                      class="text-danger">
+                    >
                 </span>
             </div>
             <div class="form-group">
                 <label>Instituição de Ensino:</label>
                 <input type="text" th:field="*{instituicao_ensino}" required>
+                <span th:if="${#fields.hasErrors('instituicao_ensino')}" th:errors="*{instituicao_ensino}">
             </div>
             <div class="form-group">
                 <label>Descrição Profissional:</label>
                 <textarea th:field="*{descricao_profissional}" required></textarea>
+                <span th:if="${#fields.hasErrors('descricao_profissional')}" th:errors="*{descricao_profissional}"></span>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label>Área Principal:</label>
                 <select th:field="*{area}" required>
                     <option value="">Selecione...</option>
                     <option th:each="area : ${areas}" th:value="${area.idArea}" th:text="${area.nomeArea}"></option>
                 </select>
-            </div>
+            </div> -->
             <div class="form-group">
-                <label>Áreas Adicionais:</label>
+                <label>Áreas de Formação:</label>
                 <div class="checkbox-group">
                     <div class="checkbox-item" th:each="area : ${areas}">
-                        <input type="checkbox" name="areasAdicionais" th:value="${area.idArea}">
+                        <!-- O que faz mapear para o requestParam é o name, já para o objeto professor é th:field -->
+                        <input type="checkbox" name="areasProfessor" th:value="${area.idArea}">
                         <label th:text="${area.nomeArea}"></label>
                     </div>
                 </div>

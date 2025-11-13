@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criação de Questão - Mínimo</title>
+    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🎓 Educatio Quiz - Professor</h1>
+        <div class ="flex items-center gap-6">
+            <span th:text="${professor.nome}" style = "margin-left:"></span>
+            <a href="/logout" class="btn-logout" style = >Sair</a>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="content-card">
+            <h2 style="color: var(--text-light); text-align: center; margin-bottom: 30px;">
+                Criação de Questão
+            </h2>
+
+        
+            
+            <form th:action="@{/questao/salvar}" method="POST">
+                <!-- Campos Ocultos para Mapeamento Spring -->
+                <input type="hidden" name="professor_criador" th:value="${professor.id_professor}">
+
+                <div style="text-align: right; margin-top: 30px;">
+                    <a th:ref = "@{/questao/listar/questoes/{id}(id=${professor.id_professor})}"
+                        class="btn btn-secondary mr-4">Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-secondary mr-4"
+                            text="Salvar Questão">
+                    </button>
+                </div>
+                
+                <!-- ENUNCIADO -->
+                <div class="form-group">
+                    <label for="enunciado" class="form-label">Enunciado da Questão</label>
+                    <textarea id="enunciado" name="enunciado" required class="form-input" rows="3" placeholder="Digite o enunciado completo da questão."></textarea>
+                </div>
+
+                
+                
+                <!-- Valores do ENUM EXIBICAO -->
+                <div class="form-group">
+                    <label for="visibilidade" class="form-label">Visibilidade (Se você quer que a questão seja pública ou privada)</label>
+                    <select name="visibilidade" id="visibilidade" class="form-input" required>
+                         <option th:each= "exibicao : ${exibicoes}" th:value="${exibicao}" th:text="${exibicao}"> </option>
+                        <!-- <option value="Público">Público</option>
+                        <option value="Privado">Privado</option> -->
+                    </select>
+                </div>
+
+
+                
+                <!-- TIPO DE QUESTÃO -->
+                <div class="form-group">
+                    <label for="tipo_questao" class="form-label">Tipo de Questão</label>
+                    <select id="tipo_questao" name="tipo_questao" required class="form-input" onchange="toggleAlternatives()">
+                         <option value="" disabled selected>Defina o tipo da questão</option>
+                         <option th:each= "tipo : ${tiposQuestao}" th:value="${tipo}" th:text="${tipo}"> </option>
+                        <!-- <option value="" disabled selected>Selecione o Tipo</option>
+                        <option value="VERDADEIRO_OU_FALSO">Verdadeiro ou Falso</option>
+                        <option value="PREENCHER_LACUNA">Preencher Lacuna</option>
+                        <option value="MULTIPLA_ESCOLHA">Múltipla Escolha</option> -->
+                    </select>
+                </div>
+
+                
+                
+                <div class="form-group">
+                    <label for="area" class="form-label">Área</label>
+                    <select id="area" name="area" required class="form-input">
+                         <option th:each= " area:${areas}" th:value="${area.getIdArea()}" th:text="${area.getNomeArea()}"> </option>
+                    </select>
+                </div>
+
+                <!-- NÍVEL DE ESCOLARIDADE E DIFICULDADE (Simplificado) -->
+                <div class="flex gap-2">
+                    <div class="form-group" style="flex-grow: 1;">
+                        <label for="escolaridade" class="form-label">Nível Educacional</label>
+                        <select id="escolaridade" name="nivel_educacional" required class="form-input">
+                            <option th:each= "nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}"> </option>
+                            <!-- Valores do ENUM ESCOLARIDADE -->
+                            <!-- <option value="Fundamental I">Fundamental I</option>
+                            <option value="Fundamental II">Fundamental II</option>
+                            <option value="Ensino Médio">Ensino Médio</option>
+                            <option value="Graduação">Graduação</option>
+                            <option value="Pós-Graduação">Pós-Graduação</option>d -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="flex-grow: 1;">
+                        <label for="dificuldade" class="form-label">Nível de Dificuldade</label>
+                        <select id="dificuldade" name="nivel_dificuldade" required class="form-input">
+                             <option th:each= "dificuldade : ${dificuldades}" th:value="${dificuldade}" th:text="${dificuldade}"> </option>
+                            <!-- <option value="FÁCIL">FÁCIL</option>
+                            <option value="MÉDIO">MÉDIO</option>
+                            <option value="DIFÍCIL">DIFÍCIL</option> -->
+                        </select>
+                    </div>
+                </div>
+
+                
+                <!-- 3. SEÇÕES DINÂMICAS DE RESPOSTA (MINIMIZADAS) -->
+                <h3 style="color: var(--accent); font-size: 1.1rem; margin-top: 20px;">Definição da Resposta</h3>
+
+                <!-- SEÇÃO MÚLTIPLA ESCOLHA -->
+                <div id="multipla-escolha-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
+                    <p class="form-label" style="color: #9da5b4;">Alternativas (5 Fixas). Selecione apenas uma como Correta.</p>
+
+                    <div th:each="i : ${#numbers.sequence(0, 4)}" class="alternativa-item flex gap-2 items-center">
+                        <input type="text" th:id="${'alt_M_' + i}" 
+                               th:name="*{alternativas[__${i}__].texto_alternativa}" 
+                               class="form-input" style="flex-grow: 1;" placeholder="Texto da Alternativa">
+
+                        <input type="radio" th:id="${'radio_M_' + i}" 
+                               th:name="*{alternativas[__${i}__].flg_eh_correta}" 
+                               value="S" style="width: 20px; height: 20px;">
+                        <label th:for="${'radio_M_' + i}" style="color: var(--accent);">Correta</label>
+
+                        <input type="hidden" th:name="${'alternativas[' + i + '].flg_eh_correta'}" value="N">
+                    </div>
+                </div>
+
+                <!-- SEÇÃO VERDADEIRO OU FALSO -->
+                <div id="verdadeiro-falso-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
+                    <p class="form-label" style="color: #9da5b4;">Afirmações V/F (5 Fixas). Marque V ou F para cada afirmação.</p>
+
+                    <div th:each="i : ${#numbers.sequence(0, 4)}" class="alternativa-item flex gap-2 items-center">
+                        <input type="text" th:id="${'alt_VF_' + i}" 
+                               th:name="*{alternativas[__${i}__].texto_alternativa}" 
+                               class="form-input" style="flex-grow: 1;" placeholder="Texto da Afirmação (V ou F)">
+
+                        <input type="radio" th:id="${'radio_V_' + i}" 
+                               th:name="*{alternativas[__${i}__].flg_eh_correta}" 
+                               value="S" style="width: 20px; height: 20px;">
+                        <label th:for="${'radio_V_' + i}" style="color: #00c26e;">V</label>
+
+                        <input type="radio" th:id="${'radio_F_' + i}" 
+                               th:name="*{alternativas[__${i}__].flg_eh_correta}" 
+                               value="N" style="width: 20px; height: 20px;">
+                        <label th:for="${'radio_F_' + i}" style="color: #EF4444;">F</label>
+
+                        <input type="hidden" th:name="${'alternativas[' + i + '].flg_eh_correta'}" value="N">
+                    </div>
+                </div>
+
+                
+                <!-- SEÇÃO PREENCHER LACUNA -->
+                <div id="preencher-lacuna-section" 
+                     style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
+                    <div class="form-group">
+                        <label for="resposta_lacuna" class="form-label"> Resposta Exata da Lacuna </label>
+
+                        <textarea id="resposta_lacuna" 
+                                  th:name="*{alternativas[0].texto_alternativa}" 
+                                  rows="2" 
+                                  class="form-input" 
+                                  placeholder="Palavra ou frase exata esperada."></textarea>
+
+                        <input type="hidden" th:name="*{alternativas[0].flg_eh_correta}" value="S">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Lógica JavaScript Mínima para Controle de Seções -->
+    <script>
+        document.addEventListener('DOMContentLoaded', toggleAlternatives);
+
+        function toggleAlternatives() {
+            const type = document.getElementById('tipo_questao').value;
+
+            const sections = [
+                'multipla-escolha-section', 
+                'verdadeiro-falso-section', 
+                'preencher-lacuna-section'
+            ];
+
+            // Oculta todas as seções
+            sections.forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+
+            let currentSectionId = '';
+
+            // Exibe a seção correta e define campos como obrigatórios (simulado)
+            if (type === 'Multipla Escolha') {
+                currentSectionId = 'multipla-escolha-section';
+            } else if (type === 'Verdadeiro ou Falso') {
+                currentSectionId = 'verdadeiro-falso-section';
+            } else if (type === 'Preencher Lacuna') {
+                currentSectionId = 'preencher-lacuna-section';
+            }
+
+            if (currentSectionId) {
+                document.getElementById(currentSectionId).style.display = 'block';
+                // Lógica de "required" simplificada: o backend tratará a validação de lista.
+            }
+        }
+    </script>
+</body>
+</html>

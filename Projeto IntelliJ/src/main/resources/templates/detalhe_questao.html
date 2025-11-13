@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Questão</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+
+    <!-- CONTEÚDO PRINCIPAL (DETALHES DA QUESTÃO) -->
+    <main class="main-content">
+
+        <!-- Botão de Voltar -->
+        <div class="mb-4">
+            <!-- <a th:href="@{/questao/listar/questoes/{id}(id=${professor.id_professor})}" class="text-muted" style="text-decoration: none; font-size: 0.9rem;">
+                &larr; Voltar para o Banco de Questões
+            </a> -->
+            <!-- //Volta uma página no navegador -->
+            <a href="javascript:void(0)" onClick="history.go(-1); return false;">Voltar</a>
+        </div>
+
+        <div class="content-card">
+
+            <div class="flex justify-between items-center mb-6 pb-4 border-bottom-accent">
+                <h2 class="text-2xl font-bold" style="color: var(--text-light);">
+                    Detalhes da Questão <span th:text="${questao.id_questao}">[ID]</span>
+                </h2>
+                <div class="flex space-x-2">
+                    <!-- Botão de Edição -->
+                    <a th:href="@{/questao/editar/{id}(id=${questao.id_questao})}" class="btn btn-primary table-action-btn btn-edit">
+                        Editar
+                    </a>
+                    <!-- Botão de Exclusão -->
+                    <form th:action="@{/questao/excluir}" 
+                          onsubmit="alert('Tem certeza que deseja excluir esta questão? Esta ação é irreversível.');" 
+                          method="post">
+                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                        <button type="submit" class="btn btn-danger mr-4">
+                                Excluir
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ENUNCIADO -->
+            <div class="mb-6">
+                <h3 class="text-xl font-bold mb-2">Enunciado:</h3>
+                <p th:text="${questao.enunciado}" class="text-light" style="font-size: 1.1rem;"></p>
+            </div>
+
+            <!-- METADADOS -->
+            <div class="flex gap-4 mb-6" style="flex-wrap: wrap;">
+
+                <div style="flex-basis: 30%;">
+                    <strong class="text-muted">Tipo:</strong>
+                    <p th:text="${questao.tipo_questao}"></p>
+                </div>
+
+                <div style="flex-basis: 30%;">
+                    <strong class="text-muted">Nível:</strong>
+                    <p th:text="${questao.nivel_educacional}"></p>
+                </div>
+
+                <div style="flex-basis: 30%;">
+                    <strong class="text-muted">Dificuldade:</strong>
+                    <p th:text="${questao.nivel_dificuldade}"></p>
+                </div>
+
+                <div style="flex-basis: 30%;">
+                    <strong class="text-muted">Área:</strong>
+                    <p th:text="${questao.area}"></p> 
+                    <!-- Arrumar para colcoar o nome da área -->
+                </div>
+
+                <div style="flex-basis: 30%;">
+                    <strong class="text-muted">Criador (ID):</strong>
+                    <p th:text="${questao.professor_criador}"></p>
+                </div>
+
+                <div style="flex-basis: 30%;">
+                    <strong class="text-muted">Visibilidade:</strong>
+                    <p th:text="${questao.visibilidade}"></p>
+                </div>
+
+            </div>
+
+            <!-- ALTERNATIVAS (Iteração) -->
+            <div class="alternativas-container" style="margin-top: 2rem; border-top: 1px dashed #2e3542; padding-top: 2rem;">
+                <h3 class="text-xl font-bold mb-4 text-accent">Alternativas / Resposta</h3>
+
+                <div th:each="alternativa, stat : ${alternativas}" class="flex items-center p-3 mb-2" 
+                     th:classappend="${alternativa.flg_eh_correta == 'S'} ? 'correct-answer' : ''"
+                     style="border-radius: 8px; background-color: #161b22; transition: background-color 0.3s;">
+
+                    <!-- Status de Correção (Ícone) -->
+                    <div style="min-width: 30px; margin-right: 15px;">
+                        <span th:if="${alternativa.flg_eh_correta == 'S'}"
+                              style="color: var(--accent); font-size: 1.5rem; line-height: 1;">
+                            &#x2705; <!-- ✅ -->
+                        </span>
+                        <span th:if="${alternativa.flg_eh_correta == 'N'}"
+                              style="color: var(--danger); font-size: 1.5rem; line-height: 1;">
+                            &#x274C; <!-- ❌ -->
+                        </span>
+                    </div>
+
+                    <!-- Letra da Alternativa (A, B, C...) -->
+                    <div style="min-width: 20px; margin-right: 10px;">
+                        <span class="font-bold" th:text="${alternativa.num_alternativa}".</span>
+                    </div>
+
+                    <!-- Texto da Alternativa / Resposta -->
+                    <div class="flex-grow-1">
+                        <span th:text="${alternativa.texto_alternativa}"
+                              th:classappend="${alternativa.flg_eh_correta == 'S'} ? 'font-weight-bold' : ''"
+                              style="font-size: 1rem;">
+                            Texto da Alternativa (exemplo)
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Mensagem se não houver alternativas -->
+            <div th:if="${#lists.isEmpty(alternativas)}" class="text-center" style="color: var(--text-muted); padding: 2rem;">
+                Nenhuma alternativa ou resposta definida para esta questão.
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Rodapé opcional -->
+    <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
+        &copy; 2024 Educatio Quiz. Todos os direitos reservados.
+    </footer>
+</body>
+</html>

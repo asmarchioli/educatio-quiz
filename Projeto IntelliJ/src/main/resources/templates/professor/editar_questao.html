@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Questão</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🎓 Educatio Quiz - Professor</h1>
+        <div class ="flex items-center gap-6">
+            <span th:text="${professor.nome}" style = "margin-left:"></span>
+            <a href="/logout" class="btn-logout" style = >Sair</a>
+        </div>
+    </nav>
+    
+        <!-- Container Principal do Formulário -->
+        <div class="main-content">
+            <div class="content-card">
+
+                <!-- Título Dinâmico -->
+                <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--accent);"
+                    th:text="${questao.id_questao == null} ? 'Criar Nova Questão' : 'Editar Questão '">
+                    Criar/Editar Questão
+                </h2>
+
+                <!--
+                    FORMULÁRIO PRINCIPAL
+                    - th:object: Liga o formulário ao objeto 'questao' (vazio ou preenchido).
+                    - th:action: Muda o endpoint dependendo se é criação ou edição.
+                -->
+                <form th:action="${questao.id_questao == null} 
+                                           ? @{/questao/salvar} 
+                                           : @{/questao/atualizar}" 
+                      method="post" 
+                      th:object="${questao}">
+
+                    
+                    <!-- CAMPO OCULTO: ID da Questão (Necessário para Edição) -->
+                    <input type="hidden" th:field="*{id_questao}" />
+
+                    
+                    <!-- CAMPO OCULTO: Professor Criador (Injetado pelo Backend) -->
+                    <input type="hidden" th:field="*{professor_criador}" th:value="${professor.getId_professor()}" />
+
+                    
+                    <div style="text-align: right; margin-top: 30px;">
+                        <!-- <a th:ref = "@{/questao/listar/questoes/{id}(id=${professor.id_professor})}"
+                            class="btn btn-secondary mr-4"
+                            title="Cancelar">Cancelar
+                        </a> -->
+                        <a href="javascript:void(0)" 
+                           onClick="voltarParaBancoQuestoes();return false;"
+                           class = "btn btn-secondary mr-4">Cancelar</a>
+
+                        <!-- Botão de Salvar (Submit) -->
+                        <button type="submit" class="btn btn-primary mr-4"
+                                title="Salvar Questão"> Salvar <Ques></Ques>
+                        </button>
+                    </div>
+
+                    
+                    <!-- 1. ENUNCIADO -->
+                    <div class="form-group">
+                        <label for="enunciado" class="form-label">Enunciado da Questão</label>
+                        <textarea th:field="*{enunciado}" id="enunciado" class="form-input" rows="4" 
+                            placeholder="Digite o texto da sua questão, incluindo o símbolo de lacuna se for o caso."
+                            required></textarea>
+                        <!-- Exemplo de como exibir erro com Thymeleaf (opcional, mas recomendado) -->
+                        <!-- <p th:if="${#fields.hasErrors('enunciado')}" th:errors="*{enunciado}" class="text-danger"></p> -->
+                    </div>
+
+            
+                    <!-- 2. TIPO DA QUESTÃO -->
+                    <div class="form-group">
+                        <label for="tipo_questao" class="form-label">Tipo da Questão</label>
+                        <select th:field="*{tipo_questao}" id="tipo_questao" class="form-input"
+                            onchange="toggleAlternatives()" accesskey   
+                                required>
+                            <option value="">Selecione o Tipo</option>
+                            <option th:each="tipo : ${tiposQuestao}" th:value="${tipo}" th:text="${tipo}">Tipo de Questão Exemplo</option>
+                        </select>
+                    </div>
+
+                    <!-- 3. ÁREA -->
+                    <div class="form-group">
+                        <label for="area" class="form-label">Tipo da Questão</label>
+                        <select th:field="*{area}" 
+                                id="area" 
+                                required 
+                                class="form-input"
+                                th:disabled="${questao.id_questao != null}"> <!-- Disabled na Edição -->
+    
+                            <option value="">Selecione a Área</option>
+    
+                            <!-- CORRIGIDO: Sintaxe do th:each e th:selected para pré-seleção -->
+                            <option th:each="areaObj : ${areasProfessor}" 
+                                    th:value="${areaObj.getIdArea()}" 
+                                    th:text="${areaObj.getNomeArea()}"
+                                    th:selected="${questao.area != null AND questao.area == areaObj.getIdArea()}">
+                            </option>
+    
+                        </select>
+                    </div>
+                    
+                    <!-- O atributo th:disabled é mantido no <select> para que ele fique cinza e não editável visualmente, mas o valor enviado será o do campo hidden. -->
+                    <input type="hidden" th:if="${questao.id_questao != null}" th:field="*{area}" />
+
+                    
+                    <!-- 3. VISIBILIDADE -->
+                    <div class="form-group">
+                        <label for="visibilidade" class="form-label">Visibilidade</label>
+                        <select th:field="*{visibilidade}" id="visibilidade" class="form-input" 
+                            <option value="">Selecione a Visibilidade</option>
+                            <option th:each="visib : ${exibicoes}" th:value="${visib}" th:text="${visib}">Visibilidade Exemplo</option>
+                        </select>
+                    </div>
+
+
+                    <!-- 5. NÍVEL EDUCACIONAL -->
+                    <div class="form-group">
+                        <label for="nivel_educacional" class="form-label">Nível Educacional</label>
+                        <select th:field="*{nivel_educacional}" id="nivel_educacional"
+                                class="form-input" required>
+                            <option value="">Selecione o Nível</option>
+                            <option th:each="nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}">Nível Exemplo</option>
+                        </select>
+                    </div>
+
+                    <!-- 6. NÍVEL DE DIFICULDADE -->
+                    <div class="form-group">
+                        <label for="nivel_dificuldade" class="form-label">Nível de Dificuldade</label>
+                        <select th:field="*{nivel_dificuldade}" id="nivel_dificuldade" 
+                                class="form-input" required>
+                            <option value="">Selecione a Dificuldade</option>
+                            <option th:each="dificuldade : ${dificuldades}" th:value="${dificuldade}" th:text="${dificuldade}">Dificuldade Exemplo</option>
+                        </select>
+                    </div>
+
+
+                    <!-- ======================================================= -->
+                    <!-- SEÇÕES DINÂMICAS DE ALTERNATIVAS -->
+                    <!-- ======================================================= -->
+
+                    <!-- 3. SEÇÕES DINÂMICAS DE RESPOSTA (MINIMIZADAS) -->
+
+                    <!-- SEÇÃO MÚLTIPLA ESCOLHA -->
+                    <h3 style="color: var(--accent); font-size: 1.1rem; margin-top: 20px;">Definição da Resposta</h3>
+                    
+                    <div id="multipla-escolha-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
+                        <p class="form-label" style="color: #9da5b4;">Alternativas (5 Fixas). Selecione apenas uma como Correta.</p>
+
+                        <div th:each="i : ${#numbers.sequence(0, 4)}" class="alternativa-item flex gap-2 items-center" style="margin-bottom: 10px;">
+                            <!-- Input Texto: alternativas[i].texto_alternativa -->
+                            <div th:each="j : ${#numbers.sequence(0, 4)}">
+                            <!-- Campo oculto para garantir que as outras sejam 'N' //Tirar se estiver causand o problema -->
+                                <input type="hidden" th:name="${'alternativas[' + j + '].flg_eh_correta'}" value="N">
+                            </div>
+                            
+                            <input type="text" 
+                                   th:id="${'alt_M_' + i}" 
+                                   th:field="*{alternativas[__${i}__].texto_alternativa}" 
+                                   class="form-input" style="flex-grow: 1;" placeholder="Texto da Alternativa">
+
+                            <!-- Radio para Correção: alternativas[i].flg_eh_correta -->
+                            <input type="radio" th:id="${'radio_M_' + i}" 
+                                   th:field="*{alternativas[__${i}__].flg_eh_correta}" 
+            th:checked="${questao.alternativas[__${i}__].flg_eh_correta == 'S'}" 
+                                   value="S" style="width: 20px; height: 20px;">
+                            <label th:for="${'radio_M_' + i}" style="color: var(--accent);">Correta</label>
+
+                        </div>
+                    </div>
+
+                    <!-- SEÇÃO VERDADEIRO OU FALSO -->
+                    <div id="verdadeiro-falso-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
+                        <p class="form-label" style="color: #9da5b4;">Afirmações V/F (5 Fixas). Marque V ou F para cada afirmação.</p>
+
+                        <div th:each="i : ${#numbers.sequence(0, 4)}" class="alternativa-item flex gap-2 items-center" style="margin-bottom: 10px;">
+                            
+                            <input type="text" th:id="${'alt_VF_' + i}" 
+                                   th:field="*{alternativas[__${i}__].texto_alternativa}"
+                                   class="form-input" style="flex-grow: 1;" 
+                                   placeholder="Texto da Afirmação (V ou F)">
+
+                            <!-- Radio V (Correta = S) -->
+                            <input type="radio" th:id="${'radio_V_' + i}" 
+                                   th:field="*{alternativas[__${i}__].flg_eh_correta}" 
+                                th:checked="${questao.alternativas[__${i}__].flg_eh_correta == 'S'}"
+                                   value="S" style="width: 20px; height: 20px;">
+                            <label th:for="${'radio_V_' + i}" style="color: #00c26e;">V</label>
+
+                            <!-- Radio F (Correta = N) -->
+                            <input type="radio" th:id="${'radio_F_' + i}" 
+                                   th:field="*{alternativas[__${i}__].flg_eh_correta}" 
+            th:checked="${questao.alternativas[__${i}__].flg_eh_correta == 'N'}"
+                                   value="N"
+                                   style="width: 20px; height: 20px;">
+                            <label th:for="${'radio_F_' + i}" style="color: #EF4444;">F</label>
+
+                            <!-- Campo oculto para garantir que o Spring não ignore nenhuma posição do array -->
+                            <!-- <input type="hidden" th:name="${'alternativas[' + i + '].flg_eh_correta'}" value="N"> -->
+                            
+                            <!-- Campo oculto para garantir que o Spring não ignore nenhuma posição do array -->
+                            <!-- NOTE: Não é mais necessário com th:field, mas mantido como backup de valor inicial 'N' //Mudar de volta se não funcionar-->
+                            <input type="hidden" th:if="${!#strings.equals(questao.alternativas[__${i}__].flg_eh_correta, 'S') and !#strings.equals(questao.alternativas[__${i}__].flg_eh_correta, 'N')}"
+                                   th:name="${'alternativas[' + i + '].flg_eh_correta'}" value="N">
+                        </div>
+                    </div>
+
+                    
+                    <!-- SEÇÃO PREENCHER LACUNA -->
+                    <div id="preencher-lacuna-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label for="resposta_lacuna" class="form-label"> Resposta Exata da Lacuna </label>
+
+
+                            <textarea id="resposta_lacuna" 
+                                      th:field="*{alternativas[0].texto_alternativa}" 
+                                      rows="2" class="form-input" 
+                                      placeholder="Palavra ou frase exata esperada."></textarea>
+
+                            <!-- Campo oculto para dizer que esta única resposta é a correta -->
+                            <input type="hidden" th:field="*{alternativas[0].flg_eh_correta}" value="S">
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+                    
+    
+    <script>
+        function toggleAlternatives() {
+            const tipo = document.getElementById('tipo_questao').value;
+
+            const mc = document.getElementById('multipla-escolha-section');
+            const vf = document.getElementById('verdadeiro-falso-section');
+            const lacuna = document.getElementById('preencher-lacuna-section');
+
+            if (mc) mc.style.display = 'none';
+            if (vf) vf.style.display = 'none';
+            if (lacuna) lacuna.style.display = 'none';
+
+            if (tipo === 'Multipla Escolha' && mc) {
+                mc.style.display = 'block';
+            } else if (tipo === 'Verdadeiro ou Falso' && vf) {
+                vf.style.display = 'block';
+            } else if (tipo === 'Preencher Lacuna' && lacuna) {
+                lacuna.style.display = 'block';
+            }
+        }
+
+        
+        function voltarParaBancoQuestoes(){
+            const paginaAnterior = document.referrer;
+            
+            if (paginaAnterior.includes('/listar/questoes/')) {
+                // Se a página anterior for 'X', volta 1 passo.
+                history.go(-1);
+
+              // Substitua 'URL_COMPLETA_DE_Y' pela URL exata da sua página Y
+              } else if (paginaAnterior.includes('questao/buscar/')) {
+                // Se a página anterior for 'Y', volta 2 passos.
+                // O pressuposto aqui é que você está em Z -> Y -> X, e quer voltar para X
+                history.go(-2);
+        }
+
+            
+        // Inicialização da Lógica de Exibição de Alternativas no carregamento
+        document.addEventListener('DOMContentLoaded', function() {
+            // A função toggleAlternatives() é chamada para exibir a seção que foi preenchida pelo Thymeleaf
+            toggleAlternatives(); 
+        });
+            
+        document.addEventListener('DOMContentLoaded', function() {
+            // A função toggleAlternatives() é chamada para exibir a seção que foi preenchida pelo Thymeleaf
+            toggleAlternatives(); 
+        });
+
+        //Não está funcionando
+        // document.addEventListener('DOMContentLoaded', function() {
+
+        //         // 2. Executa a função das Alternativas para mostrar a seção correta
+        //         // Isso garante que, se houver um tipo de questão preenchido (modo EDIÇÃO), 
+        //         // a seção correspondente seja exibida imediatamente.
+        //         toggleAlternatives(); 
+
+        //         // 3. Pré-seleciona a Resposta Correta nos Dropdowns (Múltipla Escolha / V/F)
+        //         const tipo = document.getElementById('tipo_questao').value;
+
+        //         // Só faz sentido tentar preencher a resposta correta se for EDIÇÃO e a questão tiver alternativas.
+        //         if ('[[${questao.id_questao}]]' !== '') {
+
+        //             if (tipo === 'Multipla Escolha' || tipo === 'Verdadeiro ou Falso') {
+        //                 // Esta lógica precisa ser ajustada, pois o THYMELEAF DEVE PREENCHER DIRETO.
+        //                 // O valor 'resposta_mc' e 'resposta_vf' deve ser preenchido por um atributo th:value no HTML
+
+        //                 // Exemplo de como o Thymeleaf preencheria o dropdown de resposta:
+        //                 // O Controller precisa enviar o 'letraResposta' (ex: 'C') para ser preenchido aqui.
+
+        //                 // Se estiver usando o ID temporário 'resposta_mc' para a letra:
+        //                 const letraCorreta = '[[${letraDaAlternativaCorreta}]]'; // Variável do Controller
+        //                 if (document.getElementById('resposta_mc')) {
+        //                     document.getElementById('resposta_mc').value = letraCorreta;
+        //                 }
+        //                 if (document.getElementById('resposta_vf')) {
+        //                     document.getElementById('resposta_vf').value = letraCorreta;
+        //                 }
+        //             }
+        //         }
+        //     });
+    </script>                            
+</body>
+</html>

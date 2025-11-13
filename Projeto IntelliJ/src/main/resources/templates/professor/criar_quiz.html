@@ -1,59 +1,157 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar quiz</title>
     <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <title>Educatio Quiz - Criar Novo Quiz</title>
 </head>
-<body>
-<nav class="navbar">
-    <h1>🎓 Educatio Quiz - Professor</h1>
-    <div>
-        <span th:text="${professor.nome}"></span>
-        <a href="/logout" class="btn-logout">Sair</a>
-    </div>
-</nav>
-<div>
-<!--    <<form action="/login" method="post">-->
-<!--        <div class="form-group">-->
-<!--        <label for="tipoUsuario">Você é:</label>-->
-<!--        <select id="tipoUsuario" name="tipoUsuario" required>-->
-<!--            <option value="">Selecione...</option>-->
-<!--            <option value="aluno">Aluno</option>-->
-<!--            <option value="professor">Professor</option>-->
-<!--        </select>-->
-<!--     </div>-->
+    <body>
 
-<!--    <div class="form-group">-->
-<!--        <label for="email">E-mail:</label>-->
-<!--        <input type="email" id="email" name="email" required>-->
-<!--    </div>-->
+        <nav class="navbar">
+            <h1>🎓 Educatio Quiz - Professor</h1>
+            <div>
+                <span th:text="${professor.nome}"></span>
+                <a href="/logout" class="btn-logout">Sair</a>
+            </div>
+        </nav>
 
-<!--    <div class="form-group">-->
-<!--        <label for="senha">Senha:</label>-->
-<!--        <input type="password" id="senha" name="senha" required>-->
-<!--    </div>-->
+        <!-- CONTEÚDO PRINCIPAL: Formulário de Criação de Quiz -->
+        <main class="main-content" style="max-width: 800px; margin: 4rem auto;">
+            <div class="content-card" style="padding: 3rem;">
 
-<!--    <button type="submit" class="btn">Entrar</button>-->
-<!--</form>-->
-</div>
-<div class="container">
-    <div class="cards">
-        <div class="card">
-            <div class="card-icon">🔎</div>
-            <h3>Buscar Questões</h3>
-            <p>Busque questões no banco de questões da Educatio Quiz</p>
-            <a href="/banco_questoes" class="card-btn">Buscar</a>
-        </div>
+                <h2 class="text-center font-bold mb-10" style="color: var(--text-light); font-size: 2rem;">
+                    Criação de Novo Quiz
+                </h2>
 
-        <div class="card">
-            <div class="card-icon">➕</div>
-            <h3>Adicione sua questão</h3>
-            <p>Adicione questões as quais você criou</p>
-            <a th:href="@{/questao/listarPorProfessor/{id}(id=${professor.id_professor})}" class="card-btn"></a>
-        </div>
-    </div>
-</div>
-</body>
+                <!-- Simulando a Ação de Envio para o Backend (URL de salvamento) -->
+                <form id="create-quiz-form" th:action="@{/quiz/salvar}" method="POST">
+
+                    <!-- Título do Quiz (titulo) -->
+                    <div class="form-group">
+                        <label for="quiz-title" class="form-label">
+                            Título do Quiz (Máx. 255 caracteres)
+                        </label>
+                        <input type="text" id="quiz-title" name="titulo" required
+                               class="form-input"
+                               maxlength="255"
+                               placeholder="Ex: Revisão de História - Capítulo 5"
+                        >
+                    </div>
+
+                    <!-- Visibilidade (visibilidade: Exibicao) -->
+                    <div class="form-group">
+                        <label for="quiz-visibility" class="form-label">
+                            Visibilidade do Quiz (Pública ou Privada - Requer PIN)
+                        </label>
+                        <select id="quiz-visibility" name="visibilidade" required class="form-input" onchange="togglePinAccess()">
+                            <option value="" disabled selected>Defina a visibilidade </option>
+                            <option th:each= "exibicao : ${exibicoes}" th:value="${exibicao}" th:text="${exibicao}"> </option>
+                            <!-- Valores simulando Enum Exibicao -->
+                            <!-- <option value="PUBLICO">Público (Não requer PIN)</option>
+                            <option value="PRIVADO">Privado (Requer PIN de Acesso)</option> -->
+                        </select>
+                    </div>
+
+                    <!-- PIN de Acesso (pin_acesso) - Inicialmente Oculto se Visibilidade for Pública -->
+                    <div class="form-group" id="pin-access-group" style="display: none;">
+                        <label for="quiz-pin" class="form-label">
+                            PIN de Acesso (Obrigatório para acesso Privado)
+                        </label>
+                        <input type="text" id="quiz-pin" name="pin_acesso"
+                               class="form-input"
+                               maxlength="50"
+                               placeholder="Ex: H9A2B"
+                        >
+                    </div>
+
+                    <!-- Nível Educacional (nivel_educacional: Escolaridade) -->
+                    <div class="form-group">
+                        <label for="quiz-level" class="form-label">
+                            Nível Educacional
+                        </label>
+                        <select id="quiz-level" name="nivel_educacional" required class="form-input">
+                            <option value="" disabled selected>Selecione o nível</option>
+                            <option th:each= "nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}"> </option>
+                            <!-- Valores simulando Enum Escolaridade -->
+                            <!-- <option value="Fundamental I">Fundamental I</option>
+                            <option value="Fundamental II">Fundamental II</option>
+                            <option value="Ensino Médio">Ensino Médio</option>
+                            <option value="Graduação">Graduação</option>
+                            <option value="Pós-Graduação">Pós-Graduação</option> -->
+                        </select>
+                    </div>
+
+            
+                    <!-- AREAS DO PROF -->
+                    <div class="form-group">
+                        <label for="area" class="form-label">Área</label>
+                        <select id="area" name="area" required class="form-input">
+                             <option th:each= " area:${areas}" th:value="${area.getIdArea()}" th:text="${area.getNomeArea()}"> </option>
+                        </select>
+                    </div>
+
+                    <!-- Descrição (descricao) -->
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label for="quiz-description" class="form-label">
+                            Descrição (Opcional)
+                        </label>
+                        <textarea id="quiz-description" name="descricao" rows="3"
+                                  class="form-input"
+                                  placeholder="Breve descrição sobre o propósito do quiz."
+                        ></textarea>
+                    </div>
+
+                    <!-- Botão de Ação -->
+                    <div class="flex justify-end space-x-4">
+
+                        <!-- Botão de Voltar/Cancelar (Simulando link de Voltar) -->
+                        <a href="home" class="btn btn-secondary font-bold" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                            Cancelar
+                        </a>
+
+                        <!-- Botão de Envio (Simulando o POST) -->
+                        <button type="submit" class="btn btn-primary font-bold" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                            Salvar e Adicionar Questões
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <!-- Rodapé opcional -->
+        <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
+            &copy; 2024 Educatio Quiz. Todos os direitos reservados.
+        </footer>
+
+        <!-- Lógica JavaScript Mínima para Controle de Visibilidade do PIN -->
+        <script>
+            document.addEventListener('DOMContentLoaded', (event) => {
+                // Inicializa a visibilidade do PIN no carregamento da página
+                togglePinAccess();
+            });
+
+            function togglePinAccess() {
+                const visibilitySelect = document.getElementById('quiz-visibility');
+                const pinGroup = document.getElementById('pin-access-group');
+                const pinInput = document.getElementById('quiz-pin');
+
+                // Verifica o valor selecionado (PRIVADO ou PUBLICO)
+                const isPrivate = visibilitySelect.value === 'Privado';
+
+                if (isPrivate) {
+                    // Se for PRIVADO, exibe o campo e torna obrigatório para validação do backend
+                    pinGroup.style.display = 'block';
+                    pinInput.required = true;
+                    pinInput.setAttribute('th:required', 'required'); // Ajuda na integração Thymeleaf/Spring
+                } else {
+                    // Se for PUBLICO, oculta o campo e remove a obrigatoriedade
+                    pinGroup.style.display = 'none';
+                    pinInput.required = false;
+                    pinInput.removeAttribute('th:required');
+                    pinInput.value = ''; // Limpa o valor para evitar envio desnecessário
+                }
+            }
+        </script>
+    </body>
 </html>

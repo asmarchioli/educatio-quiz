@@ -33,14 +33,15 @@
             <div class="card-icon">📋</div>
             <h3>Meus Quizzes</h3>
             <p>Gerencie e visualize todos os quizzes que você criou.</p>
-            <a href="#" class="card-btn">Ver Quizzes</a>
+            <a th:href="@{/quiz/buscar/professor_criador/{id}(id=${professor.id_professor})}" class="card-btn">Ver Quizzes</a>
         </div>
 
         <div class="card">
             <div class="card-icon">❓</div>
             <h3>Banco de Questões</h3>
             <p>Adicione e edite questões disponíveis para uso nos quizzes.</p>
-            <a href="#" class="card-btn">Gerenciar</a>
+            <a th:href="@{/questao/listar/questoes/{id}(id=${professor.id_professor})}"
+               class="card-btn">Gerenciar</a>
         </div>
     </div>
 </div>

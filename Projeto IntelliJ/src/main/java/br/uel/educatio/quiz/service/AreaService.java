@@ -18,8 +18,12 @@ public class AreaService {
         areaDAO.inserir(area);
     }
 
-    public Optional<Area> buscarPorId(Long id) {
-        return areaDAO.buscarPorId(id);
+    public Area buscarPorId(Long id) {
+        Optional<Area> area = areaDAO.buscarPorId(id);
+        if (area.isEmpty()) {
+            throw new IllegalArgumentException("Área não encontrada");
+        }
+        return area.get();
     }
 
     public List<Area> listarTodas() {

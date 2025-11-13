@@ -167,3 +167,7 @@ textarea {
 .link a:hover {
     text-decoration: underline;
 }
+
+span{
+    color: #ae0404;
+}

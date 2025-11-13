@@ -52,6 +52,7 @@ public class CadastroController {
             System.out.println("opa bl");
             return "cadastro";
         }
+        
 
         try {
             alunoService.cadastrar(aluno);
@@ -72,28 +73,42 @@ public class CadastroController {
     public String cadastrarProfessor(
             @Valid @ModelAttribute("professor") Professor professor,
             BindingResult result,
-            @RequestParam(required = false) List<Long> areasAdicionais,
+            @RequestParam(required = false) List<Long> areasProfessor,
             Model model) {
-        System.out.println("opa bl");
+
 
         if (result.hasErrors()) {
-            System.out.println("opa bl");
             model.addAttribute("aluno", new Aluno());
             model.addAttribute("escolaridades", Escolaridade.values());
             model.addAttribute("areas", areaService.listarTodas());
-            model.addAttribute("tipoErro", "professor");
+            // model.addAttribute("tipoErro", "professor");
+            return "cadastro";
+        }
+
+        // Verifica se pelo menos uma Área de Formação foi selecionada
+        if (areasProfessor == null || areasProfessor.isEmpty()) {
+
+            // Adiciona a mensagem de erro ao Model
+            model.addAttribute("erro", "É obrigatório selecionar pelo menos uma Área de Formação");
+            // model.addAttribute("tipoErro", "professor");
+            model.addAttribute("aluno", new Aluno());
+            model.addAttribute("escolaridades", Escolaridade.values());
+            model.addAttribute("areas", areaService.listarTodas());
+
             return "cadastro";
         }
 
         try {
-            professorService.cadastrar(professor, areasAdicionais);
+            professorService.cadastrar(professor, areasProfessor);
+            System.out.println("chamalala");
             return "redirect:/login?cadastro=sucesso";
         } catch (IllegalArgumentException e) {
             model.addAttribute("aluno", new Aluno());
             model.addAttribute("escolaridades", Escolaridade.values());
             model.addAttribute("areas", areaService.listarTodas());
             model.addAttribute("erro", e.getMessage());
-            model.addAttribute("tipoErro", "professor");
+            // model.addAttribute("tipoErro", "professor");
+            System.out.println(e.getMessage());
             return "cadastro";
         }
     }

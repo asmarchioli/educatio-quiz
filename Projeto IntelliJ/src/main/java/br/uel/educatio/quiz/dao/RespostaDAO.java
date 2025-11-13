@@ -93,8 +93,6 @@ public class RespostaDAO {
         String sql = "INSERT INTO RESPOSTA (id_questao, id_quiz, id_aluno, tentativa, pontuacao_aluno, flg_acertou, resposta_aluno_texto, resposta_aluno_num)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        final int TENTATIVA_ATUAL = 1; // Lógica de tentativa
-
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -102,7 +100,7 @@ public class RespostaDAO {
                 ps.setLong(1, r.getId_questao());
                 ps.setLong(2, r.getId_quiz());
                 ps.setLong(3, r.getId_aluno());
-                ps.setInt(4, TENTATIVA_ATUAL); 
+                ps.setInt(4, r.getTentativa());
                 ps.setInt(5, r.getPontuacao_aluno());
                 ps.setString(6, String.valueOf(r.getFlg_acertou()));
 
@@ -146,6 +144,40 @@ public class RespostaDAO {
     public int contarAcertos(long idAluno, long idQuiz) {
         String sql = "SELECT COUNT(*) FROM resposta WHERE id_aluno = ? AND id_quiz = ? AND flg_acertou = 'S'";
         Integer count = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz}, Integer.class);
+        return count != null ? count : 0;
+    }
+
+    //Busca o número da última tentativa do aluno em um quiz
+    public int buscarUltimaTentativa(long idAluno, long idQuiz) {
+        String sql = "SELECT COALESCE(MAX(tentativa), 0)" +
+                     "FROM resposta WHERE id_aluno = ? AND id_quiz = ?";
+        Integer tentativa = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz}, Integer.class);
+        return tentativa != null ? tentativa : 0;
+    }
+
+    //Busca respostas de uma tentativa específica
+    public List<Resposta> findByIdAlunoAndIdQuizAndTentativa(long idAluno, long idQuiz, int tentativa) {
+        String sql = "SELECT * FROM resposta WHERE id_aluno = ? AND id_quiz = ? AND tentativa = ? ORDER BY id_questao";
+        return jdbcTemplate.query(sql, new Object[]{idAluno, idQuiz, tentativa}, rowMapper);
+    }
+
+    //Busca todas as tentativas do aluno em um quiz (para histórico)
+    public List<Integer> buscarTodasTentativas(long idAluno, long idQuiz) {
+        String sql = "SELECT DISTINCT tentativa FROM resposta WHERE id_aluno = ? AND id_quiz = ? ORDER BY tentativa";
+        return jdbcTemplate.queryForList(sql, Integer.class, idAluno, idQuiz);
+    }
+
+    //Calcula pontuação de uma tentativa específica
+    public int calcularPontuacaoTotalPorTentativa(long idAluno, long idQuiz, int tentativa) {
+        String sql = "SELECT COALESCE(SUM(pontuacao_aluno), 0) FROM resposta WHERE id_aluno = ? AND id_quiz = ? AND tentativa = ?";
+        Integer total = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz, tentativa}, Integer.class);
+        return total != null ? total : 0;
+    }
+
+    //Conta acertos de uma tentativa específica
+    public int contarAcertosPorTentativa(long idAluno, long idQuiz, int tentativa) {
+        String sql = "SELECT COUNT(*) FROM resposta WHERE id_aluno = ? AND id_quiz = ? AND tentativa = ? AND flg_acertou = 'S'";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz, tentativa}, Integer.class);
         return count != null ? count : 0;
     }
 }

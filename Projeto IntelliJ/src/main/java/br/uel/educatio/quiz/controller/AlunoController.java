@@ -1,5 +1,6 @@
 package br.uel.educatio.quiz.controller;
 
+import br.uel.educatio.quiz.model.enums.TipoQuestao;
 import br.uel.educatio.quiz.dao.AlternativaDAO;
 import br.uel.educatio.quiz.dao.QuestaoDAO;
 import br.uel.educatio.quiz.dao.QuizDAO;
@@ -45,7 +46,7 @@ public class AlunoController {
     public String listarQuizzes(HttpSession session, Model model) {
         Aluno aluno = (Aluno) session.getAttribute("usuarioLogado");
         if (aluno == null) {
-            return "redirect:/login";
+            return "redirect:/login";  //o man, essas verificações de se o aluno/professor está logado são necessárias? O interceptor já faz isso, não? E essa IA do Replit é boa em 
         }
         List<Quiz> quizzes = quizService.buscarQuizzesPublicosPorNivel(
             aluno.getNivel_educacional().getDisplayValue()
@@ -80,9 +81,9 @@ public class AlunoController {
             return "redirect:/login";
         }
 
-        if (respostaService.alunoJaRealizouQuiz(aluno.getId_aluno(), id)) {
+        /*if (respostaService.alunoJaRealizouQuiz(aluno.getId_aluno(), id)) {
             return "redirect:/aluno/quizzes/" + id + "/resultado";
-        }
+        }*/                             // ALUNO PODE REALIZAR O QUIZ MAIS DE UMA VEZ!! 
 
         Quiz quiz = quizService.buscarPorId(id).orElse(null);
         if (quiz == null) {
@@ -151,16 +152,25 @@ public class AlunoController {
             return "redirect:/aluno/quizzes";
         }
 
-        int pontuacaoTotal = respostaService.calcularPontuacaoTotal(aluno.getId_aluno(), id);
-        int acertos = respostaService.contarAcertos(aluno.getId_aluno(), id);
+        int ultimaTentativa = respostaService.buscarUltimaTentativa(aluno.getId_aluno(), id);
+  
+        int pontuacaoTotal = respostaService.calcularPontuacaoTotal(aluno.getId_aluno(), id, ultimaTentativa);
+        int acertos = respostaService.contarAcertos(aluno.getId_aluno(), id, ultimaTentativa);
         int totalQuestoes = quizService.contarQuestoes(id);
         int pontuacaoMaxima = quizService.calcularPontuacaoMaxima(id);
 
+        //Busca todas as tentativas do aluno no quiz (para o histórico)
+        List<Integer> tentativas = respostaService.buscarTodasTentativas(aluno.getId_aluno(), id);
+        
         model.addAttribute("quiz", quiz);
         model.addAttribute("pontuacaoTotal", pontuacaoTotal);
         model.addAttribute("acertos", acertos);
         model.addAttribute("totalQuestoes", totalQuestoes);
         model.addAttribute("pontuacaoMaxima", pontuacaoMaxima);
+        
+        model.addAttribute("ultimaTentativa", ultimaTentativa);
+        model.addAttribute("tentativas", tentativas);
+        
         model.addAttribute("aluno", aluno);
         return "aluno/resultado_quiz";
     }
@@ -178,7 +188,12 @@ public class AlunoController {
     }
 
     @GetMapping("/quizzes/{id}/revisar")
-    public String revisarQuiz(@PathVariable long id, HttpSession session, Model model) {
+    public String revisarQuiz(
+            @PathVariable long id, 
+            @RequestParam(required = false, defaultValue = "0") int tentativa,
+            HttpSession session,
+            Model model) {
+        
         Aluno aluno = (Aluno) session.getAttribute("usuarioLogado");
         if (aluno == null) {
             return "redirect:/login";
@@ -189,14 +204,27 @@ public class AlunoController {
             return "redirect:/aluno/quizzes";
         }
 
-        List<Resposta> respostas = respostaService.buscarRespostasDoAluno(aluno.getId_aluno(), id);
+        int tentativaParaRevisar = tentativa;
+        if (tentativaParaRevisar == 0) {
+            tentativaParaRevisar = respostaService.buscarUltimaTentativa(aluno.getId_aluno(), id);
+        }
+
+        List<Resposta> respostas = respostaService.buscarRespostasDoAlunoPorTentativa(aluno.getId_aluno(), id, tentativaParaRevisar);
+        //List<Resposta> respostas = respostaService.buscarRespostasDoAluno(aluno.getId_aluno(), id);
+        
         for (Questao questao : quiz.getQuestoes()) {
             List<Alternativa> alternativas = alternativaDAO.findByQuestaoId(questao.getId_questao());
             questao.setAlternativas(alternativas);
         }
 
+        List<Integer> tentativas = respostaService.buscarTodasTentativas(aluno.getId_aluno(), id);
+
         model.addAttribute("quiz", quiz);
         model.addAttribute("respostas", respostas);
+
+        model.addAttribute("tentativaAtual", tentativaParaRevisar);
+        model.addAttribute("tentativas", tentativas);
+        
         model.addAttribute("aluno", aluno);
         return "aluno/revisar_quiz";
     }

@@ -28,6 +28,9 @@ public class RespostaService {
     @Transactional
     public void salvarRespostas(long idAluno, long idQuiz, List<Resposta> respostas, List<Integer> pontuacoesQuestoes, List<TipoQuestao> tiposQuestoes) {
 
+        int ultimaTentativa = respostaDAO.buscarUltimaTentativa(idAluno, idQuiz);
+        int novaTentativa = ultimaTentativa + 1;
+        
         // Lista para acumular as respostas antes de salvar em lote
         List<Resposta> respostasParaSalvar = new ArrayList<>();
 
@@ -35,7 +38,7 @@ public class RespostaService {
             Resposta resposta = respostas.get(i);
             resposta.setId_aluno(idAluno);
             resposta.setId_quiz(idQuiz);
-            resposta.setTentativa(1); // Define a tentativa
+            resposta.setTentativa(novaTentativa); // Define a tentativa
 
             // Lógica de verificação (vinda do Arquivo 2)
             boolean acertou = verificarResposta(resposta, tiposQuestoes.get(i));
@@ -59,13 +62,24 @@ public class RespostaService {
 
         if (tipoQuestao == TipoQuestao.PREENCHER_LACUNA) {
             if (resposta.getResposta_aluno_texto() == null) return false;
-            return resposta.getResposta_aluno_texto().trim().equalsIgnoreCase(
-                correta.get().getTexto_alternativa().trim()
-            );
+            String respostaAluno = resposta.getResposta_aluno_texto()
+                .trim()
+                .replaceAll("\\s+", " ")  // Substitui múltiplos espaços por um único
+                .toLowerCase();
+
+            String respostaCorreta = correta.get().getTexto_alternativa()
+                .trim()
+                .replaceAll("\\s+", " ")
+                .toLowerCase();
+
+            return respostaAluno.equals(respostaCorreta);
         } else {
             if (resposta.getResposta_aluno_num() == null) return false;
-            // Compara o número da alternativa (Integer) com o número da alternativa (Long)
-            return resposta.getResposta_aluno_num().equals(correta.get().getNum_alternativa().intValue());
+            
+            long respostaDoAluno = resposta.getResposta_aluno_num().longValue();
+            long respostaCorreta = correta.get().getNum_alternativa().longValue();
+
+            return respostaDoAluno == respostaCorreta;
         }
     }
 
@@ -77,11 +91,24 @@ public class RespostaService {
         return respostaDAO.findByIdAlunoAndIdQuiz(idAluno, idQuiz);
     }
 
-    public int calcularPontuacaoTotal(long idAluno, long idQuiz) {
-        return respostaDAO.calcularPontuacaoTotal(idAluno, idQuiz);
+    public int calcularPontuacaoTotal(long idAluno, long idQuiz, int tentativa) {
+        return respostaDAO.calcularPontuacaoTotalPorTentativa(idAluno, idQuiz, tentativa);
     }
 
-    public int contarAcertos(long idAluno, long idQuiz) {
-        return respostaDAO.contarAcertos(idAluno, idQuiz);
+    public int contarAcertos(long idAluno, long idQuiz, int tentativa) {
+        return respostaDAO.contarAcertosPorTentativa(idAluno, idQuiz, tentativa);
     }
+
+    public int buscarUltimaTentativa(long idAluno, long idQuiz) {
+        return respostaDAO.buscarUltimaTentativa(idAluno, idQuiz);
+    }
+
+    public List<Resposta> buscarRespostasDoAlunoPorTentativa(long idAluno, long idQuiz, int tentativa) {
+        return respostaDAO.findByIdAlunoAndIdQuizAndTentativa(idAluno, idQuiz, tentativa);
+    }
+
+    public List<Integer> buscarTodasTentativas(long idAluno, long idQuiz) {
+        return respostaDAO.buscarTodasTentativas(idAluno, idQuiz);
+    }
+
 }

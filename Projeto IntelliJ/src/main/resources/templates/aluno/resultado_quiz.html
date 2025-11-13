@@ -6,18 +6,29 @@
     <link rel="stylesheet" th:href="@{/css/home_style.css}">
     <style>
         .resultado-card {
-            background: var(--card-color);
+            background: #161b22;
             padding: 3rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             text-align: center;
-            max-width: 600px;
+            max-width: 700px;
             margin: 2rem auto;
         }
 
         .icon {
-            font-size: 4rem;
+            font-size: 5rem;
             margin-bottom: 1rem;
+            animation: bounce 1s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .resultado-card h1 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
         }
 
         .stats-grid {
@@ -28,58 +39,73 @@
         }
 
         .stat-item {
-            background: #161b22;
+            background: var(--card-color);
             padding: 1.5rem;
             border-radius: var(--radius);
+            transition: transform 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-4px);
         }
 
         .stat-label {
             color: var(--text-muted);
             font-size: 0.875rem;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
         .stat-value {
             color: var(--accent);
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 2.5rem;
+            font-weight: 700;
         }
 
         .aproveitamento {
-            background: #161b22;
+            background: var(--card-color);
             padding: 1.5rem;
             border-radius: var(--radius);
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .progress-bar {
             width: 100%;
-            height: 20px;
-            background: #12161d;
-            border-radius: 10px;
+            height: 24px;
+            background: #0e1116;
+            border-radius: 12px;
             overflow: hidden;
-            margin-top: 0.5rem;
+            margin-top: 0.75rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .progress-fill {
             height: 100%;
-            background: var(--accent);
-            transition: width 1s ease;
+            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+            transition: width 1.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
         }
 
         .actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
             margin-top: 2rem;
         }
 
         .btn {
-            flex: 1;
-            padding: 0.75rem;
+            padding: 0.875rem;
             border-radius: var(--radius);
             text-decoration: none;
             font-weight: 600;
             text-align: center;
+            transition: all 0.3s;
+            display: block;
         }
 
         .btn-primary {
@@ -87,16 +113,42 @@
             color: white;
         }
 
-        .btn-secondary {
-            background: #2563eb;
-            color: white;
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .historico-box {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--card-color);
+            border-radius: var(--radius);
+        }
+
+        .historico-box h3 {
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .icon {
+                font-size: 4rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <h1>🎉 Resultado do Quiz</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
             <span th:text="${aluno.nome}"></span>
             <a href="/logout" class="btn-logout">Sair</a>
         </div>
@@ -105,8 +157,8 @@
     <div class="container">
         <div class="resultado-card">
             <div class="icon">🎉</div>
-            <h1 style="color: var(--accent);">Quiz Finalizado!</h1>
-            <p th:text="${quiz.titulo}" style="margin-top: 0.5rem; color: var(--text-muted);"></p>
+            <h1>Quiz Finalizado!</h1>
+            <p th:text="${quiz.titulo}" style="margin-top: 0.5rem; color: var(--text-muted); font-size: 1.1rem;"></p>
 
             <div class="stats-grid">
                 <div class="stat-item">
@@ -134,18 +186,30 @@
                 <div class="stat-label">Aproveitamento</div>
                 <div class="stat-value" th:text="${#numbers.formatDecimal((pontuacaoTotal * 100.0) / pontuacaoMaxima, 1, 1)} + '%'"></div>
                 <div class="progress-bar">
-                    <div class="progress-fill" th:style="'width:' + ${(pontuacaoTotal * 100.0) / pontuacaoMaxima} + '%'"></div>
+                    <div class="progress-fill" th:style="'width:' + ${(pontuacaoTotal * 100.0) / pontuacaoMaxima} + '%'" th:text="${#numbers.formatDecimal((pontuacaoTotal * 100.0) / pontuacaoMaxima, 1, 1)} + '%'"></div>
                 </div>
             </div>
 
             <div class="actions">
-                <a th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz})}" class="btn btn-secondary">
+                <a th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz})}" class="btn btn-primary">
                     📚 Revisar Respostas
+                </a>
+                <a th:href="@{/aluno/quizzes/{id}/realizar(id=${quiz.id_quiz})}" class="btn btn-primary">
+                    🔄 Tentar Novamente
                 </a>
                 <a href="/aluno/quizzes" class="btn btn-primary">
                     🏠 Voltar aos Quizzes
                 </a>
             </div>
+
+            <div th:if="${tentativas.size() > 1}" class="historico-box">
+                <h3>📊 Histórico de Tentativas</h3>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Você realizou este quiz <span th:text="${tentativas.size()}"></span> vez(es).
+                    Mostrando resultado da tentativa <span th:text="${ultimaTentativa}"></span>.
+                </p>
+            </div>
+            
         </div>
     </div>
 </body>

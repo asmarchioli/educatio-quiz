@@ -5,11 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quizzes Disponíveis</title>
     <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <style>
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 2px solid #2a2f36;
+            background: #12161d;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .search-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .search-btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        .quiz-badge {
+            background: #161b22;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <h1>📝 Quizzes Disponíveis</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
             <span th:text="${aluno.nome}"></span>
             <a href="/logout" class="btn-logout">Sair</a>
         </div>
@@ -18,23 +63,21 @@
     <div class="container">
         <div class="welcome">
             <h2>🔐 Acessar Quiz Privado</h2>
-            <form action="/aluno/quizzes/buscar-pin" method="get" style="display: flex; gap: 1rem; margin-top: 1rem;">
-                <input type="text" name="pin" placeholder="Digite o PIN do quiz" required
-                       style="flex: 1; padding: 0.75rem; border-radius: 8px; border: 2px solid #2a2f36; background: #12161d; color: var(--text-light);">
-                <button type="submit" class="btn-logout" style="background: var(--accent);">Buscar</button>
+            <form action="/aluno/quizzes/buscar-pin" method="get" class="search-form">
+                <input type="text" name="pin" placeholder="Digite o PIN do quiz" required class="search-input">
+                <button type="submit" class="search-btn">Buscar</button>
             </form>
         </div>
 
-        <h2 style="margin-bottom: 1.5rem; color: var(--accent);">Quizzes Públicos - Seu Nível</h2>
+        <h2 style="margin-bottom: 1.5rem; color: var(--accent); text-align: center;">Quizzes Públicos - Seu Nível</h2>
 
         <div class="cards" th:if="${!quizzes.isEmpty()}">
-            <div class="card" th:each="quiz : ${quizzes}">
-                <h3 th:text="${quiz.titulo}" style="color: var(--accent); margin-bottom: 1rem;"></h3>
-                <p th:text="${quiz.descricao}" style="color: var(--text-muted); margin-bottom: 1rem;"></p>
+            <div class="card-body" th:each="quiz : ${quizzes}">
+                <h3 style="color: var(--accent); margin-bottom: 1rem;" th:text="${quiz.titulo}"></h3>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; min-height: 60px;" th:text="${quiz.descricao}"></p>
 
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                    <span style="background: #161b22; padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.875rem;" 
-                          th:text="${quiz.nivel_educacional}"></span>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: center;">
+                    <span class="quiz-badge" th:text="${quiz.nivel_educacional}"></span>
                 </div>
 
                 <a th:href="@{/aluno/quizzes/{id}/realizar(id=${quiz.id_quiz})}" class="card-btn">
@@ -44,7 +87,8 @@
         </div>
 
         <div th:if="${quizzes.isEmpty()}" style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
-            <h3>Nenhum quiz público disponível</h3>
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
+            <h3 style="color: var(--text-light); margin-bottom: 0.5rem;">Nenhum quiz público disponível</h3>
             <p>Peça um PIN ao seu professor para acessar quizzes privados.</p>
         </div>
 

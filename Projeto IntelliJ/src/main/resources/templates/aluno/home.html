@@ -4,126 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Aluno</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }
-        
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1rem 2rem;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .navbar h1 {
-            font-size: 1.5rem;
-        }
-        
-        .navbar-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .btn-logout {
-            padding: 0.5rem 1rem;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .btn-logout:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-        
-        .welcome {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .welcome h2 {
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-        
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-        
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .card h3 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-        
-        .card p {
-            color: #666;
-            margin-bottom: 1.5rem;
-        }
-        
-        .card-btn {
-            padding: 0.75rem 1.5rem;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            display: inline-block;
-            transition: all 0.3s;
-        }
-        
-        .card-btn:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/home_style.css}">
 </head>
 <body>
     <nav class="navbar">
         <h1>🎓 Educatio Quiz - Área do Aluno</h1>
-        <div class="navbar-right">
+        <div style="display: flex; align-items: center; gap: 1rem;">
             <span th:text="${aluno.nome}"></span>
             <a href="/logout" class="btn-logout">Sair</a>
         </div>
@@ -132,28 +18,28 @@
     <div class="container">
         <div class="welcome">
             <h2 th:text="'Bem-vindo(a), ' + ${aluno.nome} + '!'"></h2>
-            <p th:text="'Nível: ' + ${aluno.nivel_educacional.displayValue}"></p>
+            <p th:text="'Nível: ' + ${aluno.nivel_educacional.displayValue}" style="color: var(--text-muted);"></p>
         </div>
         
         <div class="cards">
-            <div class="card">
+            <div class="card-body">
                 <div class="card-icon">📝</div>
-                <h3>Realizar Quiz</h3>
-                <p>Acesse quizzes públicos ou insira um código PIN para quizzes privados</p>
-                <a href="#" class="card-btn">Iniciar</a>
+                <h3 style="color: var(--text-light); margin-bottom: 1rem;">Realizar Quiz</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Acesse quizzes públicos ou insira um código PIN para quizzes privados</p>
+                <a href="/aluno/quizzes" class="card-btn">Iniciar</a>
             </div>
             
-            <div class="card">
+            <div class="card-body">
                 <div class="card-icon">📚</div>
-                <h3>Meu Histórico</h3>
-                <p>Veja todos os quizzes que você já realizou</p>
-                <a href="#" class="card-btn">Ver Histórico</a>
+                <h3 style="color: var(--text-light); margin-bottom: 1rem;">Meu Histórico</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Veja todos os quizzes que você já realizou</p>
+                <a href="/aluno/historico" class="card-btn">Ver Histórico</a>
             </div>
             
-            <div class="card">
+            <div class="card-body">
                 <div class="card-icon">📊</div>
-                <h3>Meu Desempenho</h3>
-                <p>Acompanhe sua evolução e estatísticas</p>
+                <h3 style="color: var(--text-light); margin-bottom: 1rem;">Meu Desempenho</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Acompanhe sua evolução e estatísticas</p>
                 <a href="#" class="card-btn">Ver Estatísticas</a>
             </div>
         </div>

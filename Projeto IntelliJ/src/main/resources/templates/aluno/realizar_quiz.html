@@ -6,17 +6,29 @@
     <link rel="stylesheet" th:href="@{/css/home_style.css}">
     <style>
         .questao-card {
-            background: var(--card-color);
+            background: #161b22;
             padding: 2rem;
             border-radius: var(--radius);
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
         }
 
         .questao-numero {
             color: var(--accent);
             font-weight: 600;
+            font-size: 0.95rem;
             margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .questao-pontos {
+            background: rgba(0, 194, 110, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
         }
 
         .questao-enunciado {
@@ -33,18 +45,20 @@
         }
 
         .alternativa-item {
-            background: #161b22;
-            padding: 1rem;
+            background: var(--card-color);
+            padding: 1rem 1.25rem;
             border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 1rem;
             cursor: pointer;
             transition: all 0.3s;
+            border: 2px solid transparent;
         }
 
         .alternativa-item:hover {
             background: #1d232d;
+            border-color: var(--accent);
             transform: translateX(4px);
         }
 
@@ -52,16 +66,28 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .alternativa-item label {
+            cursor: pointer;
+            flex: 1;
         }
 
         .input-text {
             width: 100%;
-            padding: 0.75rem;
-            background: #12161d;
+            padding: 0.75rem 1rem;
+            background: var(--card-color);
             border: 2px solid #2a2f36;
             border-radius: 8px;
             color: var(--text-light);
             font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-text:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
         .btn-submit {
@@ -75,17 +101,28 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 2rem;
+            transition: all 0.3s;
         }
 
         .btn-submit:hover {
             background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .progress-indicator {
+            background: #161b22;
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <h1>📝 Realizando Quiz</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
             <span th:text="${aluno.nome}"></span>
             <a href="/logout" class="btn-logout">Sair</a>
         </div>
@@ -94,23 +131,32 @@
     <div class="container">
         <div class="welcome">
             <h2 th:text="${quiz.titulo}" style="color: var(--accent);"></h2>
-            <p th:text="${quiz.descricao}"></p>
+            <p th:text="${quiz.descricao}" style="color: var(--text-muted);"></p>
+        </div>
+
+        <div class="progress-indicator">
+            <span th:text="${quiz.questoes.size()} + ' questões no total'"></span>
         </div>
 
         <form th:action="@{/aluno/quizzes/{id}/submeter(id=${quiz.id_quiz})}" method="post">
             <div class="questao-card" th:each="questao, stat : ${quiz.questoes}">
-                <div class="questao-numero" th:text="'Questão ' + (${stat.index} + 1) + ' - ' + ${questao.pontuacao} + ' pontos'"></div>
+                <div class="questao-numero">
+                    <span th:text="'Questão ' + (${stat.index} + 1)"></span>
+                    <span class="questao-pontos" th:text="${questao.pontuacao} + ' pontos'"></span>
+                </div>
                 <p class="questao-enunciado" th:text="${questao.enunciado}"></p>
 
                 <div th:if="${questao.tipo_questao.toString() == 'Multipla Escolha' or questao.tipo_questao.toString() == 'Verdadeiro ou Falso'}">
                     <div class="alternativas">
-                        <label class="alternativa-item" th:each="alt : ${questao.alternativas}">
+                        <div class="alternativa-item" th:each="alt : ${questao.alternativas}">
                             <input type="radio" 
                                    th:name="'questao_' + ${questao.id_questao}" 
                                    th:value="${alt.num_alternativa}" 
+                                   th:id="'alt_' + ${questao.id_questao} + '_' + ${alt.num_alternativa}"
                                    required>
-                            <span th:text="${alt.texto_alternativa}"></span>
-                        </label>
+                            <label th:for="'alt_' + ${questao.id_questao} + '_' + ${alt.num_alternativa}" 
+                                   th:text="${alt.texto_alternativa}"></label>
+                        </div>
                     </div>
                 </div>
 
@@ -123,7 +169,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">Finalizar Quiz</button>
+            <button type="submit" class="btn-submit">✅ Finalizar Quiz</button>
         </form>
     </div>
 </body>

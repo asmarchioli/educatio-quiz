@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping; // <-- ADICIONADO
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.servlet.http.HttpSession; // <-- ADICIONADO
+
 
 import br.uel.educatio.quiz.model.Quiz;
+import br.uel.educatio.quiz.model.Professor;
 import br.uel.educatio.quiz.service.QuizService;
 import jakarta.validation.Valid;
 
@@ -72,26 +75,36 @@ public class QuizController {
         }
     }
 
-    @GetMapping("/buscar/ProfessorCriador/{id}")
+
+    //Usada em professor/home.html
+    @GetMapping("/buscar/professor_criador/{id}")
     public String buscarPorIdProfessor(@PathVariable("id") long id_prof, Model model, RedirectAttributes ra){
         try {
             model.addAttribute("Quizzes", service.buscarPorProfessorCriador(id_prof));
-            return "ficticio"; //"form"
+            return "professor/meus_quizzes"; //"form"
         } catch (RuntimeException e){
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/ficticio";
+            return "redirect:/professor/home";
         }
     }
 
+    
     @PostMapping("salvar")
-    public String criar(@Valid @ModelAttribute Quiz quiz, Model model, RedirectAttributes ra){
+    public String criar(@Valid @ModelAttribute Quiz quiz, Model model, HttpSession session, RedirectAttributes ra){
         try {
+            Professor professor = (Professor) session.getAttribute("usuarioLogado");
+            System.out.println(professor.getId_professor());
+            
+            quiz.setProfessor_criador(professor.getId_professor());
+            // quiz.setArea(professor.getArea()); // Pega a primeira área do professor
             service.criar(quiz);
-            ra.addFlashAttribute("mensagem", "Quiz criado com sucesso!");
-            return "ficticio"; //"form"
+            
+            // ra.addFlashAttribute("mensagem", "Quiz criado com sucesso!");
+            return "editar_quiz"; //"form"
         } catch (RuntimeException e){
-            ra.addFlashAttribute("error", "Houve algum erro na criação do quiz!");
-            return "redirect:/ficticio";
+            System.out.println(e.getMessage());
+            // ra.addFlashAttribute("error", "Houve algum erro na criação do quiz!");
+            return "redirect:/professor/criar_quiz";
         }
     }
 }

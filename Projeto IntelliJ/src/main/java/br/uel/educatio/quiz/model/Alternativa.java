@@ -15,10 +15,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Alternativa {
 
-    @NotNull(message = "O ID da questão é obrigatório.")
+    // @NotNull(message = "O ID da questão é obrigatório.")
     private Long id_questao;
 
-    @NotNull(message = "O número da alternativa é obrigatório.")
+    // @NotNull(message = "O número da alternativa é obrigatório.")
     private Long num_alternativa;
 
     @NotBlank(message = "O texto da alternativa não pode estar em branco.")

@@ -25,7 +25,4 @@ public class Professor extends Usuario {
 
     @Size(max = 50, message = "O link do Lattes deve ter no máximo 50 caracteres.")
     private String lattes;
-
-    @NotNull(message = "A área de atuação é obrigatória.")
-    private Long area;
 }

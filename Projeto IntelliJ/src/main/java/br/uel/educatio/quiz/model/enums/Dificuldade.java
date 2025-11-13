@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum Dificuldade {
-    FACIL("Fácil"),
-    MEDIO("Médio"),
-    DIFICIL("Difícil");
+    FACIL("FÁCIL"),
+    MEDIO("MÉDIO"),
+    DIFICIL("DIFÍCIL");
 
     private final String displayValue;
 

@@ -27,17 +27,24 @@ public class Questao {
     @NotNull(message = "O nível educacional é obrigatório.")
     private Escolaridade nivel_educacional;
 
-    @NotNull(message = "O nível de dificuldade é obrigatório")
+    @NotNull(message = "O nível de dificuldade é obrigatório.")
     private Dificuldade nivel_dificuldade;
 
-    @NotNull
+    @NotNull(message = "A área é obrigatória.") //comentei pois a área é obtida do professor depois do Valid
     private Long area;
 
-    @NotNull
+    // @NotNull
     private Long professor_criador;
 
     //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
     private int pontuacao;
+
+    //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
     private List<Alternativa> alternativas;
+
+    // Campo transiente para capturar a escolha da alternativa correta (índice 0, 1, 2, 3 ou 4)
+    // O nome DEVE bater com o 'name' do radio button group do HTML.
+    // [CAMPO TRANSIENTE]
+    private Integer mc_correct_choice; 
 
 }

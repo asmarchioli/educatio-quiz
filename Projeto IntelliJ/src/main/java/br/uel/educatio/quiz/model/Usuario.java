@@ -15,11 +15,11 @@ import lombok.Setter;
 public abstract class Usuario {
 
     @NotBlank(message = "O nome não pode estar em branco.")
-    @Size(max = 120)
+    @Size(max = 120, message = "O nome deve ter no máximo 120 caracteres.")
     private String nome;
 
     @NotBlank(message = "O e-mail não pode estar em branco.")
-    @Size(max = 255)
+    @Size(max = 255, message = "O e-mail deve ter no máximo 255 caracteres.")
     @Email
     private String email;
 

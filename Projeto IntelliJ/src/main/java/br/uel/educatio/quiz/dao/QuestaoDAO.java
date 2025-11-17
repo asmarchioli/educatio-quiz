@@ -116,6 +116,11 @@ public class QuestaoDAO {
         return count != null && count > 0;
     }
 
+    public List<Questao> findByArea(long id_area){
+        String sql = "SELECT * FROM questao WHERE area = ?";
+        return jdbcTemplate.query(sql, new Object[]{id_area}, rowMapper);
+    }
+    
     public List<Questao> findByProfessorId(long id_prof) {
         String sql = "SELECT * FROM questao WHERE professor_criador = ?";
         List<Questao> questoes = jdbcTemplate.query(sql, new Object[]{id_prof}, rowMapper);

@@ -5,6 +5,7 @@ import br.uel.educatio.quiz.model.enums.TipoQuestao;
 import br.uel.educatio.quiz.model.enums.Dificuldade;
 import br.uel.educatio.quiz.model.enums.Exibicao;
 import br.uel.educatio.quiz.model.Professor;
+import br.uel.educatio.quiz.model.Quiz;
 import br.uel.educatio.quiz.model.Alternativa;
 import br.uel.educatio.quiz.model.Area;
 import jakarta.servlet.http.HttpSession;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import br.uel.educatio.quiz.model.Professor;
 import br.uel.educatio.quiz.model.Questao;
-
+import br.uel.educatio.quiz.service.AreaService;
 import br.uel.educatio.quiz.service.QuestaoService;
 import br.uel.educatio.quiz.service.ProfessorService;
 import org.springframework.stereotype.Controller;
@@ -40,22 +41,24 @@ public class QuestaoController {
 
     @Autowired
     private ProfessorService profService;
+   
+    @Autowired
+    private AreaService areaService;
 
+  
     // --- FUNÇÃO DE BUSCA E LISTAGEM (Detalhes) - JÁ FUNCIONA ---
-
-    @GetMapping({"/novo", "/editar/{id}"})
-    public String mostrarFormularioQuestao(@PathVariable(required = false) Long id, Model model, HttpSession session) {
+    @GetMapping({"/novo", "/editar/{id_questao}"})
+    public String mostrarFormularioQuestao(@PathVariable(required = false) Long id_questao, Model model, HttpSession session) {
         Questao questao;
         
         Professor professor = (Professor) session.getAttribute("usuarioLogado");
         Long id_prof = professor.getId_professor();
         List<Area> areas = profService.buscarAreasDoProfessor(id_prof);
-        
-        List<Alternativa> alternativas = new ArrayList<Alternativa>();
-             
-        if (id != null) {
+        List<Alternativa> alternativas = new ArrayList<>();
+            
+        if (id_questao != null) {
             // MODO EDIÇÃO
-            questao = questaoService.buscarQuestao(id); 
+            questao = questaoService.buscarQuestao(id_questao); 
             alternativas = questaoService.listarAlternativas(questao.getId_questao());
             
             // ** GARANTIA **: Se a questão existir, mas tiver menos de 5 alternativas, 
@@ -128,18 +131,25 @@ public class QuestaoController {
     
     // Usada pelo botão 'Detalhes' no banco_questoes.html (GET)
     @GetMapping("/buscar/{id}")
-    public String buscarQuestao(@PathVariable("id") Long id_questao, Model model, RedirectAttributes ra) {
+    public String buscarQuestao(@PathVariable("id") Long id_questao, @RequestParam(value = "quizId", required = false) Long quizId, Model model, RedirectAttributes ra) {
         try{
+            System.out.println("QuizId: " + quizId);
+            System.out.println("QuestãoId: " + id_questao);
             Questao questao = questaoService.buscarQuestao(id_questao);
-
+            Professor profCriador = profService.buscarPorId(questao.getProfessor_criador());
+            Area questaoArea = areaService.buscarPorId(questao.getArea());
+            
             // Carrega ENUMs para os Dropdowns da view de detalhes (opcional, mas bom para consistência)
             model.addAttribute("escolaridades", Escolaridade.values());
             model.addAttribute("dificuldades", Dificuldade.values());
             model.addAttribute("tiposQuestao", TipoQuestao.values());
             model.addAttribute("exibicoes", Exibicao.values());
-
+            
             model.addAttribute("questao", questao);
+            model.addAttribute("profCriador", profCriador);
+            model.addAttribute("questaoAreaNome", questaoArea.getNomeArea());
             model.addAttribute("alternativas", questaoService.listarAlternativas(id_questao));
+            model.addAttribute("quizId", quizId);
 
             // Retorna o template de detalhes
             return "detalhe_questao"; 
@@ -221,7 +231,7 @@ public class QuestaoController {
         System.out.println("chegou opa");
         
         try {
-            questaoService.deletarQuestao(id_questao); // Assumindo que você tem um método excluir no service
+            questaoService.deletarQuestaoDoBanco(id_questao); // Assumindo que você tem um método excluir no service
             // ra.addFlashAttribute("success", "Questão excluída com sucesso!");
             System.out.println("deu bom");
             

@@ -1,0 +1,333 @@
+/* ======================================================= */
+/* ESTILOS GLOBAIS E DE AUTENTICAÇÃO (HOME, LOGIN, CADASTRO) */
+/* ======================================================= */
+
+:root {
+    /* Variáveis de cor e tamanho padronizadas */
+    --bg-color: #0e1116; /* Base do Cadastro/Index */
+    --card-color: #1a1f27;
+    --accent: #00c26e;
+    --accent-hover: #00a65d;
+    --text-light: #f5f5f5;
+    --text-muted: #9da5b4;
+    --radius: 16px;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+* {
+    /* Reset padrão para todos os arquivos */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ------------------------------------------------------- */
+/* ESTILOS DE CORPO (Body) - Centralizado para Login/Index, Não centralizado para Cadastro */
+/* O desenvolvedor precisará usar uma classe no body para alternar */
+/* ------------------------------------------------------- */
+
+body {
+    background: var(--bg-color);
+    color: var(--text-light);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* Classe auxiliar para centralizar o corpo (usar em Login e Index) */
+.body-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* ------------------------------------------------------- */
+/* ESTILOS GERAIS DE CONTAINER E COMPONENTES */
+/* ------------------------------------------------------- */
+
+/* Container geral (Usado em Cadastro/Index) */
+.container {
+    background: var(--card-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2.5rem; /* Padrão do Cadastro */
+    max-width: 800px; /* Padrão do Cadastro */
+    width: 100%;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+
+/* Container específico de Login (menor) */
+.login-container {
+    background: var(--card-color);
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin: auto; /* Centraliza no eixo vertical quando body-centered for usado */
+}
+
+/* Estilo para Títulos H2 (Usado em Login e Cadastro) */
+h2 {
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.8rem; /* Padrão do Login, menor que o Cadastro original */
+}
+
+/* Estilo para Títulos H1 (Usado apenas em Index) */
+h1 {
+    font-size: 2.4rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+/* Estilo Padrão para Parágrafos (Usado em Index) */
+p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* ------------------------------------------------------- */
+/* ESTILOS DE FORMULÁRIO E INPUTS */
+/* ------------------------------------------------------- */
+
+.form-group {
+    margin-bottom: 1.5rem; /* Padrão do Login, maior que o Cadastro original */
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+input:not([type="checkbox"]), select, textarea {
+    width: 100%;
+    padding: 0.75rem; /* Padrão do Login */
+    background: #12161d;
+    border: 2px solid #2a2f36;
+    border-radius: var(--radius);
+    color: var(--text-light);
+    transition: border 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* Estilo para link de navegação (Login/Cadastro/Link) */
+.link {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.link a:hover {
+    text-decoration: underline;
+}
+
+/* Estilo de erro ou destaque (usado em Cadastro) */
+span {
+    color: #ae0404;
+}
+
+/* ------------------------------------------------------- */
+/* ESTILOS DE BOTÃO GERAL (Usado em Login, Cadastro, Index) */
+/* ------------------------------------------------------- */
+
+.btn {
+    width: 100%; /* Padrão para Login/Cadastro */
+    padding: 0.9rem; /* Padrão do Cadastro */
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    /* Reset para que a largura possa ser ajustada em outros contextos (Index) */
+    display: inline-block;
+    text-align: center;
+}
+
+.btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+/* Container de botões para Index (alinhamento horizontal) */
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Variações de botão (Index) */
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+    width: auto; /* Sobrescreve width: 100% para o Index */
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    width: auto; /* Sobrescreve width: 100% para o Index */
+    padding: 0.75rem 2.2rem; /* Ajuste para compensar a borda de 2px */
+}
+
+.btn-secondary:hover {
+    background: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ------------------------------------------------------- */
+/* ESTILOS DE ALERTA (Alerts) */
+/* ------------------------------------------------------- */
+
+.alert {
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.alert-danger {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff6666;
+}
+
+.alert-success {
+    background: rgba(0, 255, 128, 0.1);
+    color: var(--accent);
+}
+
+/* ------------------------------------------------------- */
+/* ESTILOS ESPECÍFICOS DE CADASTRO (Tabs e Checkbox) */
+/* ------------------------------------------------------- */
+
+.tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #2a2f36;
+}
+
+.tab {
+    flex: 1;
+    padding: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.checkbox-group {
+    border: 1px solid #2a2f36;
+    border-radius: var(--radius);
+    padding: 0.8rem;
+    max-height: 180px;
+    overflow-y: auto;
+    background: #12161d;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+}
+
+/* ------------------------------------------------------- */
+/* ESTILOS ESPECÍFICOS DE INDEX (Home) */
+/* ------------------------------------------------------- */
+
+.features {
+    margin-top: 2.5rem;
+    text-align: left;
+}
+
+.feature {
+    background: #161b22;
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.feature:hover {
+    background: #1d232d;
+    transform: translateX(4px);
+}
+
+.feature h3 {
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Media Queries */
+@media (max-width: 600px) {
+    .container {
+        padding: 2rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+}

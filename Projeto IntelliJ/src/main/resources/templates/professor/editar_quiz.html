@@ -4,180 +4,227 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educatio Quiz - Editar Quiz</title>
-    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <!-- <link rel="stylesheet" th:href="@{/css/quiz_style.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
 <body>
 
-    <!-- CABEÇALHO (Navbar) -->
-    <header class="navbar">
-        <!-- Logo e Título -->
-        <div class="flex items-center gap-4">
-            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="color: var(--accent);">
-                <path fill-rule="evenodd" d="M11.668 1.916a.75.75 0 01.696.113l4 3a.75.75 0 01.13 1.06l-2.706 3.607.411 1.765a.75.75 0 01-1.354.316l-.411-1.765-3.045 4.06a.75.75 0 01-1.12.015l-3.51-3.51a.75.75 0 010-1.06l3.51-3.51a.75.75 0 01.53-.22h.004zM16 11.75a4.25 4.25 0 100-8.5 4.25 4.25 0 000 8.5z" clip-rule="evenodd" />
-            </svg>
-            <h1 class="text-xl font-semibold" style="color: var(--text-light);">Educatio Quiz - Professor</h1>
+    <nav class="navbar">
+        <h1>🎓 Educatio Quiz - Professor</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${professor.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
         </div>
+    </nav>
 
-        <!-- Perfil e Botão Sair -->
-        <div class="flex items-center gap-4">
-            <span class="font-semibold" style="color: var(--accent); font-size: 0.9rem;">Maria</span>
-            <button class="btn-logout font-semibold">
-                Sair
-            </button>
-        </div>
-    </header>
-
+    
     <!-- CONTEÚDO PRINCIPAL: Edição de Questões do Quiz -->
-    <main class="main-content">
+     <main class="main-content">
         <div class="content-card">
 
-            <!-- Cabeçalho do Quiz em Edição -->
-            <div class="border-bottom-accent pb-4 mb-8">
-                <h2 class="text-2xl font-bold mb-2" style="color: var(--text-light);">
-                    Editando Quiz: <span style="color: var(--accent);">Revisão de Biologia Celular</span>
+            <!-- BLOCO 1: Título do Quiz e Botões Principais -->
+            <!-- Usa a nova classe quiz-header para controle de flexbox e espaçamento -->
+            <div class="quiz-header">
+                <!-- Título do Quiz (Ocupa o espaço restante) -->
+                <h2 class="text-xl font-semibold" style="color: var(--text-light);">
+                    Quiz: <span th:text="${quiz.titulo}" class="text-accent"></span>
                 </h2>
-                <div class="flex flex-wrap gap-4" style="color: var(--text-muted); font-size: 0.9rem;">
-                    <p><strong>Disciplina:</strong> Biologia</p>
-                    <p><strong>Nível:</strong> Ensino Médio</p>
-                    <p><strong>Questões Atuais:</strong> <span id="question-count" class="font-bold" style="color: var(--text-light);">3</span></p>
-                    <p><strong>Status:</strong> <span style="color: #ffc107;" class="font-semibold">Rascunho</span></p>
+
+                <!-- Container dos botões principais (Adicionar e Voltar) -->
+                <div class="quiz-actions-group">
+                    <!-- Botão de Criação -->
+                    <a th:href="@{/quiz/banco_questoes(quizId=${quiz.id_quiz})}" class="btn btn-primary">
+                        ➕ Adicionar questão
+                    </a> 
+
+                    
+                    <a th:href="@{/quiz/modificar/{id_quiz}(id_quiz = ${quiz.id_quiz})}" class="btn btn-secondary">
+                        Editar informações do quiz
+                    </a>    
+                        
+                    <!-- Botão de Voltar/Cancelar -->
+                    <a href="/professor/home"         
+                        class="btn btn-secondary ">
+                        ⬅️ Voltar para Menu Inicial
+                    </a>
                 </div>
             </div>
 
-            <!-- Botões de Ação Principal -->
-            <div class="flex justify-between items-center mb-8">
+            <!-- BLOCO 2: BARRA DE PESQUISA DINÂMICA -->
+            <!-- Usa a nova classe filter-bar para controle de flexbox e espaçamento -->
+            <div class="filter-bar">
+                <!-- Dropdown de Tipo de Busca -->
+                <select id="search-type" class="form-select search-filter-select" onchange="filterQuestions()">
+                    <option value="enunciado">Buscar por Enunciado</option>
+                    <option value="tipo">Buscar por Tipo da Questão</option>
+                </select>
 
-                <!-- Botão para Adicionar Mais Questões -->
-                <a th:href="@{/listar/questoes/{id}}" class="btn btn-primary w-auto">
-                    + Adicionar Mais Questões do Banco
-                </a>
-
-                <!-- Ações de Gerenciamento do Quiz -->
-                <div class="flex space-x-3 w-auto">
-                    <button onclick="saveQuiz()" class="btn btn-secondary">
-                        Salvar Rascunho
-                    </button>
-                    <button onclick="publishQuiz()" class="btn btn-primary">
-                        Publicar Quiz
-                    </button>
+                <!-- Input de Pesquisa - Usa search-container para ocupar o resto da largura -->
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Digite para buscar..."
+                           class="form-input search-input"
+                           onkeyup="filterQuestions()"
+                    >
+                    <div class="search-icon">
+                        <!-- Ícone de Lupa - SVG mantido, mas o posicionamento é feito pelo CSS:search-container -->
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
-            <h3 class="text-xl font-semibold mb-4" style="color: var(--text-light);">
-                Questões Atuais do Quiz
-            </h3>
-
-            <!-- Tabela de Questões do Quiz -->
-            <div class="table-container">
+            
+            <!-- Tabela Responsiva de Questões -->
+           <div class="table-container"> 
                 <table class="dark-table">
                     <thead>
                         <tr>
-                            <th style="width: 16%;">Tipo</th>
-                            <th style="width: 50%;">Enunciado</th>
-                            <th class="text-center" style="width: 15%;">Dificuldade</th>
-                            <th class="text-right" style="width: 19%;">Ações</th>
+                            <th style="width: 5%;">N°Questão</th>
+                            <th style="width: 15%;">Tipo</th>
+                            <th style="width: 40%;">Enunciado</th>
+                            <th style="width: 15%;">Nível</th>
+                            <th class="text-center" style="width: 10%;">Dificuldade</th>
+                            <th class="text-center" style="width: 15%;">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="quiz-questions-body">
+                    <tbody>
+                        <tr th:each="questao, stat : ${questoes}">
 
-                        <!-- Questão 1 -->
-                        <tr id="question-row-1">
-                            <td>Múltipla Escolha</td>
-                            <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                Qual é a função principal das mitocôndrias na célula?
+                            <td th:text="${stat.count}">Número da Questão</td>
+                            <td th:text="${questao.tipo_questao}"></td>
+                            <td th:text="${questao.enunciado}"
+                                style="max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             </td>
-                            <td class="text-center" style="color: #ffc107;">Média</td>
-                            <td class="text-right">
-                                <button onclick="removeQuestion(1)" class="btn btn-danger">
-                                    Remover
-                                </button>
+                            <td th:text="${questao.nivel_educacional}" class="text-center"></td>
+                            <td th:text="${questao.nivel_dificuldade}" class="text-center text-accent" ></td>
+                            
+                            <!-- alguma dessas classes deve estar quebrando a tabela -->
+                            <td class="flex items-center space-y-1">
+                                <div class="flex-column-buttons">
+                                    <a th:href="@{/questao/buscar/{id}(id=${questao.id_questao}, quizid=${quiz.id_quiz})}" 
+                                       class="table-action-btn btn-details" 
+                                       data-toggle="page">
+                                        Detalhes
+                                    </a>
+
+                                    <form th:action="@{/quiz/excluir/questao}" method="post" class="inline-block">
+                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                                        <input type="hidden" name="id_quiz" th:value="${quiz.id_quiz}" />
+                                        <button type="submit" class="table-action-btn btn-danger-table"> 
+                                              Excluir
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Linha de Mensagem de Quiz Vazio (th:if garante que só aparece se a lista de questões estiver vazia) -->
+                        <tr id="empty-quiz-row" th:if="${#lists.isEmpty(questoes)}">
+                            <td colspan="6" class="text-center" style="color: var(--text-muted); padding: 2rem;">
+                                Nenhuma questão adicionada a este quiz. Use o botão acima para adicionar!
                             </td>
                         </tr>
 
-                        <!-- Questão 2 -->
-                        <tr id="question-row-2">
-                            <td>Verdadeiro ou Falso</td>
-                            <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                O DNA é encontrado exclusivamente no núcleo das células eucarióticas.
-                            </td>
-                            <td class="text-center" style="color: #EF4444;">Difícil</td>
-                            <td class="text-right">
-                                <button onclick="removeQuestion(2)" class="btn btn-danger">
-                                    Remover
-                                </button>
+                        <!-- Linha de Mensagem de Filtro Vazio (Controlada pelo JS) -->
+                        <tr id="no-results-row" style="display: none;">
+                            <td colspan="6" class="text-center" style="color: var(--text-muted); padding: 2rem;">
+                                Nenhuma questão encontrada com este filtro.
                             </td>
                         </tr>
-
-                        <!-- Questão 3 -->
-                        <tr id="question-row-3">
-                            <td>Dissertativa</td>
-                            <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                Descreva brevemente o processo de osmose.
-                            </td>
-                            <td class="text-center" style="color: var(--accent);">Fácil</td>
-                            <td class="text-right">
-                                <button onclick="removeQuestion(3)" class="btn btn-danger">
-                                    Remover
-                                </button>
-                            </td>
-                        </tr>
-
                     </tbody>
                 </table>
 
-                <p id="empty-quiz-message" style="display: none;" class="text-center" style="color: var(--text-muted); margin-top: 2rem;">
-                    Nenhuma questão adicionada a este quiz. Use o botão acima para adicionar!
-                </p>
-            </div>
+                    
+            </div> 
             <!-- Fim da Tabela -->
 
         </div>
-    </main>
+    </main> 
 
     <!-- Rodapé opcional -->
     <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
         &copy; 2024 Educatio Quiz. Todos os direitos reservados.
-    </footer>
+    </footer> 
 
     <script>
-        // Array simulado de questões no quiz (para controle do JavaScript)
-        let currentQuizQuestions = [1, 2, 3]; 
-
-        function updateQuestionCount() {
-            const count = currentQuizQuestions.length;
-            document.getElementById('question-count').textContent = count;
-            document.getElementById('empty-quiz-message').style.display = count > 0 ? 'none' : 'block';
+        /**
+         * Inicializa a página adicionando o listener de evento de mudança ao dropdown.
+         */
+        function initializePage() {
+            // Adiciona listener para o dropdown de tipo de pesquisa
+            const searchType = document.getElementById('search-type');
+            if (searchType) {
+                searchType.addEventListener('change', filterQuestions);
+            }
         }
 
-        function removeQuestion(id) {
-            // Remove a linha visualmente
-            const row = document.getElementById(`question-row-${id}`);
-            if (row) {
-                row.remove();
+        /**
+         * Realiza a filtragem das questões na tabela com base no texto e no tipo de busca selecionado.
+         */
+        function filterQuestions() {
+            const input = document.getElementById('search-input');
+            // Obtém o texto do filtro em maiúsculas e remove espaços em branco extras
+            const filter = input.value.toUpperCase().trim(); 
+            const type = document.getElementById('search-type').value; // 'enunciado' ou 'tipo'
+            const rows = document.querySelectorAll('.question-row');
+            const emptyQuizRow = document.getElementById('empty-quiz-row');
+            const noResultsRow = document.getElementById('no-results-row');
+            let visibleRows = 0;
+
+            // Oculta a mensagem de quiz vazio (se ela existir) ao iniciar a filtragem
+            if (emptyQuizRow) {
+                emptyQuizRow.style.display = 'none'; 
             }
 
-            // Remove do array de controle
-            currentQuizQuestions = currentQuizQuestions.filter(qId => qId !== id);
+            // Caso o filtro esteja vazio, exibe todas as questões e gerencia as mensagens de status
+            if (filter.length === 0) {
+                rows.forEach(row => {
+                    row.style.display = ""; // Mostra a linha
+                    visibleRows++;
+                });
 
-            // Atualiza a contagem
-            updateQuestionCount();
+                // Reexibe a mensagem de quiz vazio apenas se ela foi carregada pelo Thymeleaf (ou seja, lista original estava vazia)
+                if (emptyQuizRow) {
+                    emptyQuizRow.style.display = ''; 
+                }
 
-            console.log(`Questão #${id} removida do Quiz.`);
-        }
-
-        function saveQuiz() {
-            alert(`Quiz 'Revisão de Biologia Celular' salvo como rascunho com ${currentQuizQuestions.length} questões.`);
-        }
-
-        function publishQuiz() {
-            if (currentQuizQuestions.length === 0) {
-                 alert("Não é possível publicar: Adicione pelo menos uma questão ao quiz!");
-                 return;
+                noResultsRow.style.display = 'none'; // Oculta a mensagem de nenhum resultado do filtro
+                return;
             }
-            alert(`Quiz 'Revisão de Biologia Celular' publicado com sucesso!`);
+
+            // Aplica o filtro
+            rows.forEach(row => {
+                let cell;
+
+                // Seleciona a célula de busca correta com base no tipo
+                if (type === 'enunciado') {
+                    cell = row.querySelector('[data-filter-enunciado]');
+                } else {
+                    cell = row.querySelector('[data-filter-type]');
+                }
+
+                if (cell) {
+                    const cellValue = cell.textContent || cell.innerText;
+                    // Verifica se o valor da célula contém o texto do filtro
+                    if (cellValue.toUpperCase().indexOf(filter) > -1) {
+                        row.style.display = ""; // Mostra a linha
+                        visibleRows++;
+                    } else {
+                        row.style.display = "none"; // Oculta a linha
+                    }
+                } else {
+                    // Oculta a linha se, por algum motivo, a célula de filtro não for encontrada
+                    row.style.display = "none"; 
+                }
+            });
+
+            // Gerencia a mensagem de "Nenhuma questão encontrada com este filtro"
+            noResultsRow.style.display = visibleRows === 0 ? '' : 'none';
         }
 
-        window.onload = updateQuestionCount;
+        window.onload = initializePage;
     </script>
 </body>
 </html>

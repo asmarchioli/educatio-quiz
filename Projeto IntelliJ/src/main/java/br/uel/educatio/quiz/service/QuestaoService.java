@@ -119,11 +119,16 @@ public class QuestaoService {
     //         alternativaDAO.save(alt); 
     //     }
     // }
+
     
     public List<Alternativa> listarAlternativas(Long id_questao) {
         return alternativaDAO.findByQuestaoId(id_questao);
     }
 
+    public List<Questao> listarQuestoesPorArea(Long id_area){
+        return questaoDAO.findByArea(id_area);
+    }
+    
     public List<Questao> listarQuestoesPorProf(Long idProfessor) {
         return questaoDAO.findByProfessorId(idProfessor);
     }
@@ -142,12 +147,15 @@ public class QuestaoService {
         return questao;
     }
 
+  
+    //Deleta a questão do banco de dados
     @Transactional // Garante que a operação seja atômica
-    public void deletarQuestao(Long id_questao){
+    public void deletarQuestaoDoBanco(Long id_questao){
 
         // 1. CHAMA O DAO PARA DELETAR OS FILHOS (ALTERNATIVA)
         alternativaDAO.deleteByIdQuestao(id_questao);
 
+        
         // 2. CHAMA O DAO PARA DELETAR O PAI (QUESTAO)
         questaoDAO.deleteById(id_questao);
     }

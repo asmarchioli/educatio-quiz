@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Professor</title>
-    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
+    <!-- <link rel="stylesheet" th:href="@{/css/home_style.css}"> -->
 </head>
 <body>
 <nav class="navbar">
     <h1>🎓 Educatio Quiz - Professor</h1>
-    <div>
+    <div style="display: flex; align-items: center; gap: 1rem;">  
         <span th:text="${professor.nome}"></span>
         <a href="/logout" class="btn-logout">Sair</a>
     </div>
@@ -22,21 +24,21 @@
     </div>
 
     <div class="cards">
-        <div class="card">
+        <div class="card-body">
             <div class="card-icon">➕</div>
             <h3>Criar Quiz</h3>
             <p>Crie um novo quiz selecionando questões do banco.</p>
-            <a href="/professor/criar_quiz" class="card-btn">Criar Novo</a>
+            <a href="/quiz/criar" class="card-btn">Criar Novo</a>
         </div>
 
-        <div class="card">
+        <div class="card-body">
             <div class="card-icon">📋</div>
             <h3>Meus Quizzes</h3>
             <p>Gerencie e visualize todos os quizzes que você criou.</p>
-            <a th:href="@{/quiz/buscar/professor_criador/{id}(id=${professor.id_professor})}" class="card-btn">Ver Quizzes</a>
+            <a th:href="@{/quiz/professor_criador/buscarQuizzes/{id}(id=${professor.id_professor})}" class="card-btn">Ver Quizzes</a>
         </div>
 
-        <div class="card">
+        <div class="card-body">
             <div class="card-icon">❓</div>
             <h3>Banco de Questões</h3>
             <p>Adicione e edite questões disponíveis para uso nos quizzes.</p>

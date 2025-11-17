@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educatio Quiz - Gerenciamento de Questões</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
 <body>
     <nav class="navbar">
         <h1>🎓 Educatio Quiz - Professor</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
             <span th:text="${professor.nome}"></span>
             <a href="/logout" class="btn-logout">Sair</a>
         </div>
@@ -24,11 +26,20 @@
                 <h2 class="text-xl font-semibold" style="color: var(--text-light);">
                     Gerenciamento de Questões
                 </h2>
-                <!-- Botão de Criação -->
-                <a href="/questao/novo" class="btn btn-primary font-semibold">
-                <!-- <a href="/professor/criar_questao" class="btn btn-primary font-semibold"> -->
-                    + Criar Nova Questão
-                </a>
+                
+                <div th:if="${quizId == null}">
+                    <!-- Botão de Voltar/Cancelar -->
+                    <a href="/professor/home"         
+                        class="btn btn-secondary ">
+                        ⬅️ Voltar para Menu Inicial
+                    </a>
+                    
+                    <!-- Botão de Criação -->
+                    <a href="/questao/novo" class="btn btn-primary font-semibold">
+                    <!-- <a href="/professor/criar_questao" class="btn btn-primary font-semibold"> -->
+                        ➕ Criar Nova Questão
+                    </a>
+                </div>
             </div>
 
             <!-- BARRA DE PESQUISA ESTÁTICA -->
@@ -51,23 +62,13 @@
                         <tr>
                             <th style="width: 15%;">Tipo</th>
                             <th style="width: 45%;">Enunciado</th>
-                            <th class="text-center" style="width: 10%;">Nível</th>
+                            <th style="width: 15%;">Nível</th>
                             <th class="text-center" style="width: 10%;">Dificuldade</th>
-                            <th class="text-center" style="width: 20%;">Ações</th>
+                            <th class="text-center" style="width: 15%;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="questao : ${questoes}">
-
-                            <!-- Esta estrutura garante que o parser HTML não se confunda com as aspas duplas, pois o Thymeleaf injeta cada atributo `data-` separadamente. Isso deve resolver o `Malformed markup` na Linha 68. -->
-
-                            <!-- **Explicação:**
-
-                            1.  **`questao.alternativas != null ?`**: Verifica se a lista de alternativas **não é nula**.
-                            2.  **`#json.toJSON(questao.alternativas)`**: Se não for nula, serializa a lista.
-                            3.  **`:`**: Senão...
-                            4.  **`'[]'`**: Injeta uma *string* vazia (`'[]'`) no atributo `data-alternativas`.data-                                            alternativas=${#json.toJSON(questao.alternativas)}"> -->
-                        
                             <td th:text="${questao.tipo_questao}"></td>
                             <td th:text="${questao.enunciado}"
                                 style="max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -75,33 +76,70 @@
                             </td>
                             <td th:text="${questao.nivel_educacional}" class="text-center"></td>
                             <td th:text="${questao.nivel_dificuldade}" class="text-center text-accent" ></td>
-                            
-                            <!-- alguma dessas classes deve estar quebrando a tabela -->
-                            <td class="text-right actions flex justify-end items-center space-x-1-2"> 
-                                
-                                <!-- 1. BOTÃO DETALHES (Agora passa dados estáticos e não depende de array JS) -->
-                                <a th:href="@{/questao/buscar/{id}(id=${questao.id_questao})}"
-                                   class="table-action-btn btn-details"
-                                   data-toggle="page">
-                                    Detalhes
-                                </a>
 
-                                <!-- 2. BOTÃO EDITAR (Link de navegação GET) -->
-                                <a th:href="@{/questao/editar/{id}(id=${questao.getId_questao()})}"
-                                   class="table-action-btn btn-edit">
-                                    Editar
-                                </a>
+                            <!-- Botões de ação  -->
+                            <td class="actions-cell"> 
 
-                                <!-- 3. BOTÃO EXCLUIR (Formulário POST) -->
-                                <form th:action="@{/questao/excluir}" 
-                                      method="post" 
-                                    >
-                                    <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
-                                    <button type="submit" class="table-action-btn btn-danger">
-                                        Excluir
-                                    </button>
-                                </form>
+                                <div th:if="${quizId != null}" class="flex-column-buttons">
+                                    <form th:action="@{/quiz/adicionar/questao}" method="post" class="inline-block"> 
+                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                                        <input type="hidden" name="id_quiz" th:value="${quizId}" />
+                                        <button type="submit" class="table-action-btn btn-primary">
+                                            ➕
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div th:if="${quizId == null}" class="flex-column-buttons"> 
+
+                                    <a th:href="@{/questao/buscar/{id}(id=${questao.id_questao})}"
+                                       class="table-action-btn btn-details"
+                                       data-toggle="page">
+                                        Detalhes
+                                    </a>
+
+                                    <a th:href="@{/questao/editar/{id}(id=${questao.getId_questao()})}"
+                                       class="table-action-btn btn-edit">
+                                        Editar
+                                    </a>
+
+                                    <form th:action="@{/questao/excluir}" method="post" class="inline-block"> 
+                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                                        <button type="submit" class="table-action-btn btn-danger-table"> 
+                                            Excluir
+                                        </button>
+                                    </form>
+
+                                </div>
                             </td>
+                            <!-- alguma dessas classes deve estar quebrando a tabela -->
+                            <!-- <td class="flex items-center space-x-1-2"> 
+                                <div class="flex-column-buttons">
+
+
+                                    <a th:if="history.back() = ''""></a>
+                                    <a th:href="@{/questao/buscar/{id}(id=${questao.id_questao})}"
+                                       class="table-action-btn btn-details"
+                                       data-toggle="page">
+                                        Detalhes
+                                    </a>
+  
+                                    <a th:href="@{/questao/editar/{id}(id=${questao.getId_questao()})}"
+                                       class="table-action-btn btn-edit">
+                                        Editar
+                                    </a>
+
+                                    <form th:action="@{/questao/excluir}" 
+                                          method="post"
+                                    >
+                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                                        <button type="submit" class="btn btn-danger">
+                                            Excluir
+                                        </button>
+                                    </form>
+                                </div>
+                            </td> -->
+                            
                         </tr>
                     </tbody>
                 </table>

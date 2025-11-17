@@ -57,28 +57,6 @@ public class ProfessorController {
     // }
 
     
-    // Usada em professor/home.html
-    // @GetMapping("/criar_quiz")
-    // public String forms_criar_quiz(HttpSession session, Model model) {
-    //     Professor professor = (Professor) session.getAttribute("usuarioLogado");
-        
-    //     Long id_prof = professor.getId_professor();
-    //     List<Area> areas = profService.buscarAreasDoProfessor(id_prof);
-        
-    //     // if (professor == null) {
-    //     //     return "redirect:/login"; //Verificar se é melhor redirecionar para a home ou para a página de login (e se é necessário esse bloco)
-    //     // }
-        
-    //     model.addAttribute("questao", new Questao());
-    //     model.addAttribute("professor", professor);
-    //     model.addAttribute("escolaridades", Escolaridade.values());
-    //     model.addAttribute("tiposQuestao", TipoQuestao.values());
-    //     model.addAttribute("dificuldades", Dificuldade.values());
-    //     model.addAttribute("exibicoes", Exibicao.values());
-    //     model.addAttribute("areas", areas);
-     
-    //     return "professor/editar_quiz";
-    // }
 
     
     // Usada em professor/banco_questoes.html

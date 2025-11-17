@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes da Questão</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
 <body>
     <nav class="navbar">
         <h1>🎓 Educatio Quiz - Professor</h1>
-        <div class ="flex items-center gap-6">
+        <div style="display: flex; align-items: center; gap: 1rem;">
             <span th:text="${professor.nome}" style = "margin-left:"></span>
             <a href="/logout" class="btn-logout" style = >Sair</a>
         </div>
@@ -234,6 +236,7 @@
     <script>
         function toggleAlternatives() {
             const tipo = document.getElementById('tipo_questao').value;
+            console.log('Tipo de Questão Selecionado:', tipo);
 
             const mc = document.getElementById('multipla-escolha-section');
             const vf = document.getElementById('verdadeiro-falso-section');
@@ -261,10 +264,11 @@
                 history.go(-1);
 
               // Substitua 'URL_COMPLETA_DE_Y' pela URL exata da sua página Y
-              } else if (paginaAnterior.includes('questao/buscar/')) {
+              } else if (paginaAnterior.includes('/questao/buscar/')) {
                 // Se a página anterior for 'Y', volta 2 passos.
                 // O pressuposto aqui é que você está em Z -> Y -> X, e quer voltar para X
                 history.go(-2);
+            }
         }
 
             
@@ -273,12 +277,7 @@
             // A função toggleAlternatives() é chamada para exibir a seção que foi preenchida pelo Thymeleaf
             toggleAlternatives(); 
         });
-            
-        document.addEventListener('DOMContentLoaded', function() {
-            // A função toggleAlternatives() é chamada para exibir a seção que foi preenchida pelo Thymeleaf
-            toggleAlternatives(); 
-        });
-
+ 
         //Não está funcionando
         // document.addEventListener('DOMContentLoaded', function() {
 

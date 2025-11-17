@@ -1,0 +1,105 @@
+/* ======================================================= */
+/* ESTILOS ESPECÍFICOS DO FLUXO DO ALUNO */
+/* ======================================================= */
+
+/* ------------------------------------------------------- */
+/* ESTILOS DE PESQUISA E TABELA */
+/* ------------------------------------------------------- */
+
+/* Pesquisa Centralizada do Aluno */
+.search-container.aluno {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto 2rem auto;
+}
+.search-container.aluno .search-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+.search-container.aluno .search-input {
+    padding-left: 35px;
+}
+
+/* Efeito de Hover nas Linhas - Fluxo Aluno (Sugere clique na linha) */
+.dark-table tbody tr:hover td {
+    background-color: #1d232d;
+    cursor: pointer;
+}
+
+/* Ajuste para a célula de Ações na Tabela */
+.dark-table tbody td.actions {
+    min-width: 180px; /* Garante espaço mínimo para os 3 botões */
+    padding: 10px 15px; /* Padding ajustado para a célula de ação */
+}
+
+/* Ajuste do botão de ação na tabela do Aluno */
+.table-action-btn.aluno {
+    /* CRÍTICO: Define largura máxima e mínima igual para uniformizar */
+    width: 100%; 
+    min-width: 80px; 
+    max-width: 80px; 
+}
+
+/* Botão Excluir na Tabela (Apenas para o contexto da tabela do aluno) */
+.dark-table .btn-danger { 
+    color: var(--card-color);
+    font-weight: 500;
+}
+
+
+/* ------------------------------------------------------- */
+/* ESTILOS DE MODAL */
+/* ------------------------------------------------------- */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    padding: 20px;
+}
+
+.modal-content {
+    background: var(--card-color);
+    padding: 30px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Alternativas no Modal */
+.modal-alternatives {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #2e3542;
+}
+.modal-alternatives ul {
+    list-style: none;
+    padding: 0;
+}
+.modal-alternatives li {
+    background-color: #161b22;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+}
+.correct-answer {
+    border-color: var(--accent);
+    background-color: #1f271a;
+}

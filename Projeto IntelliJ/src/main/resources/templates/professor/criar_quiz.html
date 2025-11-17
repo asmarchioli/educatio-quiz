@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <!-- <!-- <link rel="stylesheet" th:href="@{/css/home_style.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">-->
     <title>Educatio Quiz - Criar Novo Quiz</title>
 </head>
     <body>
 
         <nav class="navbar">
             <h1>🎓 Educatio Quiz - Professor</h1>
-            <div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
                 <span th:text="${professor.nome}"></span>
                 <a href="/logout" class="btn-logout">Sair</a>
             </div>
@@ -25,14 +27,29 @@
                 </h2>
 
                 <!-- Simulando a Ação de Envio para o Backend (URL de salvamento) -->
-                <form id="create-quiz-form" th:action="@{/quiz/salvar}" method="POST">
+                <form id="create-quiz-form" 
+                      th:action="${quiz.id_quiz == null} 
+                           ? @{/quiz/salvar} 
+                           : @{/quiz/atualizar}" 
+                    method="post" 
+                    th:object="${quiz}">
+
+
+                    <!-- CAMPO OCULTO: ID da Questão (Necessário para o id_quiz e a data de criação recebidos do backend serem os mesmos do objeto atualizado) -->
+                    
+                    <input type="hidden" th:field="*{id_quiz}" th:value="${quiz.id_quiz}"/>
+                    <input type="hidden" th:field="*{data_criacao}" th:value="${quiz.data_criacao}" />
+                    
+                    <!-- CAMPO OCULTO: Professor Criador (Injetado pelo Backend) -->
+                    <input type="hidden" th:field="*{professor_criador}" th:value="${professor.getId_professor()}" />
+                    
 
                     <!-- Título do Quiz (titulo) -->
                     <div class="form-group">
                         <label for="quiz-title" class="form-label">
                             Título do Quiz (Máx. 255 caracteres)
                         </label>
-                        <input type="text" id="quiz-title" name="titulo" required
+                        <input type="text" id="quiz-title" th:field="*{titulo}" required
                                class="form-input"
                                maxlength="255"
                                placeholder="Ex: Revisão de História - Capítulo 5"
@@ -44,7 +61,7 @@
                         <label for="quiz-visibility" class="form-label">
                             Visibilidade do Quiz (Pública ou Privada - Requer PIN)
                         </label>
-                        <select id="quiz-visibility" name="visibilidade" required class="form-input" onchange="togglePinAccess()">
+                        <select id="quiz-visibility" th:field="*{visibilidade}" required class="form-input" onchange="togglePinAccess()">
                             <option value="" disabled selected>Defina a visibilidade </option>
                             <option th:each= "exibicao : ${exibicoes}" th:value="${exibicao}" th:text="${exibicao}"> </option>
                             <!-- Valores simulando Enum Exibicao -->
@@ -58,7 +75,7 @@
                         <label for="quiz-pin" class="form-label">
                             PIN de Acesso (Obrigatório para acesso Privado)
                         </label>
-                        <input type="text" id="quiz-pin" name="pin_acesso"
+                        <input type="text" id="quiz-pin" th:field="*{pin_acesso}"
                                class="form-input"
                                maxlength="50"
                                placeholder="Ex: H9A2B"
@@ -70,7 +87,7 @@
                         <label for="quiz-level" class="form-label">
                             Nível Educacional
                         </label>
-                        <select id="quiz-level" name="nivel_educacional" required class="form-input">
+                        <select id="quiz-level" th:field="*{nivel_educacional}" required class="form-input">
                             <option value="" disabled selected>Selecione o nível</option>
                             <option th:each= "nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}"> </option>
                             <!-- Valores simulando Enum Escolaridade -->
@@ -86,7 +103,7 @@
                     <!-- AREAS DO PROF -->
                     <div class="form-group">
                         <label for="area" class="form-label">Área</label>
-                        <select id="area" name="area" required class="form-input">
+                        <select id="area" th:field="*{area}" required class="form-input">
                              <option th:each= " area:${areas}" th:value="${area.getIdArea()}" th:text="${area.getNomeArea()}"> </option>
                         </select>
                     </div>
@@ -96,7 +113,7 @@
                         <label for="quiz-description" class="form-label">
                             Descrição (Opcional)
                         </label>
-                        <textarea id="quiz-description" name="descricao" rows="3"
+                        <textarea id="quiz-description" th:field="*{descricao}" rows="3"
                                   class="form-input"
                                   placeholder="Breve descrição sobre o propósito do quiz."
                         ></textarea>
@@ -106,9 +123,13 @@
                     <div class="flex justify-end space-x-4">
 
                         <!-- Botão de Voltar/Cancelar (Simulando link de Voltar) -->
-                        <a href="home" class="btn btn-secondary font-bold" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                        <a href="/professor/home"
+                            class="btn btn-secondary font-bold" style="font-size: 1.1rem; 
+                            padding: 1rem 2rem;
+                            margin-right: 1rem">
                             Cancelar
                         </a>
+                        
 
                         <!-- Botão de Envio (Simulando o POST) -->
                         <button type="submit" class="btn btn-primary font-bold" style="font-size: 1.1rem; padding: 1rem 2rem;">
@@ -123,7 +144,7 @@
         <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
             &copy; 2024 Educatio Quiz. Todos os direitos reservados.
         </footer>
-
+        
         <!-- Lógica JavaScript Mínima para Controle de Visibilidade do PIN -->
         <script>
             document.addEventListener('DOMContentLoaded', (event) => {
@@ -149,7 +170,7 @@
                     pinGroup.style.display = 'none';
                     pinInput.required = false;
                     pinInput.removeAttribute('th:required');
-                    pinInput.value = ''; // Limpa o valor para evitar envio desnecessário
+                    pinInput.value = null; 
                 }
             }
         </script>

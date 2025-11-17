@@ -124,8 +124,13 @@ public class ProfessorService {
         return professorDAO.findAll(); // Método DAO do Arquivo 2
     }
 
-    public Optional<Professor> buscarPorId(Long id) {
-        return professorDAO.findById(id); // Método DAO do Arquivo 2
+    public Professor buscarPorId(Long id) {
+        Optional<Professor> professorOpt = professorDAO.findById(id);
+        if (professorOpt.isEmpty()) {
+            throw new RuntimeException("Professor não encontrado");
+        }
+
+        return professorOpt.get();
     }
 
     // Adicionado do Arquivo 1 (mas usando DAO do Arquivo 2)

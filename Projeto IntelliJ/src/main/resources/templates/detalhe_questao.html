@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes da Questão</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
 <body>
 
@@ -18,29 +20,41 @@
                 &larr; Voltar para o Banco de Questões
             </a> -->
             <!-- //Volta uma página no navegador -->
-            <a href="javascript:void(0)" onClick="history.go(-1); return false;">Voltar</a>
         </div>
 
         <div class="content-card">
 
             <div class="flex justify-between items-center mb-6 pb-4 border-bottom-accent">
                 <h2 class="text-2xl font-bold" style="color: var(--text-light);">
-                    Detalhes da Questão <span th:text="${questao.id_questao}">[ID]</span>
+                    Detalhes da Questão
                 </h2>
                 <div class="flex space-x-2">
                     <!-- Botão de Edição -->
-                    <a th:href="@{/questao/editar/{id}(id=${questao.id_questao})}" class="btn btn-primary table-action-btn btn-edit">
-                        Editar
+            
+                    <a href="javascript:void(0)" onClick="history.go(-1); return false;" 
+                       class="btn btn-secondary font-bold"> ⬅️ Voltar
                     </a>
-                    <!-- Botão de Exclusão -->
-                    <form th:action="@{/questao/excluir}" 
-                          onsubmit="alert('Tem certeza que deseja excluir esta questão? Esta ação é irreversível.');" 
-                          method="post">
-                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
-                        <button type="submit" class="btn btn-danger mr-4">
-                                Excluir
-                        </button>
-                    </form>
+
+                    <!-- Se a página que redirecionou para esta foi a de banco_questoes, então o botão de editar e excluir aparece.Já se veio da de editar_quiz, então não aparece -->
+                    <div th:if="${quizId == null}" class="flex space-x-2 align-items-center">
+                        <a th:href="@{/questao/editar/{id}(id=${questao.id_questao})}" 
+                           class="btn btn-primary mr-4">
+                            Editar
+                        </a>
+                        
+                        <!-- Botão de Exclusão -->
+                        <form th:action="@{/questao/excluir/{id}(id=${questao.id_questao})}" 
+                              onsubmit="alert('Tem certeza que deseja excluir esta questão? Esta ação é irreversível.');" 
+                              method="post"
+                                >
+                            <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                            <button type="submit" class="btn btn-danger mr-4">
+                                   🗑️ Excluir
+                            </button>
+                        </form>
+                    </div>
+
+                    
                 </div>
             </div>
 
@@ -68,17 +82,23 @@
                     <p th:text="${questao.nivel_dificuldade}"></p>
                 </div>
 
+                
                 <div style="flex-basis: 30%;">
                     <strong class="text-muted">Área:</strong>
-                    <p th:text="${questao.area}"></p> 
+                    <p th:text="${questaoAreaNome}"></p> 
                     <!-- Arrumar para colcoar o nome da área -->
                 </div>
 
                 <div style="flex-basis: 30%;">
-                    <strong class="text-muted">Criador (ID):</strong>
-                    <p th:text="${questao.professor_criador}"></p>
+                    <strong class="text-muted">Professor Criador:</strong>
+                    <p th:text="${profCriador.nome}"></p>
                 </div>
 
+                <div style="flex-basis: 30%;">
+                    <strong class="text-muted">Instituição de Ensino do Professor:</strong>
+                    <p th:text="${profCriador.instituicao_ensino}"></p> 
+                    <!-- Arrumar para colcoar o nome da área -->
+                </div>
                 <div style="flex-basis: 30%;">
                     <strong class="text-muted">Visibilidade:</strong>
                     <p th:text="${questao.visibilidade}"></p>

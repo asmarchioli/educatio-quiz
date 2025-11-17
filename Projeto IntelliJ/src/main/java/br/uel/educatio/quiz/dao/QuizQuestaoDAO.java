@@ -3,6 +3,7 @@ package br.uel.educatio.quiz.dao;
 import br.uel.educatio.quiz.model.QuizQuestao;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -26,6 +27,7 @@ public class QuizQuestaoDAO {
         return qq;
     };
 
+
     /**
      * Adiciona uma questão a um quiz com uma pontuação.
      * @param idQuestao ID da Questão.
@@ -33,10 +35,14 @@ public class QuizQuestaoDAO {
      * @param pontuacao Pontuação da questão neste quiz.
      * @return O número de linhas afetadas.
      */
-    public int addQuestaoToQuiz(long idQuestao, long idQuiz, int pontuacao) {
+    public void addQuestaoToQuiz(long id_questao, long id_quiz, int pontuacao) {
         // ON CONFLICT permite atualizar a pontuação se a relação já existir
         String sql = "INSERT INTO quiz_questao (id_questao, id_quiz, pontuacao_questao) VALUES (?, ?, ?) ON CONFLICT (id_questao, id_quiz) DO UPDATE SET pontuacao_questao = EXCLUDED.pontuacao_questao";
-        return jdbcTemplate.update(sql, idQuestao, idQuiz, pontuacao);
+
+       // Correção: Usando o método correto para atualização
+        jdbcTemplate.update(sql, id_questao, id_quiz, pontuacao);
+
+   
     }
 
     /**
@@ -45,6 +51,7 @@ public class QuizQuestaoDAO {
      * @param idQuiz ID do Quiz.
      */
     public void removeQuestaoFromQuiz(long idQuestao, long idQuiz) {
+        System.out.println("idQuestao: " + idQuestao + " idQuiz: " + idQuiz);
         String sql = "DELETE FROM quiz_questao WHERE id_questao = ? AND id_quiz = ?";
         jdbcTemplate.update(sql, idQuestao, idQuiz);
     }

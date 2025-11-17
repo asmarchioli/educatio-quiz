@@ -41,10 +41,19 @@ public class Quiz {
     private Long area;
 
     // @NotNull(message = "A data de criação é obrigatória.")
-    @FutureOrPresent(message = "A data de criação não pode ser no passado.")
+    // @FutureOrPresent(message = "A data de criação não pode ser no passado.")
     private LocalDate data_criacao;
 
     //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
     private List<Questao> questoes;
+
+    //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
+    private int num_questoes;
+    
+    //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
+    private String nome_area;
+    
+    //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
+    private String professor_criador_nome;
 
 }

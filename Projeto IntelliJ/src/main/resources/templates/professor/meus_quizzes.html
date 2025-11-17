@@ -4,181 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educatio Quiz - Meus Quizzes</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <!-- <style>
-        /* Variáveis de Tema fornecidas pelo usuário */
-        :root {
-            --bg-color: #0e1116;
-            --card-color: #1a1f27;
-            --accent: #00c26e;
-            --accent-hover: #00a65d;
-            --text-light: #f5f5f5;
-            --text-muted: #9da5b4;
-            --radius: 16px;
-            --shadow: 0 6px 20px rgba(0,0,0,0.3);
-            --danger: #EF4444;
-            --danger-hover: #DC2626;
-        }
-
-        body {
-            background: var(--bg-color);
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-light);
-            margin: 0;
-        }
-
-        /* --- Layout Geral --- */
-
-        .navbar {
-            background: var(--card-color);
-            padding: 1rem 2rem;
-            color: var(--accent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow);
-        }
-
-        /* Container Principal do Conteúdo */
-        .main-content {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        /* Área de Conteúdo (Card do Conteúdo) */
-        .content-card {
-            background: var(--card-color);
-            padding: 2rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            min-height: 70vh;
-        }
-
-        /* --- Estilos de Card --- */
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .quiz-card {
-            background: #161b22;
-            padding: 2rem;
-            border-radius: var(--radius);
-            transition: transform 0.3s, background 0.3s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .quiz-card:hover {
-            transform: translateY(-4px);
-            background: #1d232d;
-        }
-
-        .card-title {
-            color: var(--text-light);
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        .card-details {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-        .card-status {
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .status-draft { color: #ffc107; } /* Amarelo */
-        .status-published { color: var(--accent); } /* Verde */
-        .status-low-q { color: #EF4444; } /* Vermelho */
-
-
-        /* --- Estilos de Botão --- */
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            cursor: pointer;
-            border: none;
-            display: inline-block;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        /* Botão Primário (Verde) */
-        .btn-primary {
-            background: var(--accent);
-            color: #161b22;
-            box-shadow: 0 4px 10px rgba(0, 194, 110, 0.3);
-        }
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-        }
-
-        /* Botão Secundário/Padrão (Cinza Escuro) */
-        .btn-secondary {
-            background: #374151;
-            color: var(--text-light);
-            padding: 0.5rem 1rem;
-        }
-        .btn-secondary:hover {
-            background: #4B5563;
-        }
-
-        /* Botão de Perfil/Sair */
-        .btn-logout {
-            background: var(--accent);
-            color: #fff;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-
-        /* Botão de Remover (Vermelho) */
-        .btn-danger {
-            background: var(--danger); 
-            color: #161b22;
-            padding: 0.5rem 1rem;
-        }
-        .btn-danger:hover {
-            background: var(--danger-hover);
-        }
-
-        /* --- Classes Auxiliares --- */
-        .flex { display: flex; }
-        .justify-between { justify-content: space-between; }
-        .justify-end { justify-content: flex-end; }
-        .items-center { align-items: center; }
-        .gap-4 { gap: 1rem; }
-        .space-x-2 > * + * { margin-left: 0.5rem; }
-        .w-full { width: 100%; }
-        .w-auto { width: auto; }
-        .text-center { text-align: center; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .mb-8 { margin-bottom: 2rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .pb-4 { padding-bottom: 1rem; }
-        .text-accent { color: var(--accent); }
-    </style> -->
+    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
 <body>
 
     <!-- CABEÇALHO (Navbar) -->
     <nav class="navbar">
         <h1>🎓 Educatio Quiz - Professor</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
             <span th:text="${professor.nome}"></span>
             <a href="/logout" class="btn-logout">Sair</a>
         </div>
@@ -188,94 +23,88 @@
     <main class="main-content">
         <div class="content-card">
 
-            <h2 class="text-center font-semibold mb-8" style="color: var(--text-light); font-size: 1.5rem;">
+            <h1 class="text-center font-semibold mb-8" style="color: var(--text-light); font-size: 1.5rem;">
                 Meus Quizzes
-            </h2>
-
+            </h1>
+            
+            <a href="/professor/home" 
+                class="btn btn-secondary font-bold" style="font-size: 1.1rem; 
+                padding: 1rem 2rem;">
+                 ⬅️ Voltar para Menu Inicial
+            </a>
+            
             <!-- Botão de Ação Rápida: Criar Novo Quiz -->
-            <div class="flex justify-end mb-8">
-                <a href="criar_quiz.html" class="btn btn-primary font-semibold">
-                    + Criar Novo Quiz
+            <div class="flex justify-end gap-4 mb-8">
+                <a href="/quiz/criar" class="btn btn-primary font-semibold">
+                    ➕ Criar Novo Quiz
                 </a>
             </div>
 
             <!-- Grid de Cards -->
+            <!-- O Controller deve enviar a lista de Quiz na variável 'quizzes' -->
             <div class="cards">
 
-                <!-- Quiz de Exemplo 1 (Rascunho) -->
-                <div class="quiz-card">
+                <div th:each="quiz : ${quizzes}" class="quiz-card">
                     <div>
-                        <p class="card-title">Revisão de Biologia Celular</p>
+                        <!-- Título do Quiz -->
+                        <h2 th:text="${quiz.titulo}" class="card-title"></h2>
+
                         <div class="card-details space-y-1">
-                            <p><strong>Disciplina:</strong> Biologia</p>
-                            <p><strong>Nível:</strong> Ensino Médio</p>
-                            <p><strong>Questões:</strong> 15</p>
+                            <!-- ID da Área - Nota: O Controller deve buscar o nome da área se necessário -->
+                            <strong class="text-muted">Área:</strong>
+                            <p th:text="${quiz.nome_area}"></p>
                         </div>
-                        <p class="card-status status-draft mb-4">
-                            STATUS: Rascunho
-                        </p>
+
+                        <div class="card-details space-y-1">
+                            <strong class="text-muted">Nível:</strong>
+                            <p th:text="${quiz.nivel_educacional}"></p>
+                        </div>
+
+                        <div class="card-details space-y-1">
+                            <strong class="text-muted">Visibilidade:</strong>
+                            <p th:text="${quiz.visibilidade}"></p>
+                        </div>
+
+                        <div class="card-details space-y-1">
+                            <strong class="text-muted">N° Questões:</strong>
+                            <!-- Assumindo que num_questoes foi preenchido no Controller -->
+                            <p th:text="${quiz.num_questoes}"></p>
+                        </div>
+
+                        <!-- Lógica de Status: Adapta a cor e o texto baseado na visibilidade -->
+                        <!-- <p class="card-status mb-4" 
+                           th:classappend="${quiz.visibilidade.toString() == 'PÚBLICO' ? 'status-published' : 'status-draft'}"
+                           th:text="'STATUS: ' + ${quiz.visibilidade.toString()}">
+                            <h3><STATUS:</h3> 
+                            <p>Arrumar para mostrar o status do quiz<p>
+                        </p> -->
                     </div>
-                    <div class="flex space-x-2 w-full">
-                        <a href="editar_quiz.html" class="btn btn-secondary w-1/2 text-center">
+
+                    <div class="flex gap-3 w-full mt-4">
+                        <!-- Botão de Edição -->
+                        <a th:href="@{/quiz/editar/questoes/{id}(id=${quiz.id_quiz})}" class="btn btn-secondary w-1/2 text-center">
                             Editar
                         </a>
-                        <button onclick="publishQuiz(1)" class="btn btn-primary w-1/2">
-                            Publicar
-                        </button>
+
+                        <form th:action="@{/quiz/excluir/{id}(id=${quiz.id_quiz})}" method="post" style="margin-left:10px; width: 50%;">
+                            <!-- O botão ocupa metade da largura do contêiner flex pai -->
+                            <button type="submit" class="btn btn-danger">
+                                🗑️ Excluir
+                            </button>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Quiz de Exemplo 2 (Publicado) -->
-                <div class="quiz-card">
-                    <div>
-                        <p class="card-title">Introdução à Lógica (Fácil)</p>
-                        <div class="card-details space-y-1">
-                            <p><strong>Disciplina:</strong> Matemática</p>
-                            <p><strong>Nível:</strong> Fundamental II</p>
-                            <p><strong>Questões:</strong> 10</p>
-                        </div>
-                        <p class="card-status status-published mb-4">
-                            STATUS: Publicado
-                        </p>
-                    </div>
-                    <div class="flex space-x-2 w-full">
-                        <a href="editar_quiz.html" class="btn btn-secondary w-1/2 text-center">
-                            Editar
-                        </a>
-                        <button onclick="unpublishQuiz(2)" class="btn btn-danger w-1/2">
-                            Excluir
-                        </button>
-                    </div>
+                <!-- Bloco de 'sem quizzes' pode ser útil aqui -->
+                 <div th:if="${#lists.isEmpty(quizzes)}" class="w-full text-center p-8 text-muted">
+                    <p>Você ainda não criou nenhum Quiz. Comece criando um novo!</p>
                 </div>
-
-                <!-- Quiz de Exemplo 3 (Rascunho - Poucas Questões) -->
-                <div class="quiz-card">
-                    <div>
-                        <p class="card-title">Física Moderna - Conceitos Iniciais</p>
-                        <div class="card-details space-y-1">
-                            <p><strong>Disciplina:</strong> Física</p>
-                            <p><strong>Nível:</strong> Ensino Médio</p>
-                            <p><strong>Questões:</strong> <span class="status-low-q">5</span></p>
-                        </div>
-                        <p class="card-status status-draft mb-4">
-                            STATUS: Rascunho
-                        </p>
-                    </div>
-                    <div class="flex space-x-2 w-full">
-                        <a href="editar_quiz.html" class="btn btn-secondary w-1/2 text-center">
-                            Editar
-                        </a>
-                        <button onclick="publishQuiz(3)" class="btn btn-primary w-1/2">
-                            Publicar
-                        </button>
-                    </div>
-                </div>
-
             </div>
             <!-- Fim do Grid -->
 
         </div>
     </main>
+ 
 
     <!-- Rodapé opcional -->
     <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">

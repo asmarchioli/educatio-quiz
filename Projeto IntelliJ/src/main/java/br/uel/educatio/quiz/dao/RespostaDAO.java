@@ -1,6 +1,7 @@
 package br.uel.educatio.quiz.dao;
 
 import br.uel.educatio.quiz.model.Resposta;
+import br.uel.educatio.quiz.model.dto.RankingDTO;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,7 +22,7 @@ public class RespostaDAO {
     public RespostaDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-
+    
     private final RowMapper<Resposta> rowMapper = (rs, rowNum) -> {
         Resposta r = new Resposta();
         r.setId_resposta(rs.getLong("id_resposta"));
@@ -31,7 +32,6 @@ public class RespostaDAO {
         r.setTentativa(rs.getInt("tentativa"));
         r.setPontuacao_aluno(rs.getInt("pontuacao_aluno"));
 
-        // Correção de bug (não presente no Arquivo 2)
         String flag = rs.getString("flg_acertou");
         if (flag != null && !flag.isEmpty()) {
             r.setFlg_acertou(flag.charAt(0));
@@ -39,7 +39,7 @@ public class RespostaDAO {
 
         r.setResposta_aluno_texto(rs.getString("resposta_aluno_texto"));
         int respostaNum = rs.getInt("resposta_aluno_num");
-        // Correção para números nulos
+
         if (!rs.wasNull()) {
             r.setResposta_aluno_num(respostaNum);
         }
@@ -140,7 +140,7 @@ public class RespostaDAO {
         Integer total = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz}, Integer.class);
         return total != null ? total : 0;
     }
-
+                                  
     public int contarAcertos(long idAluno, long idQuiz) {
         String sql = "SELECT COUNT(*) FROM resposta WHERE id_aluno = ? AND id_quiz = ? AND flg_acertou = 'S'";
         Integer count = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz}, Integer.class);
@@ -178,6 +178,12 @@ public class RespostaDAO {
     public int contarAcertosPorTentativa(long idAluno, long idQuiz, int tentativa) {
         String sql = "SELECT COUNT(*) FROM resposta WHERE id_aluno = ? AND id_quiz = ? AND tentativa = ? AND flg_acertou = 'S'";
         Integer count = jdbcTemplate.queryForObject(sql, new Object[]{idAluno, idQuiz, tentativa}, Integer.class);
+        return count != null ? count : 0;
+    }
+
+    public int frequenciaResolucaoQuiz(long id_quiz){
+        String sql = "SELECT COUNT(DISTINCT (id_aluno, tentativa)) FROM resposta WHERE id_quiz = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, new Object[]{id_quiz}, Integer.class);
         return count != null ? count : 0;
     }
 }

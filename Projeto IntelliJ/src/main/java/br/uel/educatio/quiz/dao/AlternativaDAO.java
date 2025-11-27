@@ -28,7 +28,7 @@ public class AlternativaDAO {
             alt.setNum_alternativa(rs.getLong("num_alternativa"));
             alt.setTexto_alternativa(rs.getString("texto_alternativa"));
 
-            // A correção de bug
+            
             String flag = rs.getString("flg_eh_correta");
             if (flag != null && !flag.isEmpty()) {
                 alt.setFlg_eh_correta(flag.charAt(0));
@@ -40,18 +40,18 @@ public class AlternativaDAO {
 
     public List<Alternativa> findByQuestaoId(long idQuestao) {
         String sql = "SELECT * FROM alternativa WHERE id_questao = ? ORDER BY num_alternativa";
-        // Usa o RowMapper seguro
+     
         return jdbcTemplate.query(sql, new Object[]{idQuestao}, new AlternativaRowMapper());
     }
 
 
     public Optional<Alternativa> findAlternativaCorreta(long idQuestao) {
-        //String sql = "SELECT * FROM alternativa WHERE id_questao = ? AND flg_eh_correta = 'S'";
+    
         String sql = "SELECT a.* FROM alternativa a " +
             "JOIN questao q ON a.id_questao = q.id_questao " +
             "WHERE a.id_questao = ? AND (UPPER(a.flg_eh_correta) = 'S' " +
             "OR q.tipo_questao = 'Preencher Lacuna')";
-        // Usa o RowMapper seguro
+      
         List<Alternativa> alternativas = jdbcTemplate.query(sql, new Object[]{idQuestao}, new AlternativaRowMapper());
         return alternativas.isEmpty() ? Optional.empty() : Optional.of(alternativas.get(0));
     }

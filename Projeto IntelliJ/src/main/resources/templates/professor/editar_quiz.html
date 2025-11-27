@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educatio Quiz - Editar Quiz</title>
-    <!-- <link rel="stylesheet" th:href="@{/css/quiz_style.css}"> -->
+    
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
@@ -17,27 +17,51 @@
             <a href="/logout" class="btn-logout">Sair</a>
         </div>
     </nav>
-
     
-    <!-- CONTEÚDO PRINCIPAL: Edição de Questões do Quiz -->
+        <!-- Mensagens de sucesso e erro -->
+        <div th:if="${success}" class="alert alert-success" 
+             style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+            <span th:text="${success}"></span>
+    
+            <button type="button" 
+                    onclick="this.parentElement.style.display='none'"
+                    style="background: none; border: none; color: #721c24; font-size: 1.2rem; font-weight: bold; cursor: pointer;">
+                &times;
+            </button>
+        </div>
+    
+        <div th:if="${error}" class="alert alert-danger" 
+             style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+            <span th:text="${error}"></span>
+    
+            <button type="button" 
+                    onclick="this.parentElement.style.display='none'"
+                    style="background: none; border: none; color: #721c24; font-size: 1.2rem; font-weight: bold; cursor: pointer;">
+                &times;
+            </button>
+        </div>   
+    
      <main class="main-content">
         <div class="content-card">
 
-            <!-- BLOCO 1: Título do Quiz e Botões Principais -->
-            <!-- Usa a nova classe quiz-header para controle de flexbox e espaçamento -->
             <div class="quiz-header">
-                <!-- Título do Quiz (Ocupa o espaço restante) -->
-                <h2 class="text-xl font-semibold" style="color: var(--text-light);">
-                    Quiz: <span th:text="${quiz.titulo}" class="text-accent"></span>
+                <!-- Título do Quiz  -->
+                <h2 class="text-xl font-semibold" style="color: var(--text-light); font-size: 1.5rem;">
+                    Quiz: <span th:text="${quiz.titulo}" class="text-accent font-bold text-2xl"></span>
                 </h2>
 
                 <!-- Container dos botões principais (Adicionar e Voltar) -->
                 <div class="quiz-actions-group">
-                    <!-- Botão de Criação -->
-                    <a th:href="@{/quiz/banco_questoes(quizId=${quiz.id_quiz})}" class="btn btn-primary">
-                        ➕ Adicionar questão
-                    </a> 
+                    
+                    <a th:if="${totalPontos < 100}" 
+                       th:href="@{/quiz/banco_questoes(quizId=${quiz.id_quiz})}" 
+                       class="btn btn-primary">
+                        ➕ Questão
+                    </a>
 
+                    <button th:if="${totalPontos >= 100}" class="btn btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed;">
+                        🔒 Limite de 100 pontos atingido
+                    </button>
                     
                     <a th:href="@{/quiz/modificar/{id_quiz}(id_quiz = ${quiz.id_quiz})}" class="btn btn-secondary">
                         Editar informações do quiz
@@ -46,125 +70,253 @@
                     <!-- Botão de Voltar/Cancelar -->
                     <a href="/professor/home"         
                         class="btn btn-secondary ">
-                        ⬅️ Voltar para Menu Inicial
+                        ⬅️ Voltar ao ínicio 
                     </a>
                 </div>
             </div>
 
-            <!-- BLOCO 2: BARRA DE PESQUISA DINÂMICA -->
-            <!-- Usa a nova classe filter-bar para controle de flexbox e espaçamento -->
-            <div class="filter-bar">
-                <!-- Dropdown de Tipo de Busca -->
-                <select id="search-type" class="form-select search-filter-select" onchange="filterQuestions()">
-                    <option value="enunciado">Buscar por Enunciado</option>
-                    <option value="tipo">Buscar por Tipo da Questão</option>
+            
+            <!-- Barra de pesquisa e filtros -->
+            <form th:action="@{/quiz/editar/questoes}" method="get" class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center;">
+                <input type="hidden" name="id_quiz" th:value="${quiz.id_quiz}"/> 
+                <!-- Id para o Backend buscar o quix -->
+                
+                <input type="hidden" name="quizId" th:value="${quizId}"/> 
+                <!-- Verifica se está vindo do editar quiz -->
+                
+                <select name="filtroTipo" class="form-input form-select search-filter-select" style="width: 200px;">
+                    <option value="">Todos os Tipos</option>
+
+                    <option th:each="tipo : ${tiposQuestao}" 
+                            th:value="${tipo.name()}" 
+                            th:text="${tipo.displayValue}" 
+                            th:selected="${tipo.name() == filtroTipoSelecionado}">
+                        Tipo Exemplo
+                    </option>
                 </select>
 
-                <!-- Input de Pesquisa - Usa search-container para ocupar o resto da largura -->
-                <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Digite para buscar..."
-                           class="form-input search-input"
-                           onkeyup="filterQuestions()"
-                    >
-                    <div class="search-icon">
-                        <!-- Ícone de Lupa - SVG mantido, mas o posicionamento é feito pelo CSS:search-container -->
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
+                <div class="search-container" style="position: relative; flex-grow: 1;">
+                    <input type="text" 
+                           name="termoBusca" 
+                           th:value="${termoBuscaDigitado}" 
+                           placeholder="Buscar enunciado da questão..."
+                           class="form-input search-input" 
+                           style="width: 100%; padding-left: 35px;">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px; height: 42px;">
+                    🔍
+                </button>
+
+                <a th:href="@{/quiz/editar/questoes(id_quiz=${quiz.id_quiz})}" class="btn btn-secondary" style="padding: 10px 20px; text-decoration: none; display: flex; align-items: center;">
+                    Limpar
+                </a>
+            </form>
+            <!-- Término da barra de pesquisa -->
+
+            <!-- Pontuação total -->
+            <div style="background-color: #161b22; 
+                            padding: 1.5rem 2rem; 
+                            border-radius: var(--radius); 
+                            border: 1px solid #2e3542; 
+                            display: flex; 
+                            justify-content: space-between; 
+                            align-items: center; 
+                            margin-bottom: 2rem; 
+                            box-shadow: var(--shadow);">
+
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2rem;">🎯</div> <div>
+                            <h3 style="color: var(--text-muted); font-size: 0.9rem; margin: 0; text-transform: uppercase; letter-spacing: 1px;">
+                                Pontuação Total
+                            </h3>
+
+                            <div style="display: flex; align-items: baseline; gap: 5px;">
+                                <span style="font-size: 2rem; font-weight: bold;" 
+                                      th:styleappend="${totalPontos == 100 ? 'color: var(--accent);' : (totalPontos > 100 ? 'color: var(--danger);' : 'color: var(--text-light);')}"
+                                      th:text="${totalPontos}">
+                                    0
+                                </span>
+                                <span style="color: var(--text-muted); font-size: 1.2rem;">/ 100</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right;">
+
+                        <div th:if="${totalPontos == 100}">
+                            <span style="color: var(--accent); font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                ✅ Quiz Completo
+                            </span>
+                            <small style="color: var(--text-muted);">Pronto para aplicação</small>
+                        </div>
+
+                        <div th:if="${totalPontos < 100}">
+                            <span style="color: var(--warning); font-weight: bold; font-size: 1.1rem;">
+                                ⚠️ Em Andamento
+                            </span>
+                            <div style="color: var(--text-light); margin-top: 4px;">
+                                Faltam <strong th:text="${100 - totalPontos}"></strong> pontos para fechar.
+                            </div>
+                        </div>
+
+                        <div th:if="${totalPontos > 100}">
+                            <span style="color: var(--danger); font-weight: bold; font-size: 1.1rem;">
+                                ⛔ Excedido
+                            </span>
+                            <div style="color: var(--text-light); margin-top: 4px;">
+                                Remova <strong class="text-danger" th:text="${totalPontos - 100}"></strong> pontos.
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
-
             
-            <!-- Tabela Responsiva de Questões -->
-           <div class="table-container"> 
+            <div class="table-container"> 
                 <table class="dark-table">
                     <thead>
                         <tr>
-                            <th style="width: 5%;">N°Questão</th>
+                            <th style="width: 5%;">N°</th>
                             <th style="width: 15%;">Tipo</th>
-                            <th style="width: 40%;">Enunciado</th>
-                            <th style="width: 15%;">Nível</th>
+                            <th style="width: 35%;">Enunciado</th>
+                            <th style="width: 10%;">Nível</th>
                             <th class="text-center" style="width: 10%;">Dificuldade</th>
+
+                            <th class="text-center" style="width: 10%;">Pontuação</th> 
+
                             <th class="text-center" style="width: 15%;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="questao, stat : ${questoes}">
+                        <tbody>
+                            <tr th:each="questao, stat : ${questoes}">
 
-                            <td th:text="${stat.count}">Número da Questão</td>
-                            <td th:text="${questao.tipo_questao}"></td>
-                            <td th:text="${questao.enunciado}"
-                                style="max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            </td>
-                            <td th:text="${questao.nivel_educacional}" class="text-center"></td>
-                            <td th:text="${questao.nivel_dificuldade}" class="text-center text-accent" ></td>
-                            
-                            <!-- alguma dessas classes deve estar quebrando a tabela -->
-                            <td class="flex items-center space-y-1">
-                                <div class="flex-column-buttons">
-                                    <a th:href="@{/questao/buscar/{id}(id=${questao.id_questao}, quizid=${quiz.id_quiz})}" 
-                                       class="table-action-btn btn-details" 
-                                       data-toggle="page">
-                                        Detalhes
-                                    </a>
+                                <td th:text="${stat.count}">1</td>
+                                <td th:text="${questao.tipo_questao}"></td>
+                                <td th:text="${questao.enunciado}" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></td>
+                                <td th:text="${questao.nivel_educacional}" class="text-center"></td>
+                                <td th:text="${questao.nivel_dificuldade}" class="text-center text-accent" ></td>
 
-                                    <form th:action="@{/quiz/excluir/questao}" method="post" class="inline-block">
-                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                                <td class="text-center">
+                                    <form th:action="@{/quiz/atualizar/pontuacao}" method="post" 
+                                          style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+
                                         <input type="hidden" name="id_quiz" th:value="${quiz.id_quiz}" />
-                                        <button type="submit" class="table-action-btn btn-danger-table"> 
-                                              Excluir
+                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+
+                                        <input type="number" name="pontuacao" 
+                                               th:value="${questao.pontuacao}" 
+                                               min="1" max="100"
+                                               class="form-input" 
+                                               style="width: 60px; padding: 5px; text-align: center; height: 30px;" />
+
+                                        <button type="submit" class="btn btn-primary" 
+                                                style="padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"
+                                                title="Salvar Pontuação">
+                                            💾
                                         </button>
                                     </form>
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        <!-- Linha de Mensagem de Quiz Vazio (th:if garante que só aparece se a lista de questões estiver vazia) -->
-                        <tr id="empty-quiz-row" th:if="${#lists.isEmpty(questoes)}">
-                            <td colspan="6" class="text-center" style="color: var(--text-muted); padding: 2rem;">
-                                Nenhuma questão adicionada a este quiz. Use o botão acima para adicionar!
-                            </td>
-                        </tr>
+                                </td>
+                                <td class="flex items-center justify-center">
+                                    <div class="flex-column-buttons">
+                                        <a th:href="@{/questao/buscar(id_questao=${questao.id_questao}, quizId=${quiz.id_quiz})}" 
+                                           class="table-action-btn btn-details" 
+                                           data-toggle="page">
+                                            Detalhes
+                                        </a>
 
-                        <!-- Linha de Mensagem de Filtro Vazio (Controlada pelo JS) -->
-                        <tr id="no-results-row" style="display: none;">
-                            <td colspan="6" class="text-center" style="color: var(--text-muted); padding: 2rem;">
-                                Nenhuma questão encontrada com este filtro.
+                                        <button type="button"
+                                                class="table-action-btn btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalExclusao"
+                                                th:data-id="${questao.id_questao}"
+                                                style="width:120px;">
+                                                🗑️
+                                        </button>
+                                    
+                                    </div>
+                                </td>
+                            </tr>
+
+                            </tbody>
+
+                        <tr id="empty-quiz-row" th:if="${#lists.isEmpty(questoes)}">
+                            <td colspan="7" class="text-center" style="color: var(--text-muted); padding: 2rem;">
+                                Nenhuma questão adicionada a este quiz. Use o botão acima para adicionar!
                             </td>
                         </tr>
                     </tbody>
                 </table>
-
-                    
-            </div> 
+            </div>
             <!-- Fim da Tabela -->
 
         </div>
     </main> 
 
-    <!-- Rodapé opcional -->
-    <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
-        &copy; 2024 Educatio Quiz. Todos os direitos reservados.
-    </footer> 
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" data-bs-theme="dark" id="modalExclusao" tabindex="-1" aria-labelledby="modalExclusaoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-danger" id="modalExclusaoLabel">Confirmar Exclusão</h1>
+                </div>
+                <div class="modal-body text-accent"> Tem certeza que deseja excluir esta Questão do Quiz? <br>
+                </div>
 
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+                    <form th:action="@{/quiz/excluir/questao}" method="post">
+                        <input type="hidden" name="id_questao" id="idQuestInputHidden" value="" />
+                        <input type="hidden" name="id_quiz" th:value="${quiz.id_quiz}" />
+                        <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        /**
-         * Inicializa a página adicionando o listener de evento de mudança ao dropdown.
-         */
+        // Script para o modal de exclusão
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalExclusao = document.getElementById('modalExclusao');
+            if (modalExclusao) {
+                modalExclusao.addEventListener('show.bs.modal', event => {
+
+                    // Botão que aciona o modal
+                    const button = event.relatedTarget;
+
+                    // Extrai o ID do atributo data-id
+                    const id_questao = button.getAttribute('data-id');
+
+                    // Atualiza o input oculto no formulário do modal
+                    const hiddenInput = modalExclusao.querySelector('#idQuestInputHidden');
+                    hiddenInput.value = id_questao
+                });
+            }
+        });
+
+        
+      
+        // Inicializa a página adicionando o listener de evento de mudança ao dropdown.
         function initializePage() {
-            // Adiciona listener para o dropdown de tipo de pesquisa
+            // Adiciona o listener para o dropdown de tipo de pesquisa
             const searchType = document.getElementById('search-type');
             if (searchType) {
                 searchType.addEventListener('change', filterQuestions);
             }
         }
 
-        /**
-         * Realiza a filtragem das questões na tabela com base no texto e no tipo de busca selecionado.
-         */
+        
+       
+         
+        // Realiza a filtragem das questões na tabela com base no texto e no tipo de busca selecionado.
         function filterQuestions() {
             const input = document.getElementById('search-input');
+            
             // Obtém o texto do filtro em maiúsculas e remove espaços em branco extras
             const filter = input.value.toUpperCase().trim(); 
             const type = document.getElementById('search-type').value; // 'enunciado' ou 'tipo'
@@ -194,7 +346,7 @@
                 return;
             }
 
-            // Aplica o filtro
+
             rows.forEach(row => {
                 let cell;
 
@@ -209,10 +361,10 @@
                     const cellValue = cell.textContent || cell.innerText;
                     // Verifica se o valor da célula contém o texto do filtro
                     if (cellValue.toUpperCase().indexOf(filter) > -1) {
-                        row.style.display = ""; // Mostra a linha
+                        row.style.display = ""; 
                         visibleRows++;
                     } else {
-                        row.style.display = "none"; // Oculta a linha
+                        row.style.display = "none"; 
                     }
                 } else {
                     // Oculta a linha se, por algum motivo, a célula de filtro não for encontrada

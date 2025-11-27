@@ -13,10 +13,12 @@
     --radius: 16px;
     --shadow: 0 6px 20px rgba(0,0,0,0.3);
     --danger: #EF4444;
+    --danger-light: #d9b4b4;
     --danger-hover: #DC2626;
     --warning: #ffc107; /* Cor de Rascunho/Aviso */
     --gap-spacing: 1rem; /* Espaçamento padrão para layouts flex */
 }
+
 
 body {
     background: var(--bg-color);
@@ -115,6 +117,7 @@ body {
     padding: 0.5rem 1rem;
     /* width: 100px; Removido para ser mais genérico, o professor tem um específico */
 }
+
 .btn-danger:hover {
     background: var(--danger-hover);
 }
@@ -261,7 +264,8 @@ body {
     border-spacing: 0;
     color: var(--text-light);
     font-family: inherit;
-    table-layout: fixed; /* Ajuda no controle de largura das colunas */
+    /* table-layout: auto; */
+    /* table-layout: fixed; /* Ajuda no controle de largura das colunas */ */
 }
 
 .dark-table thead th {
@@ -293,6 +297,162 @@ body {
 
 .dark-table tbody tr:last-child td {
     border-bottom: none;
+}
+
+/* ======================================================= */
+/* ESTILO MÍNIMO PARA MODAL */
+/* ======================================================= */
+
+/* Fundo escuro atrás do modal */
+.modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: #000;
+    opacity: 0.5;
+    z-index: 1040;
+}
+
+/* O container do modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1050;
+    display: none; /* Escondido por padrão */
+    overflow-x: hidden;
+    overflow-y: auto;
+    outline: 0;
+}
+
+/* Classe adicionada pelo JS do Bootstrap quando abre */
+.modal.show {
+    display: block;
+}
+
+/* A caixa do modal em si */
+.modal-dialog {
+    position: relative;
+    width: auto;
+    margin: 1.75rem auto;
+    max-width: 500px;
+    pointer-events: none;
+}
+
+/* Conteúdo interno */
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    pointer-events: auto;
+    background-color: var(--card-color); /* Usa sua cor */
+    background-clip: padding-box;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    outline: 0;
+    box-shadow: var(--shadow);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 1rem;
+    border-bottom: 1px solid #2e3542;
+}
+
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: 1rem;
+    color: var(--text-light);
+}
+
+.modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.75rem;
+    border-top: 1px solid #2e3542;
+    gap: 0.5rem;
+}
+
+/* Botão de fechar (X) */
+.btn-close {
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    box-sizing: content-box;
+    width: 1em; height: 1em;
+    padding: 0.25em;
+    border: 0;
+    opacity: 0.5;
+    cursor: pointer;
+}
+.btn-close:hover { opacity: 1; }
+
+
+/* ======================================================= */
+/* ESTILO DO TOOLTIP (Info Ranking) */
+/* ======================================================= */
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: help; /* Muda o cursor para interrogação */
+}
+
+.info-icon {
+    font-size: 1.2rem;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.info-icon:hover {
+    opacity: 1;
+}
+
+/* O Balão de Texto (Escondido por padrão) */
+.tooltip-text {
+    visibility: hidden;
+    width: 250px; /* Largura do balão */
+    background-color: #2e3542; /* Cor de fundo (Cinza escuro) */
+    color: #fff;
+    text-align: left;
+    border-radius: 8px;
+    padding: 12px;
+    position: absolute;
+    z-index: 100;
+
+    /* Posicionamento */
+    bottom: 125%; /* Faz aparecer ACIMA do ícone */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza em relação ao ícone */
+
+    /* Efeitos visuais */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    border: 1px solid var(--accent); /* Borda verde para destacar */
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.85rem;
+    font-weight: normal;
+    line-height: 1.4;
+}
+
+/* A setinha embaixo do balão */
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* Na parte de baixo do balão */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #2e3542 transparent transparent transparent;
+}
+
+/* Mostrar quando passar o mouse */
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
 
 /* ------------------------------------------------------- */

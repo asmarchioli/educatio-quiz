@@ -23,7 +23,6 @@ public class QuizDAO {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // RowMapper (do Arquivo 2 - MAIS SEGURO, com verificação de data nula)
     private final RowMapper<Quiz> rowMapper = (rs, rowNum) -> {
         Quiz quiz = new Quiz();
         quiz.setId_quiz(rs.getLong("id_quiz"));
@@ -47,7 +46,6 @@ public class QuizDAO {
         return quiz;
     };
 
-    // --- Métodos CRUD (do Arquivo 2) ---
 
     public List<Quiz> findAll() {
         String sql = "SELECT * FROM quiz ORDER BY titulo";
@@ -66,7 +64,7 @@ public class QuizDAO {
 
     public Quiz save(Quiz quiz) {
         if (quiz.getId_quiz() == null || quiz.getId_quiz() == 0) {
-            // INSERIR
+            // Inserir
             String sql = "INSERT INTO quiz (titulo, pin_acesso, descricao, visibilidade, nivel_educacional," +
                     "professor_criador, area, data_criacao) VALUES" +
                     "(?, ?, ?, CAST(? AS EXIBICAO), CAST(? AS ESCOLARIDADE), ?, ?, ?) RETURNING id_quiz";
@@ -82,7 +80,7 @@ public class QuizDAO {
             }, Long.class);
             quiz.setId_quiz(newId != null ? newId : 0L);
         } else {
-            // ATUALIZAR
+            // Atualizar
             String sql = "UPDATE quiz SET titulo = ?, pin_acesso = ?, descricao = ?," +
                     "visibilidade = CAST(? AS EXIBICAO),nivel_educacional = CAST(? AS ESCOLARIDADE)," +
                     "professor_criador = ?, area = ?, data_criacao = ? WHERE id_quiz = ?";
@@ -100,24 +98,25 @@ public class QuizDAO {
         return quiz;
     }
 
-    public void deleteById(long id) {
+    public void deleteById(long id){
+        jdbcTemplate.update("DELETE FROM RESPOSTA WHERE id_quiz = ?", id);
+        jdbcTemplate.update("DELETE FROM QUIZ_QUESTAO WHERE id_quiz = ?", id);
+
         String sql = "DELETE FROM quiz WHERE id_quiz = ?";
         jdbcTemplate.update(sql, id);
     }
 
     public boolean existsById(long id) {
         String sql = "SELECT COUNT(*) FROM quiz WHERE id_quiz = ?";
-        // Corrigindo a passagem de argumentos para queryForObject
+        
         Integer count = jdbcTemplate.queryForObject(sql, new Object[]{id}, Integer.class);
         return count != null && count > 0;
     }
 
-    // --- Métodos de busca (do Arquivo 2) ---
 
     public Optional<Quiz> findByPinAcesso(String pin) {
         String sql = "SELECT * FROM quiz WHERE pin_acesso = ?";
         try {
-            // Corrigindo a passagem de argumentos
             Quiz quiz = jdbcTemplate.queryForObject(sql, new Object[]{pin}, rowMapper);
             return Optional.ofNullable(quiz);
         } catch (EmptyResultDataAccessException e) {
@@ -142,7 +141,7 @@ public class QuizDAO {
 
     public List<Quiz> findByProfessorCriador(long professorId) {
         String sql = "SELECT * FROM quiz WHERE professor_criador = ? ORDER BY data_criacao DESC";
-        // Corrigindo a passagem de argumentos
+    
         return jdbcTemplate.query(sql, new Object[]{professorId}, rowMapper);
     }
 
@@ -158,15 +157,15 @@ public class QuizDAO {
         String sql = "Select nome_area from area a " +
                 "JOIN quiz q ON a.id_area = q.area " +
                 "WHERE q.id_quiz = ?";
+        
         // O método queryForList espera (sql, elementType, args...)
         return jdbcTemplate.queryForList(sql, String.class, id_quiz);
     }
 
-    // --- Método de busca (Adicionado do Arquivo 1) ---
+
 
     public List<Quiz> findPublicQuizzes() {
         String sql = "SELECT * FROM QUIZ WHERE visibilidade = 'Público'";
-        // CORREÇÃO: Usa o 'rowMapper' lambda unificado
         return jdbcTemplate.query(sql, rowMapper);
     }
 }

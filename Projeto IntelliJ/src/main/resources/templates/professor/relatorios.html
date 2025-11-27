@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educatio Quiz - Meus Quizzes</title>
+    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
+</head>
+<body>
+
+    <!-- CABEÇALHO (Navbar) -->
+    <nav class="navbar">
+        <h1>🎓 Educatio Quiz - Professor</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${professor.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-card">
+
+            <div class="quiz-header">
+           
+                <h2 class="text-xl font-semibold" style="color: var(--text-light); font-size: 1.5rem;">
+                    Quiz: <span th:text="${quiz.titulo}" class="text-accent text-2xl font-bold"></span>
+                </h2>
+
+                <!-- Container dos botões principais (Adicionar e Voltar) -->
+                <div class="quiz-actions-group">
+                    
+                    <!-- Botão de Voltar/Cancelar -->
+                    <a th:href="@{/quiz/professor_criador/buscarQuizzes/{id}(id=${professor.id_professor})}"      
+                        class="btn btn-secondary ">
+                        ⬅️ Voltar para Meus Quizzes
+                    </a>
+                </div>
+            </div>
+
+
+            <!-- Grid de Cards -->
+            <div class="cards">
+                 <div class="card-body">
+                    <div class="card-icon">🧑‍🎓</div>
+                    <h3>Ranking de Alunos</h3>
+                    <p>Visualize o Ranking dos alunos que fizeram o quiz.</p>
+                    <a th:href="@{/quiz/relatorios/desempenho(id_quiz=${quiz.id_quiz})}" class="card-btn">Ver relatório</a>
+                 </div>
+
+                 <div class="card-body">
+                    <div class="card-icon">📝</div>
+                    <h3>Ranking de Questões</h3>
+                    <p>Questões as quais os alunos estão com mais dificuldade</p>
+                    <a th:href="@{/quiz/relatorios/questoes(id_quiz=${quiz.id_quiz})}" class="card-btn">Ver relatório</a>
+                </div>
+
+                <div class="card-body">
+                    <div class ="card-icon">📊</div>
+                    <h3>Gráfico de Barras das Questões</h3>
+                    <p>Vizualize a porcentagem de acertos por questão</p>
+                    <a th:href="@{/quiz/relatorios/grafico(id_quiz=${quiz.id_quiz})}" class="card-btn">Ver relatório</a>
+                </div>
+            </div>
+            <!-- Fim do Grid -->
+
+        </div>
+    </main>
+
+
+    <script>
+    </script>
+</body>
+</html>

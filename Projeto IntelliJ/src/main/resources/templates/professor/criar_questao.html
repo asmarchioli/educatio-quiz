@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criação de Questão - Mínimo</title>
-    <!-- <link rel="stylesheet" th:href="@{/css/home_style.css}"> -->
+
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
@@ -52,8 +52,6 @@
                     <label for="visibilidade" class="form-label">Visibilidade (Se você quer que a questão seja pública ou privada)</label>
                     <select name="visibilidade" id="visibilidade" class="form-input" required>
                          <option th:each= "exibicao : ${exibicoes}" th:value="${exibicao}" th:text="${exibicao}"> </option>
-                        <!-- <option value="Público">Público</option>
-                        <option value="Privado">Privado</option> -->
                     </select>
                 </div>
 
@@ -65,10 +63,7 @@
                     <select id="tipo_questao" name="tipo_questao" required class="form-input" onchange="toggleAlternatives()">
                          <option value="" disabled selected>Defina o tipo da questão</option>
                          <option th:each= "tipo : ${tiposQuestao}" th:value="${tipo}" th:text="${tipo}"> </option>
-                        <!-- <option value="" disabled selected>Selecione o Tipo</option>
-                        <option value="VERDADEIRO_OU_FALSO">Verdadeiro ou Falso</option>
-                        <option value="PREENCHER_LACUNA">Preencher Lacuna</option>
-                        <option value="MULTIPLA_ESCOLHA">Múltipla Escolha</option> -->
+    
                     </select>
                 </div>
 
@@ -81,18 +76,12 @@
                     </select>
                 </div>
 
-                <!-- NÍVEL DE ESCOLARIDADE E DIFICULDADE (Simplificado) -->
+                <!-- NÍVEL DE ESCOLARIDADE E DIFICULDADE -->
                 <div class="flex gap-2">
                     <div class="form-group" style="flex-grow: 1;">
                         <label for="escolaridade" class="form-label">Nível Educacional</label>
                         <select id="escolaridade" name="nivel_educacional" required class="form-input">
                             <option th:each= "nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}"> </option>
-                            <!-- Valores do ENUM ESCOLARIDADE -->
-                            <!-- <option value="Fundamental I">Fundamental I</option>
-                            <option value="Fundamental II">Fundamental II</option>
-                            <option value="Ensino Médio">Ensino Médio</option>
-                            <option value="Graduação">Graduação</option>
-                            <option value="Pós-Graduação">Pós-Graduação</option>d -->
                         </select>
                     </div>
                     
@@ -100,15 +89,11 @@
                         <label for="dificuldade" class="form-label">Nível de Dificuldade</label>
                         <select id="dificuldade" name="nivel_dificuldade" required class="form-input">
                              <option th:each= "dificuldade : ${dificuldades}" th:value="${dificuldade}" th:text="${dificuldade}"> </option>
-                            <!-- <option value="FÁCIL">FÁCIL</option>
-                            <option value="MÉDIO">MÉDIO</option>
-                            <option value="DIFÍCIL">DIFÍCIL</option> -->
                         </select>
                     </div>
                 </div>
 
-                
-                <!-- 3. SEÇÕES DINÂMICAS DE RESPOSTA (MINIMIZADAS) -->
+          
                 <h3 style="color: var(--accent); font-size: 1.1rem; margin-top: 20px;">Definição da Resposta</h3>
 
                 <!-- SEÇÃO MÚLTIPLA ESCOLHA -->
@@ -172,7 +157,7 @@
         </div>
     </main>
 
-    <!-- Lógica JavaScript Mínima para Controle de Seções -->
+    <!-- Lógica do JS para Controle de Seções -->
     <script>
         document.addEventListener('DOMContentLoaded', toggleAlternatives);
 
@@ -192,7 +177,7 @@
 
             let currentSectionId = '';
 
-            // Exibe a seção correta e define campos como obrigatórios (simulado)
+            // Exibe a seção correta e define campos como obrigatórios
             if (type === 'Multipla Escolha') {
                 currentSectionId = 'multipla-escolha-section';
             } else if (type === 'Verdadeiro ou Falso') {
@@ -203,7 +188,6 @@
 
             if (currentSectionId) {
                 document.getElementById(currentSectionId).style.display = 'block';
-                // Lógica de "required" simplificada: o backend tratará a validação de lista.
             }
         }
     </script>

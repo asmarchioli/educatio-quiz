@@ -6,7 +6,6 @@
     <title>Home - Professor</title>
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
-    <!-- <link rel="stylesheet" th:href="@{/css/home_style.css}"> -->
 </head>
 <body>
 <nav class="navbar">
@@ -42,7 +41,7 @@
             <div class="card-icon">❓</div>
             <h3>Banco de Questões</h3>
             <p>Adicione e edite questões disponíveis para uso nos quizzes.</p>
-            <a th:href="@{/questao/listar/questoes/{id}(id=${professor.id_professor})}"
+            <a th:href="@{/questao/listar/questoes(id_prof=${professor.id_professor})}"
                class="card-btn">Gerenciar</a>
         </div>
     </div>

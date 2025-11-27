@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes da Questão</title>
-    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
@@ -12,304 +11,550 @@
     <nav class="navbar">
         <h1>🎓 Educatio Quiz - Professor</h1>
         <div style="display: flex; align-items: center; gap: 1rem;">
-            <span th:text="${professor.nome}" style = "margin-left:"></span>
-            <a href="/logout" class="btn-logout" style = >Sair</a>
+            <span th:text="${professor.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
         </div>
     </nav>
+
+    <div th:if="${error}" class="alert alert-danger" 
+         style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+        <span th:text="${error}"></span>
+    </div>
     
-        <!-- Container Principal do Formulário -->
-        <div class="main-content">
-            <div class="content-card">
+    <div class="main-content">
+        <div class="content-card">
 
-                <!-- Título Dinâmico -->
-                <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--accent);"
-                    th:text="${questao.id_questao == null} ? 'Criar Nova Questão' : 'Editar Questão '">
-                    Criar/Editar Questão
-                </h2>
+            <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--accent);"
+                th:text="${questao.id_questao == null} ? 'Criar Nova Questão' : 'Editar Questão'">
+                Criar/Editar Questão
+            </h2>
 
-                <!--
-                    FORMULÁRIO PRINCIPAL
-                    - th:object: Liga o formulário ao objeto 'questao' (vazio ou preenchido).
-                    - th:action: Muda o endpoint dependendo se é criação ou edição.
-                -->
-                <form th:action="${questao.id_questao == null} 
-                                           ? @{/questao/salvar} 
-                                           : @{/questao/atualizar}" 
-                      method="post" 
-                      th:object="${questao}">
+            <form th:action="${questao.id_questao == null} ? @{/questao/salvar} : @{/questao/atualizar}" 
+                  method="post" 
+                  th:object="${questao}"
+                  id="questionForm">
 
+                <input type="hidden" th:field="*{id_questao}" />
+                <input type="hidden" th:field="*{professor_criador}" th:value="${professor.getId_professor()}" />
+
+                <div style="text-align: right; margin-top: 30px;">
+                    <a href="javascript:void(0)" onClick="voltarParaBancoQuestoes();return false;" class="btn btn-secondary mr-4">
+                        Cancelar
+                    </a>
                     
-                    <!-- CAMPO OCULTO: ID da Questão (Necessário para Edição) -->
-                    <input type="hidden" th:field="*{id_questao}" />
+                    <button type="submit" class="btn btn-primary mr-4">
+                        Salvar Questão
+                    </button>
+                </div>
 
-                    
-                    <!-- CAMPO OCULTO: Professor Criador (Injetado pelo Backend) -->
-                    <input type="hidden" th:field="*{professor_criador}" th:value="${professor.getId_professor()}" />
+                <div class="form-group">
+                    <label for="enunciado" class="form-label">Enunciado da Questão</label>
+                    <textarea th:field="*{enunciado}" id="enunciado" class="form-input" rows="4" required placeholder="Digite o enunciado..."></textarea>
+                </div>
 
-                    
-                    <div style="text-align: right; margin-top: 30px;">
-                        <!-- <a th:ref = "@{/questao/listar/questoes/{id}(id=${professor.id_professor})}"
-                            class="btn btn-secondary mr-4"
-                            title="Cancelar">Cancelar
-                        </a> -->
-                        <a href="javascript:void(0)" 
-                           onClick="voltarParaBancoQuestoes();return false;"
-                           class = "btn btn-secondary mr-4">Cancelar</a>
+                <div class="form-group">
+                    <label for="tipo_questao" class="form-label">Tipo da Questão</label>
+                    <select th:field="*{tipo_questao}" id="tipo_questao" class="form-input" onchange="toggleAlternatives()" required>
+                        <option value="">Selecione o Tipo</option>
+                        <option th:each="tipo : ${tiposQuestao}" th:value="${tipo}" th:text="${tipo}"></option>
+                    </select>
+                </div>
 
-                        <!-- Botão de Salvar (Submit) -->
-                        <button type="submit" class="btn btn-primary mr-4"
-                                title="Salvar Questão"> Salvar <Ques></Ques>
-                        </button>
-                    </div>
-
-                    
-                    <!-- 1. ENUNCIADO -->
-                    <div class="form-group">
-                        <label for="enunciado" class="form-label">Enunciado da Questão</label>
-                        <textarea th:field="*{enunciado}" id="enunciado" class="form-input" rows="4" 
-                            placeholder="Digite o texto da sua questão, incluindo o símbolo de lacuna se for o caso."
-                            required></textarea>
-                        <!-- Exemplo de como exibir erro com Thymeleaf (opcional, mas recomendado) -->
-                        <!-- <p th:if="${#fields.hasErrors('enunciado')}" th:errors="*{enunciado}" class="text-danger"></p> -->
-                    </div>
-
-            
-                    <!-- 2. TIPO DA QUESTÃO -->
-                    <div class="form-group">
-                        <label for="tipo_questao" class="form-label">Tipo da Questão</label>
-                        <select th:field="*{tipo_questao}" id="tipo_questao" class="form-input"
-                            onchange="toggleAlternatives()" accesskey   
-                                required>
-                            <option value="">Selecione o Tipo</option>
-                            <option th:each="tipo : ${tiposQuestao}" th:value="${tipo}" th:text="${tipo}">Tipo de Questão Exemplo</option>
-                        </select>
-                    </div>
-
-                    <!-- 3. ÁREA -->
-                    <div class="form-group">
-                        <label for="area" class="form-label">Tipo da Questão</label>
-                        <select th:field="*{area}" 
-                                id="area" 
-                                required 
-                                class="form-input"
-                                th:disabled="${questao.id_questao != null}"> <!-- Disabled na Edição -->
-    
-                            <option value="">Selecione a Área</option>
-    
-                            <!-- CORRIGIDO: Sintaxe do th:each e th:selected para pré-seleção -->
-                            <option th:each="areaObj : ${areasProfessor}" 
-                                    th:value="${areaObj.getIdArea()}" 
-                                    th:text="${areaObj.getNomeArea()}"
-                                    th:selected="${questao.area != null AND questao.area == areaObj.getIdArea()}">
-                            </option>
-    
-                        </select>
-                    </div>
-                    
-                    <!-- O atributo th:disabled é mantido no <select> para que ele fique cinza e não editável visualmente, mas o valor enviado será o do campo hidden. -->
+                <div class="form-group">
+                    <label for="area" class="form-label">Área de Conhecimento</label>
+                    <select th:field="*{area}" id="area" required class="form-input" th:disabled="${questao.id_questao != null}">
+                        <option value="">Selecione a Área</option>
+                        <option th:each="areaObj : ${areasProfessor}" 
+                                th:value="${areaObj.getIdArea()}" 
+                                th:text="${areaObj.getNomeArea()}"
+                                th:selected="${questao.area != null AND questao.area == areaObj.getIdArea()}">
+                        </option>
+                    </select>
                     <input type="hidden" th:if="${questao.id_questao != null}" th:field="*{area}" />
+                </div>
 
+                <div class="form-group">
+                    <label for="visibilidade" class="form-label">Visibilidade</label>
+                    <select th:field="*{visibilidade}" id="visibilidade" class="form-input">
+                        <option th:each="visib : ${exibicoes}" th:value="${visib}" th:text="${visib}"></option>
+                    </select>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="form-group">
+                        <label for="quiz-level" class="form-label">
+                            Nível Educacional
+                        </label>
+
+                        <select id="quiz-level" th:field="*{nivel_educacional}" required class="form-input">
+                            <option value="" disabled selected>Selecione o nível</option>
+                            <option th:each= "nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}"> </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group w-1-2">
+                        <label for="nivel_dificuldade" class="form-label">Dificuldade</label>
+                        <select th:field="*{nivel_dificuldade}" id="nivel_dificuldade" class="form-input" required>
+                            <option th:each="dificuldade : ${dificuldades}" th:value="${dificuldade}" th:text="${dificuldade}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                
+                <div id="multipla-escolha-section" style="display:none; padding: 15px; 
+                        border: 1px dashed #2e3542; border-radius: 8px; margin-top: 20px;"
+                     class="alternativas-section">
                     
-                    <!-- 3. VISIBILIDADE -->
-                    <div class="form-group">
-                        <label for="visibilidade" class="form-label">Visibilidade</label>
-                        <select th:field="*{visibilidade}" id="visibilidade" class="form-input" 
-                            <option value="">Selecione a Visibilidade</option>
-                            <option th:each="visib : ${exibicoes}" th:value="${visib}" th:text="${visib}">Visibilidade Exemplo</option>
-                        </select>
-                    </div>
+                    <h3 style="color: var(--accent); font-size: 1.1rem; 
+                        margin-bottom: 10px;">
+                        Alternativas (Múltipla Escolha)
+                    </h3>
+                    <p class="text-muted mb-4" style="font-size: 0.9rem;">
+                        Adicione as opções e selecione a "bolinha" da alternativa correta.
+                    </p>
 
+                    <div id="alternativas-container-mc">
+                        <div th:each="alt, stat : *{alternativas}" class="alternativa-item" 
+                            th:attr="data-index=${stat.index}" style="margin-bottom: 20px; 
+                            padding-bottom: 10px; border-bottom: 1px solid #161b22;">
 
-                    <!-- 5. NÍVEL EDUCACIONAL -->
-                    <div class="form-group">
-                        <label for="nivel_educacional" class="form-label">Nível Educacional</label>
-                        <select th:field="*{nivel_educacional}" id="nivel_educacional"
-                                class="form-input" required>
-                            <option value="">Selecione o Nível</option>
-                            <option th:each="nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}">Nível Exemplo</option>
-                        </select>
-                    </div>
+                            <div class="flex gap-2 items-center mb-1">
+                                <input type="text" 
+                                    th:field="*{alternativas[__${stat.index}__].texto_alternativa}" 
+                                    class="form-input flex-grow" 
+                                    placeholder="Preencha o enunciado da Alternativa" required>
 
-                    <!-- 6. NÍVEL DE DIFICULDADE -->
-                    <div class="form-group">
-                        <label for="nivel_dificuldade" class="form-label">Nível de Dificuldade</label>
-                        <select th:field="*{nivel_dificuldade}" id="nivel_dificuldade" 
-                                class="form-input" required>
-                            <option value="">Selecione a Dificuldade</option>
-                            <option th:each="dificuldade : ${dificuldades}" th:value="${dificuldade}" th:text="${dificuldade}">Dificuldade Exemplo</option>
-                        </select>
-                    </div>
-
-
-                    <!-- ======================================================= -->
-                    <!-- SEÇÕES DINÂMICAS DE ALTERNATIVAS -->
-                    <!-- ======================================================= -->
-
-                    <!-- 3. SEÇÕES DINÂMICAS DE RESPOSTA (MINIMIZADAS) -->
-
-                    <!-- SEÇÃO MÚLTIPLA ESCOLHA -->
-                    <h3 style="color: var(--accent); font-size: 1.1rem; margin-top: 20px;">Definição da Resposta</h3>
-                    
-                    <div id="multipla-escolha-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
-                        <p class="form-label" style="color: #9da5b4;">Alternativas (5 Fixas). Selecione apenas uma como Correta.</p>
-
-                        <div th:each="i : ${#numbers.sequence(0, 4)}" class="alternativa-item flex gap-2 items-center" style="margin-bottom: 10px;">
-                            <!-- Input Texto: alternativas[i].texto_alternativa -->
-                            <div th:each="j : ${#numbers.sequence(0, 4)}">
-                            <!-- Campo oculto para garantir que as outras sejam 'N' //Tirar se estiver causand o problema -->
-                                <input type="hidden" th:name="${'alternativas[' + j + '].flg_eh_correta'}" value="N">
+                                <button type="button" class="btn-danger" onclick="removerAlternativa(this)" 
+                                    style="width:30; height: 35; border-radius:10px">
+                                    🗑️
+                                </button>
                             </div>
-                            
-                            <input type="text" 
-                                   th:id="${'alt_M_' + i}" 
-                                   th:field="*{alternativas[__${i}__].texto_alternativa}" 
-                                   class="form-input" style="flex-grow: 1;" placeholder="Texto da Alternativa">
 
-                            <!-- Radio para Correção: alternativas[i].flg_eh_correta -->
-                            <input type="radio" th:id="${'radio_M_' + i}" 
-                                   th:field="*{alternativas[__${i}__].flg_eh_correta}" 
-            th:checked="${questao.alternativas[__${i}__].flg_eh_correta == 'S'}" 
-                                   value="S" style="width: 20px; height: 20px;">
-                            <label th:for="${'radio_M_' + i}" style="color: var(--accent);">Correta</label>
+                            <div class="alternativa-action-group flex items-center justify-start">
+                                <input type="radio" name="mc_selection_group" th:value="${stat.index}" 
+                                       th:checked="${alt.flg_eh_correta == 'S'}" 
+                                       style="width: 20px; height: 20px; margin-top: 10px">
+                                <label style="color: var(--accent); font-weight: 600; margin-right: 1rem; margin-top: 10px">Correta</label>
+                            </div>
 
+                            <input type="hidden" th:field="*{alternativas[__${stat.index}__].flg_eh_correta}" class="flag-correta">
+                            <input type="hidden" th:field="*{alternativas[__${stat.index}__].num_alternativa}">
                         </div>
                     </div>
 
-                    <!-- SEÇÃO VERDADEIRO OU FALSO -->
-                    <div id="verdadeiro-falso-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
-                        <p class="form-label" style="color: #9da5b4;">Afirmações V/F (5 Fixas). Marque V ou F para cada afirmação.</p>
+                    <button type="button" onclick="adicionarAlternativa('mc')" class="btn btn-primary mt-4">➕ Nova Alternativa</button>
+                </div>
 
-                        <div th:each="i : ${#numbers.sequence(0, 4)}" class="alternativa-item flex gap-2 items-center" style="margin-bottom: 10px;">
-                            
-                            <input type="text" th:id="${'alt_VF_' + i}" 
-                                   th:field="*{alternativas[__${i}__].texto_alternativa}"
-                                   class="form-input" style="flex-grow: 1;" 
-                                   placeholder="Texto da Afirmação (V ou F)">
+                <!-- SEÇÃO VERDADEIRO OU FALSO -->
+                <!-- SEÇÃO VERDADEIRO/FALSO - VERSÃO CORRIGIDA -->
+                <div id="verdadeiro-falso-section" 
+                     style="display:none; padding: 15px; border: 1px dashed #2e3542; 
+                            border-radius: 8px; margin-top: 20px;"
+                     class="alternativas-section">
 
-                            <!-- Radio V (Correta = S) -->
-                            <input type="radio" th:id="${'radio_V_' + i}" 
-                                   th:field="*{alternativas[__${i}__].flg_eh_correta}" 
-                                th:checked="${questao.alternativas[__${i}__].flg_eh_correta == 'S'}"
-                                   value="S" style="width: 20px; height: 20px;">
-                            <label th:for="${'radio_V_' + i}" style="color: #00c26e;">V</label>
+                    <h3 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 10px;">
+                        Resposta (Verdadeiro ou Falso)
+                    </h3>
+                    <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                        Selecione qual é a resposta correta para o enunciado: 
+                    </p>
 
-                            <!-- Radio F (Correta = N) -->
-                            <input type="radio" th:id="${'radio_F_' + i}" 
-                                   th:field="*{alternativas[__${i}__].flg_eh_correta}" 
-            th:checked="${questao.alternativas[__${i}__].flg_eh_correta == 'N'}"
-                                   value="N"
-                                   style="width: 20px; height: 20px;">
-                            <label th:for="${'radio_F_' + i}" style="color: #EF4444;">F</label>
+                    <!-- Radio buttons para selecionar V ou F -->
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 10px;">
+                            <input type="radio" 
+                                   name="vf_selection" 
+                                   value="V" 
+                                   class="vf-radio-verdadeiro"
+                                   style="width: 20px; height: 20px; margin-right: 10px;">
+                            <span style="color: var(--accent); font-weight: 600;">Verdadeiro (V)</span>
+                        </label>
 
-                            <!-- Campo oculto para garantir que o Spring não ignore nenhuma posição do array -->
-                            <!-- <input type="hidden" th:name="${'alternativas[' + i + '].flg_eh_correta'}" value="N"> -->
-                            
-                            <!-- Campo oculto para garantir que o Spring não ignore nenhuma posição do array -->
-                            <!-- NOTE: Não é mais necessário com th:field, mas mantido como backup de valor inicial 'N' //Mudar de volta se não funcionar-->
-                            <input type="hidden" th:if="${!#strings.equals(questao.alternativas[__${i}__].flg_eh_correta, 'S') and !#strings.equals(questao.alternativas[__${i}__].flg_eh_correta, 'N')}"
-                                   th:name="${'alternativas[' + i + '].flg_eh_correta'}" value="N">
-                        </div>
+                        <label style="display: block;">
+                            <input type="radio" 
+                                   name="vf_selection" 
+                                   value="F" 
+                                   class="vf-radio-falso"
+                                   style="width: 20px; height: 20px; margin-right: 10px;">
+                            <span style="color: var(--accent); font-weight: 600;">Falso (F)</span>
+                        </label>
                     </div>
 
-                    
-                    <!-- SEÇÃO PREENCHER LACUNA -->
-                    <div id="preencher-lacuna-section" style="display:none; padding: 15px; border: 1px dashed #2e3542; border-radius: 8px; margin-top: 10px;">
-                        <div class="form-group">
-                            <label for="resposta_lacuna" class="form-label"> Resposta Exata da Lacuna </label>
+                    <!-- Alternativa 1: "Verdadeiro" -->
+                    <input type="hidden" 
+                           th:field="*{alternativas[0].texto_alternativa}" 
+                           value="Verdadeiro">
+                    <input type="hidden" 
+                           th:field="*{alternativas[0].flg_eh_correta}" 
+                           class="vf-flag-verdadeiro">
+                    <input type="hidden" 
+                           th:field="*{alternativas[0].num_alternativa}" 
+                           value="1">
 
+                    <!-- Alternativa 2: "Falso" -->
+                    <input type="hidden" 
+                           th:field="*{alternativas[1].texto_alternativa}" 
+                           value="Falso">
+                    <input type="hidden" 
+                           th:field="*{alternativas[1].flg_eh_correta}" 
+                           class="vf-flag-falso">
+                    <input type="hidden" 
+                           th:field="*{alternativas[1].num_alternativa}" 
+                           value="2">
+                </div>
 
-                            <textarea id="resposta_lacuna" 
-                                      th:field="*{alternativas[0].texto_alternativa}" 
-                                      rows="2" class="form-input" 
-                                      placeholder="Palavra ou frase exata esperada."></textarea>
-
-                            <!-- Campo oculto para dizer que esta única resposta é a correta -->
-                            <input type="hidden" th:field="*{alternativas[0].flg_eh_correta}" value="S">
-                        </div>
+                
+                <div id="preencher-lacuna-section" 
+                     class="alternativas-section"
+                    style="display:none; padding: 15px; border: 1px dashed #2e3542; 
+                    border-radius: 8px; margin-top: 20px">
+                    <div class="form-group">
+                        <label for="resposta_lacuna" class="form-label">Resposta Exata da Lacuna</label>
+                        <textarea id="resposta_lacuna" 
+                                  th:field="*{alternativas[0].texto_alternativa}"
+                                  rows="2" class="form-input" 
+                                  placeholder="Palavra exata esperada..."></textarea>
+                        <input type="hidden" name="alternativas[0].flg_eh_correta" value="S">
+                        <input type="hidden" name="alternativas[0].num_alternativa" value="1">
                     </div>
-
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
-                    
-    
+    </div>
     <script>
+        // =====================================================
+        // JAVASCRIPT COMPLETO E CORRIGIDO PARA editar_questao.html
+        // =====================================================
+
+        // 1. Gerenciamento de Exibição de Seções
         function toggleAlternatives() {
-            const tipo = document.getElementById('tipo_questao').value;
-            console.log('Tipo de Questão Selecionado:', tipo);
+            const tipoElement = document.getElementById('tipo_questao');
+            if (!tipoElement) return;
+
+            const tipo = tipoElement.value;
+            console.log('Tipo Selecionado:', tipo); 
 
             const mc = document.getElementById('multipla-escolha-section');
             const vf = document.getElementById('verdadeiro-falso-section');
             const lacuna = document.getElementById('preencher-lacuna-section');
 
-            if (mc) mc.style.display = 'none';
-            if (vf) vf.style.display = 'none';
-            if (lacuna) lacuna.style.display = 'none';
+            // Oculta todas as seções
+            if(mc) mc.style.display = 'none';
+            if(vf) vf.style.display = 'none';
+            if(lacuna) lacuna.style.display = 'none';
 
-            if (tipo === 'Multipla Escolha' && mc) {
-                mc.style.display = 'block';
-            } else if (tipo === 'Verdadeiro ou Falso' && vf) {
-                vf.style.display = 'block';
-            } else if (tipo === 'Preencher Lacuna' && lacuna) {
-                lacuna.style.display = 'block';
+            // Exibe a seção correspondente ao tipo selecionado
+            if (tipo === 'MULTIPLA_ESCOLHA' || tipo === 'Multipla Escolha' || tipo === 'Múltipla Escolha') {
+                if(mc) mc.style.display = 'block';
+            } 
+            else if (tipo === 'VERDADEIRO_FALSO' || tipo === 'Verdadeiro ou Falso' || tipo === 'VerdadeiroFalso') {
+                if(vf) vf.style.display = 'block';
+            } 
+            else if (tipo === 'PREENCHER_LACUNA' || tipo === 'Preencher Lacuna') {
+                if(lacuna) lacuna.style.display = 'block';
             }
         }
 
-        
-        function voltarParaBancoQuestoes(){
-            const paginaAnterior = document.referrer;
-            
-            if (paginaAnterior.includes('/listar/questoes/')) {
-                // Se a página anterior for 'X', volta 1 passo.
-                history.go(-1);
+        // 2. Adicionar Nova Alternativa (apenas Múltipla Escolha)
+        function adicionarAlternativa(tipo) {
+            if (tipo !== 'mc') return;
 
-              // Substitua 'URL_COMPLETA_DE_Y' pela URL exata da sua página Y
-              } else if (paginaAnterior.includes('/questao/buscar/')) {
-                // Se a página anterior for 'Y', volta 2 passos.
-                // O pressuposto aqui é que você está em Z -> Y -> X, e quer voltar para X
-                history.go(-2);
+            const container = document.getElementById('alternativas-container-mc');
+            const nextIndex = container.querySelectorAll('.alternativa-item').length;
+
+            const html = `
+            <div class="alternativa-item" data-index="${nextIndex}" style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #161b22;">
+                <div class="flex gap-2 items-center mb-1">
+                    <input type="text" 
+                           name="alternativas[${nextIndex}].texto_alternativa" 
+                           class="form-input flex-grow" 
+                           placeholder="Preencha o enunciado da Alternativa" 
+                           required>
+                    <button type="button" 
+                            class="btn-danger" 
+                            onclick="removerAlternativa(this)" 
+                            style="width:30px; height: 35px; border-radius:10px">
+                        🗑️
+                    </button>
+                </div>
+
+                <div class="alternativa-action-group flex items-center justify-start">
+                    <input type="radio" 
+                           name="mc_selection_group" 
+                           value="${nextIndex}" 
+                           style="width: 20px; height: 20px; margin-top: 10px">
+                    <label style="color: var(--accent); font-weight: 600; margin-right: 1rem; margin-top: 10px">
+                        Correta
+                    </label>
+                </div>
+
+                <input type="hidden" 
+                       name="alternativas[${nextIndex}].flg_eh_correta" 
+                       value="N" 
+                       class="flag-correta">
+                <input type="hidden" 
+                       name="alternativas[${nextIndex}].num_alternativa" 
+                       value="${nextIndex + 1}">
+            </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        // 3. Remover Alternativa
+        function removerAlternativa(btn) {
+            const item = btn.closest('.alternativa-item');
+            const container = item.parentNode;
+
+            if (container.id === 'alternativas-container-mc') {
+                const totalItems = container.querySelectorAll('.alternativa-item').length;
+
+                if (totalItems > 1) {
+                    item.remove();
+                    reindexar(container);
+                } else {
+                    alert("Múltipla Escolha deve ter pelo menos uma alternativa.");
+                }
             }
         }
 
-            
-        // Inicialização da Lógica de Exibição de Alternativas no carregamento
+        // 4. Reindexar alternativas após remoção
+        function reindexar(container) {
+            const items = container.querySelectorAll('.alternativa-item');
+
+            items.forEach((item, index) => {
+                // Atualiza o atributo data-index
+                item.setAttribute('data-index', index);
+
+                // Atualiza todos os inputs
+                const inputs = item.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    // Atualiza o name (CRÍTICO para Spring Boot)
+                    if (input.name) {
+                        input.name = input.name.replace(/alternativas\[\d+\]/, `alternativas[${index}]`);
+                    }
+
+                    // Atualiza o id
+                    if (input.id) {
+                        input.id = input.id.replace(/\d+$/, index);
+                    }
+                });
+
+                // Atualiza o valor do rádio
+                const radioMC = item.querySelector('input[name="mc_selection_group"]');
+                if (radioMC) {
+                    radioMC.value = index;
+                }
+
+                // Atualiza o número sequencial
+                const hiddenNum = item.querySelector('input[name$="num_alternativa"]');
+                if (hiddenNum) {
+                    hiddenNum.value = index + 1;
+                }
+            });
+        }
+
+        // 5. Evento de Submit do Formulário
         document.addEventListener('DOMContentLoaded', function() {
-            // A função toggleAlternatives() é chamada para exibir a seção que foi preenchida pelo Thymeleaf
-            toggleAlternatives(); 
+            const form = document.getElementById('questionForm');
+
+            if (!form) return;
+
+            form.addEventListener('submit', function(e) {
+                const tipo = document.getElementById('tipo_questao').value;
+
+                // Identifica a seção ativa
+                let activeSectionId = '';
+                if (tipo === 'MULTIPLA_ESCOLHA' || tipo === 'Multipla Escolha' || tipo === 'Múltipla Escolha') {
+                    activeSectionId = 'multipla-escolha-section';
+                } else if (tipo === 'VERDADEIRO_FALSO' || tipo === 'Verdadeiro ou Falso') {
+                    activeSectionId = 'verdadeiro-falso-section';
+                } else if (tipo === 'PREENCHER_LACUNA' || tipo === 'Preencher Lacuna') {
+                    activeSectionId = 'preencher-lacuna-section';
+                }
+
+                // Desabilita TODOS os inputs primeiro
+                const allSections = document.querySelectorAll('.alternativas-section');
+                allSections.forEach(section => {
+                    const inputs = section.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        input.disabled = true; 
+                    });
+                });
+
+                // Processa a seção ativa
+                if (activeSectionId) {
+                    const activeSection = document.getElementById(activeSectionId);
+
+                    // ESPECÍFICO PARA VERDADEIRO/FALSO
+                    if (activeSectionId === 'verdadeiro-falso-section') {
+                        const radios = document.getElementsByName('vf_selection');
+                        const flagVerdadeiro = document.querySelector('.vf-flag-verdadeiro');
+                        const flagFalso = document.querySelector('.vf-flag-falso');
+
+                        // Verifica qual rádio está marcado e atualiza as flags
+                        let selectedValue = '';
+                        for (let i = 0; i < radios.length; i++) {
+                            if (radios[i].checked) {
+                                selectedValue = radios[i].value;
+                                break;
+                            }
+                        }
+
+                        if (selectedValue === 'V') {
+                            flagVerdadeiro.value = 'S';
+                            flagFalso.value = 'N';
+                        } else if (selectedValue === 'F') {
+                            flagVerdadeiro.value = 'N';
+                            flagFalso.value = 'S';
+                        } else {
+                            // Se nenhum foi selecionado, previne o submit
+                            e.preventDefault();
+                            alert("Selecione se a resposta é Verdadeiro ou Falso.");
+
+                            // Reabilita inputs
+                            allSections.forEach(section => {
+                                const inputs = section.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => input.disabled = false);
+                            });
+                            return;
+                        }
+                    }
+
+                    // ESPECÍFICO PARA MÚLTIPLA ESCOLHA
+                    else if (activeSectionId === 'multipla-escolha-section') {
+                        const items = activeSection.querySelectorAll('.alternativa-item');
+
+                        // Remove alternativas com texto vazio
+                        items.forEach(item => {
+                            const textoInput = item.querySelector('input[name*="texto_alternativa"]');
+                            if (textoInput && (!textoInput.value || textoInput.value.trim() === '')) {
+                                item.remove();
+                            }
+                        });
+
+                        // Reindexar após remoção
+                        const container = document.getElementById('alternativas-container-mc');
+                        reindexar(container);
+
+                        // Validação: pelo menos uma alternativa
+                        const remainingItems = activeSection.querySelectorAll('.alternativa-item');
+                        if (remainingItems.length === 0) {
+                            e.preventDefault();
+                            alert("Adicione pelo menos uma alternativa.");
+
+                            // Reabilita inputs para correção
+                            allSections.forEach(section => {
+                                const inputs = section.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => input.disabled = false);
+                            });
+                            return;
+                        }
+
+                        // Validação: uma deve estar marcada como correta
+                        const radios = document.getElementsByName('mc_selection_group');
+                        let selecionado = false;
+                        for (let i = 0; i < radios.length; i++) {
+                            if (radios[i].checked) { 
+                                selecionado = true; 
+                                break; 
+                            }
+                        }
+
+                        if (!selecionado) {
+                            e.preventDefault();
+                            alert("Selecione qual é a alternativa correta.");
+
+                            // Reabilita inputs para correção
+                            allSections.forEach(section => {
+                                const inputs = section.querySelectorAll('input, select, textarea');
+                                inputs.forEach(input => input.disabled = false);
+                            });
+                            return; 
+                        }
+
+                        // Atualiza flags ocultas baseado nos rádios
+                        remainingItems.forEach(item => {
+                            const radio = item.querySelector('input[name="mc_selection_group"]');
+                            const hiddenFlag = item.querySelector('.flag-correta');
+                            if (radio && hiddenFlag) {
+                                hiddenFlag.value = radio.checked ? 'S' : 'N';
+                            }
+                        });
+                    }
+
+                    // Reabilita APENAS os inputs da seção ativa
+                    const validInputs = activeSection.querySelectorAll('input, select, textarea');
+                    validInputs.forEach(input => {
+                        input.disabled = false;
+                    });
+                }
+            });
         });
- 
-        //Não está funcionando
-        // document.addEventListener('DOMContentLoaded', function() {
 
-        //         // 2. Executa a função das Alternativas para mostrar a seção correta
-        //         // Isso garante que, se houver um tipo de questão preenchido (modo EDIÇÃO), 
-        //         // a seção correspondente seja exibida imediatamente.
-        //         toggleAlternatives(); 
+        // 6. Inicialização e limpeza ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========================================================
+            // PARTE A: Inicializar MÚLTIPLA ESCOLHA
+            // ========================================================
+            const containerMC = document.getElementById('alternativas-container-mc');
+            if (containerMC) {
+                const items = containerMC.querySelectorAll('.alternativa-item');
 
-        //         // 3. Pré-seleciona a Resposta Correta nos Dropdowns (Múltipla Escolha / V/F)
-        //         const tipo = document.getElementById('tipo_questao').value;
+                // Passo 1: Limpar vazios (opcional, mas recomendado)
+                items.forEach(item => {
+                    const textoInput = item.querySelector('input[name*="texto_alternativa"]');
+                    if (textoInput && (!textoInput.value || textoInput.value.trim() === '')) {
+                        item.remove();
+                    }
+                });
 
-        //         // Só faz sentido tentar preencher a resposta correta se for EDIÇÃO e a questão tiver alternativas.
-        //         if ('[[${questao.id_questao}]]' !== '') {
+                // Passo 2: Reindexar e Marcar Rádio Correto
+                const remainingItems = containerMC.querySelectorAll('.alternativa-item');
+                if (remainingItems.length > 0) {
+                    reindexar(containerMC); // Garante que índices [0], [1] estão certos
 
-        //             if (tipo === 'Multipla Escolha' || tipo === 'Verdadeiro ou Falso') {
-        //                 // Esta lógica precisa ser ajustada, pois o THYMELEAF DEVE PREENCHER DIRETO.
-        //                 // O valor 'resposta_mc' e 'resposta_vf' deve ser preenchido por um atributo th:value no HTML
+                    remainingItems.forEach((item, index) => {
+                        // Encontra a flag vinda do banco (S ou N)
+                        const hiddenFlag = item.querySelector('.flag-correta'); 
+                        // Encontra o rádio visual
+                        const radio = item.querySelector('input[name="mc_selection_group"]');
 
-        //                 // Exemplo de como o Thymeleaf preencheria o dropdown de resposta:
-        //                 // O Controller precisa enviar o 'letraResposta' (ex: 'C') para ser preenchido aqui.
+                        // Se a flag for 'S', marca o rádio!
+                        if (hiddenFlag && radio && hiddenFlag.value === 'S') {
+                            radio.checked = true;
+                        }
 
-        //                 // Se estiver usando o ID temporário 'resposta_mc' para a letra:
-        //                 const letraCorreta = '[[${letraDaAlternativaCorreta}]]'; // Variável do Controller
-        //                 if (document.getElementById('resposta_mc')) {
-        //                     document.getElementById('resposta_mc').value = letraCorreta;
-        //                 }
-        //                 if (document.getElementById('resposta_vf')) {
-        //                     document.getElementById('resposta_vf').value = letraCorreta;
-        //                 }
-        //             }
-        //         }
-        //     });
-    </script>                            
+                        // Garante que o valor do rádio bata com o índice atual
+                        if (radio) radio.value = index;
+                    });
+                }
+            }
+
+            // Precisamos ler as flags ocultas (vf-flag-verdadeiro e vf-flag-falso)
+            // e marcar o rádio visual correspondente (V ou F)
+            const flagVerdadeiro = document.querySelector('.vf-flag-verdadeiro');
+            const radioVerdadeiro = document.querySelector('.vf-radio-verdadeiro');
+            const radioFalso = document.querySelector('.vf-radio-falso');
+
+            if (flagVerdadeiro && radioVerdadeiro && radioFalso) {
+                // Se a Alternativa 1 (Verdadeiro) tem flag 'S', então a resposta é VERDADEIRO
+                if (flagVerdadeiro.value === 'S') {
+                    radioVerdadeiro.checked = true;
+                } 
+                // Se a Alternativa 1 (Verdadeiro) tem flag 'N', então a resposta é FALSO
+                else if (flagVerdadeiro.value === 'N') {
+                    radioFalso.checked = true;
+                }
+            }
+
+            // Exibe a seção correta baseada no tipo selecionado
+            toggleAlternatives();
+        });
+
+        // 7. Função de navegação (voltar)
+        function voltarParaBancoQuestoes() {
+            history.back();
+        }
+    </script>
 </body>
 </html>

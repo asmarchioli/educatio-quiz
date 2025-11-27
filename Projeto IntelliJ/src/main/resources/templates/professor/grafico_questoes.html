@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educatio Quiz - Gráfico</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1>🎓 Educatio Quiz - Relatórios</h1>
+        <div class="flex items-center gap-4">
+            <span th:if="${professor}" th:text="${professor.nome}">Professor</span>
+            <a href="/logout" class="btn-logout">Sair</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-card">
+            <div class="quiz-header">
+                <div>
+                    <h2 class="text-xl font-bold" style="color: var(--text-light);">
+                        📊 Gráfico de Desempenho
+                    </h2>
+                    <p class="text-muted"> Porcentagem de acertos por questão</p>
+                </div>
+                <a th:href="@{/quiz/relatorios(id_quiz=${quiz.id_quiz})}" class="btn btn-secondary">
+                    ⬅️ Voltar
+                </a>
+            </div>
+
+            <div class="filtros-container" style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <select id="filtroOrdem" class="form-select" onchange="atualizarGrafico()">
+                    <option value= "padrao">Por Número de Questão</option>
+                    <option value="maior_acerto"> Maior Taxa de Acerto </option>
+                    <option value="menor_acerto"> Menor Taxa de Acerto </option>
+                </select>
+
+                <select id="filtroTipo" class="form-select" onchange="atualizarGrafico()">
+                    <option value="todos">Todos os Tipos</option>
+                    <option th:each= "tipo : ${tiposQuestao}" th:value="${tipo}" th:text="${tipo}"> </option>
+                </select>
+            </div>
+            
+            <div id="msgSemDados" style="display: none; text-align: center; padding: 3rem; color: var(--text-muted);">
+                <h3>⚠️ Nenhuma questão encontrada!</h3>
+            </div>
+
+            <div id="graficoContainer" style="position: relative; height:60vh; width:100%">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <script th:inline="javascript"> //Converte os tipos de dados do JAVA para JAVASCRIPT dentro dos comentários 
+        /*<![CDATA[*/  // Evita que o Thymeleaf interprete os caracteres especiais como tags HTML
+
+            const dados = /*[[${dados}]]*/ []; 
+
+            // Variável global para guardar o gráfico
+            let myChart = null;
+
+            function quebrarTexto(str, maxLen) {
+                if (!str) return [];
+                const words = str.split(' ');
+                const lines = [];
+                let currentLine = words[0];
+
+                for (let i = 1; i < words.length; i++) {
+                    if (currentLine.length + 1 + words[i].length <= maxLen) {
+                        currentLine += ' ' + words[i];
+                    } else {
+                        lines.push(currentLine);
+                        currentLine = words[i];
+                    }
+                }
+                lines.push(currentLine);
+                return lines;
+            }
+        
+
+            function atualizarGrafico() {
+                const ordem = document.getElementById('filtroOrdem').value;
+                const tipoSelecionado = document.getElementById('filtroTipo').value;
+
+                const containerGrafico = document.getElementById('graficoContainer');
+                const msgSemDados = document.getElementById('msgSemDados');
+
+                // Filtra os dados com base no tipo selecionado
+                let dadosFiltrados = dados.filter(item => {
+                    if (tipoSelecionado === 'todos') return true;
+                    return item.tipoQuestao === tipoSelecionado;
+                });
+
+                if (dadosFiltrados.length === 0) {
+                    containerGrafico.style.display = 'none';
+                    msgSemDados.style.display = '';
+                    return;
+                } else {
+                    containerGrafico.style.display = '';
+                    msgSemDados.style.display = 'none';
+                }
+
+                // Ordena os dados com base na seleção do usuário
+                dadosFiltrados.sort((a, b) => {
+                    if (ordem === 'padrao') {
+                        const matchA = a.label.match(/\d+/);
+                        const matchB = b.label.match(/\d+/);
+                        const numA = matchA ? parseInt(matchA[0]) : 0; 
+                        const numB = matchB ? parseInt(matchB[0]) : 0;
+                        return numA - numB; 
+                    }
+                    const valA = a.porcentagemAcerto;
+                    const valB = b.porcentagemAcerto;
+                    if (ordem === 'maior_acerto') return valB - valA; 
+                    else return valA - valB; 
+                });
+
+               // Prepara os dados para o gráfico
+                const novasLabels = dadosFiltrados.map(d => d.label);
+                const novosValores = dadosFiltrados.map(d => d.porcentagemAcerto);
+               
+                const novosEnunciados = dadosFiltrados.map(d => d.enunciado || "Sem enunciado");
+
+                // Atualiza o gráfico
+                const ctx = document.getElementById('myChart');
+
+                if (myChart) {
+                    myChart.data.labels = novasLabels;
+                    myChart.data.datasets[0].data = novosValores;
+                    myChart.data.datasets[0].enunciadosCompletos = novosEnunciados;
+                    myChart.update();
+                } else {
+                    myChart = new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: novasLabels,
+                            datasets: [{
+                                label: '% de Acertos',
+                                backgroundColor: "#00c26e",
+                                borderColor: "#00a65d",
+                                borderWidth: 1,
+                                data: novosValores,
+                                enunciadosCompletos: novosEnunciados
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: { ticks: { color: '#f5f5f5' }, grid: { color: '#2e3542' } },
+                                y: { beginAtZero: true, max: 100, ticks: { color: '#f5f5f5' }, grid: { color: '#2e3542' } }
+                            },
+                            plugins: {
+                                legend: { labels: { color: '#f5f5f5' } },
+                                tooltip: {
+                                    callbacks: {
+                                        // Altera o Título do Tooltip 
+                                        title: function(tooltipItems) {
+                                            const item = tooltipItems[0];
+                                            const index = item.dataIndex;
+                                    
+                                            const textoCompleto = item.dataset.enunciadosCompletos[index];
+
+                                            // Quebra o texto em linhas de 60 caracteres para não ficar gigante
+                                            return quebrarTexto(textoCompleto, 60);
+                                        },
+                                        label: function(context) {
+                                            return `Acertos: ${context.parsed.y}%`;
+                                        }
+                                    },
+                                    // Estilização
+                                    titleFont: { size: 14, weight: 'bold' },
+                                    bodyFont: { size: 13 },
+                                    padding: 12,
+                                    backgroundColor: 'rgba(26, 31, 39, 0.95)', 
+                                    borderColor: '#00c26e',
+                                    borderWidth: 1,
+                                    displayColors: false
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Inicializa o gráfico assim que carregar
+            document.addEventListener("DOMContentLoaded", function() {
+                atualizarGrafico();
+            });
+
+            /*]]>*/
+        </script>
+    
+</body>
+</html>

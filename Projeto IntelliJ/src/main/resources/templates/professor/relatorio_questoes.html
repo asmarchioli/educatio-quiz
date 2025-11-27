@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educatio Quiz - Dificuldade</title>
+
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1>🎓 Educatio Quiz - Relatórios</h1>
+        <div class="flex items-center gap-4">
+            <span th:if="${professor}" th:text="${professor.nome}">Professor</span>
+            <a href="/logout" class="btn-logout">Sair</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-card">
+
+            <div class="quiz-header">
+                <div>
+                    <h2 class="text-xl font-bold" style="color: var(--text-light); margin-bottom: 0.5rem;">
+                        ❌ Questões com Maior Índice de Erro
+                    </h2>
+                    <p class="text-muted" style="font-size: 0.9rem;">
+                        Baseado na frequência de erros dos alunos neste quiz.
+                    </p>
+                </div>
+
+                <a th:href="@{/quiz/relatorios(id_quiz=${quiz.id_quiz})}" class="btn btn-secondary">
+                    ⬅️ Voltar
+                </a>
+            </div>
+
+            <div class="filtros-container" style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <select id="filtroOrdem" class="form-select" onchange="aplicarFiltros()">
+                    <option value="maior_erro"> Maior Taxa de Erro (Mais Difíceis) </option>
+                    <option value="menor_erro"> Menor Taxa de Erro (Mais Fáceis) </option>
+                </select>
+
+                <select id="filtroTipo" class="form-select" onchange="aplicarFiltros()">
+                    <option value="todos">Todos os Tipos</option>
+                    <option th:each= "tipo : ${tiposQuestao}" th:value="${tipo}" th:text="${tipo}"> </option>
+                </select>
+            </div>
+            
+            <div class="table-container">
+                <table class="dark-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 50%; text-align: left;">Enunciado</th>
+                            <th scope="col" class="text-center" style="width: 15%;">Quantidade de Respostas</th>
+                            <th scope="col" class="text-center" style="width: 10%;">Erros</th>
+                            <th scope="col" style="width: 25%; text-align: left; padding-left: 20px;">Taxa de Erro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaCorpo">
+
+                        <tr th:each="q : ${questoes}" 
+                            class="linha-questao"
+                            th:data-erro="${q.taxaErroNumerica}" 
+                            th:data-tipo="${q.tipoQuestao}">
+
+                            <td style="text-align: left;">
+                                <span th:text="${q.enunciado}" 
+                                      style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500;">
+                                    Enunciado da questão...
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                <span th:text="${q.qtdRespostas}">10</span>
+                            </td>
+
+                            <td class="text-center">
+                                <span th:text="${q.totalErros}" class="text-danger font-bold">5</span>
+                            </td>
+
+                            <td>
+                                <div class="progress-wrapper" style="padding-left: 10px;">
+
+                                    <div class="progress-track">
+                                        <div class="progress-fill" 
+                                             th:style="'width: ' + ${q.porcentagemErro}">
+                                        </div>
+                                    </div>
+
+                                    <span class="text-danger font-bold" style="font-size: 0.85rem; min-width: 35px;" 
+                                          th:text="${q.porcentagemErro}">
+                                        50%
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr th:if="${#lists.isEmpty(questoes)}" id="msgSemQuestoesBackend">
+                            <td colspan="4" class="text-center text-muted" style="padding: 2rem;">
+                                ⚠️ O quiz não possui questões respondidas!
+                            </td>
+                        </tr>
+
+                        <tr id="msgSemResultadosFiltro" style="display: none;">
+                            <td colspan="4" class="text-center text-muted" style="padding: 2rem;">
+                                🔍 Nenhum resultado encontrado para este filtro.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </main>
+<script>
+        function aplicarFiltros() {
+            const ordem = document.getElementById('filtroOrdem').value;
+            const tipoSelecionado = document.getElementById('filtroTipo').value;
+            const tbody = document.getElementById('tabelaCorpo');
+
+            // Converte as linhas para um Array real para ordenar
+            let linhas = Array.from(document.querySelectorAll('.linha-questao'));
+            let visiveisCount = 0;
+            
+            // Filtra por tipo e conta quantas linhas estão visíveis
+            linhas.forEach(linha => {
+                const tipoLinha = linha.getAttribute('data-tipo');
+                const matchTipo = (tipoSelecionado === 'todos') || (tipoLinha === tipoSelecionado);
+
+                if (matchTipo) {
+                    linha.style.display = ''; 
+                    visiveisCount++;
+                } else {
+                    linha.style.display = 'none'; 
+                }
+            });
+
+            
+            if (visiveisCount === 0) {
+                msgSemResultadosFiltro.style.display = ''; // Mostra a linha da mensagem 
+            } else {
+                msgSemResultadosFiltro.style.display = 'none'; // Esconde a linha da mensagem
+            }
+            
+            // Ordena as linhas visíveis
+            linhas.sort((a, b) => {
+                // Pega o valor numérico do atributo data-erro
+                const erroA = parseFloat(a.getAttribute('data-erro')) || 0;
+                const erroB = parseFloat(b.getAttribute('data-erro')) || 0;
+
+                if (ordem === 'maior_erro') {
+                    return erroB - erroA; // Decrescente (Maior erro primeiro)
+                } else {
+                    return erroA - erroB; // Crescente (Menor erro primeiro)
+                }
+            });
+
+            // Reinsere as linhas ordenadas no corpo da tabela
+            linhas.forEach(linha => tbody.appendChild(linha));
+        }
+    </script>
+</script>
+</body>
+</html>

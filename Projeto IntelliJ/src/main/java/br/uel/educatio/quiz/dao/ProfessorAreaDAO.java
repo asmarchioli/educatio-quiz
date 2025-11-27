@@ -15,12 +15,12 @@ public class ProfessorAreaDAO {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // MELHOR PRÁTICA: Injeção por construtor (do Arquivo 2)
+   
     public ProfessorAreaDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // RowMapper para ProfessorArea (lambda do Arquivo 2)
+  
     private final RowMapper<ProfessorArea> professorAreaRowMapper = (rs, rowNum) -> {
         ProfessorArea pa = new ProfessorArea();
         pa.setId_professor(rs.getLong("id_professor"));
@@ -28,7 +28,6 @@ public class ProfessorAreaDAO {
         return pa;
     };
 
-    // RowMapper para Area (Adicionado do Arquivo 1)
     private final RowMapper<Area> areaRowMapper = new RowMapper<Area>() {
         @Override
         public Area mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -39,10 +38,8 @@ public class ProfessorAreaDAO {
         }
     };
 
-    // --- Métodos do Arquivo 2 (Nomes modernos e 'ON CONFLICT') ---
 
     public int addAreaToProfessor(long idProfessor, long idArea) {
-        // Usa INSERT ... ON CONFLICT DO NOTHING para evitar erro se a relação já existir
         String sql = "INSERT INTO professor_area (id_professor, id_area) VALUES (?, ?) ON CONFLICT (id_professor, id_area) DO NOTHING";
         return jdbcTemplate.update(sql, idProfessor, idArea);
     }
@@ -70,7 +67,7 @@ public class ProfessorAreaDAO {
         return jdbcTemplate.queryForList(sql, Long.class, new Object[]{idArea});
     }
 
-    // --- Métodos Adicionados do Arquivo 1 (Funcionalidades extras) ---
+
 
     public void inserirVarias(Long idProfessor, List<Long> idsAreas) {
         String sql = "INSERT INTO professor_area (id_professor, id_area) VALUES (?, ?)";

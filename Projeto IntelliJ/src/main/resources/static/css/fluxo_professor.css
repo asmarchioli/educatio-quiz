@@ -93,7 +93,7 @@
 .btn-details { /* Botão Detalhes e Secundário na Tabela */
     background-color: #374151;
     color: var(--text-light);
-    width: 70 px
+    width: 90 px
     text-align: center;
 }
 .btn-details:hover {
@@ -171,4 +171,43 @@
 .search-input {
     padding-left: 35px;
     width: 100%; /* Garante que o input preencha o search-container */
+}
+
+/* .form-select {
+    padding: 8px 12px;
+    background-color: #2e3542; 
+    color: white;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #00c26e; 
+} */
+/* ------------------------------------------------------- */
+/* ESTILOS DE BARRA DE PROGRESSO */
+/* ------------------------------------------------------- */
+
+.progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaço entre a barra e a porcentagem */
+    width: 100%;
+}
+
+.progress-track {
+    background-color: #2e3542; /* Cor do fundo da barra (cinza escuro) */
+    height: 12px;
+    border-radius: 6px;
+    flex-grow: 1; /* Ocupa o espaço disponível */
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--danger); /* Usa sua variável vermelha */
+    border-radius: 6px;
+    transition: width 0.4s ease;
 }

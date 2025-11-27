@@ -17,12 +17,12 @@ public class AlunoDAO {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // 1. MELHOR PRÁTICA: Injeção por construtor (do Arquivo 2)
+
     public AlunoDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // 2. MAIS SEGURO: RowMapper como lambda e com verificação de nulo (do Arquivo 2)
+
     private final RowMapper<Aluno> rowMapper = (rs, rowNum) ->  {
         Aluno aluno = new Aluno();
         aluno.setId_aluno(rs.getLong("id_aluno"));
@@ -30,15 +30,14 @@ public class AlunoDAO {
         aluno.setEmail(rs.getString("email"));
         aluno.setSenha(rs.getString("senha"));
 
-        // Verificação de nulo é crucial
-        String escolaridade = rs.getString("nivel_educacional"); // Corrigido nome da coluna
+
+        String escolaridade = rs.getString("nivel_educacional"); 
         if(escolaridade != null) {
             aluno.setNivel_educacional(Escolaridade.fromString(escolaridade));
         }
         return aluno;
     };
 
-    // --- Métodos modernos (mantidos do Arquivo 2 / comuns) ---
 
     public List<Aluno> findAll() {
         String sql = "SELECT * FROM aluno ORDER BY nome";
@@ -114,7 +113,7 @@ public class AlunoDAO {
         return jdbcTemplate.update(sql, novaSenha, idAluno);
     }
 
-    // --- Método útil (mantido do Arquivo 1) ---
+   
 
     public boolean emailJaExiste(String email) {
         String sql = "SELECT COUNT(*) FROM aluno WHERE email = ?";

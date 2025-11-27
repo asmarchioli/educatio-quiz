@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educatio Quiz - Gerenciamento de Questões</title>
-    <!-- <link rel="stylesheet" th:href="@{/css/style.css}"> -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
 </head>
@@ -17,7 +17,30 @@
         </div>
     </nav>
 
-    <!-- CONTEÚDO PRINCIPAL (Tabela) -->
+
+    <div th:if="${success}" class="alert alert-success" 
+         style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+        <span th:text="${success}"></span>
+
+        <button type="button" 
+                onclick="this.parentElement.style.display='none'"
+                style="background: none; border: none; color: #721c24; font-size: 1.2rem; font-weight: bold; cursor: pointer;">
+            &times;
+        </button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" 
+         style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+        <span th:text="${error}"></span>
+
+        <button type="button" 
+                onclick="this.parentElement.style.display='none'"
+                style="background: none; border: none; color: #721c24; font-size: 1.2rem; font-weight: bold; cursor: pointer;">
+            &times;
+        </button>
+    </div>
+
+
     <main class="main-content">
         <div class="content-card">
 
@@ -33,27 +56,71 @@
                         class="btn btn-secondary ">
                         ⬅️ Voltar para Menu Inicial
                     </a>
-                    
+                
                     <!-- Botão de Criação -->
                     <a href="/questao/novo" class="btn btn-primary font-semibold">
                     <!-- <a href="/professor/criar_questao" class="btn btn-primary font-semibold"> -->
                         ➕ Criar Nova Questão
                     </a>
                 </div>
-            </div>
-
-            <!-- BARRA DE PESQUISA ESTÁTICA -->
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="Buscar enunciado da questão..."
-                       class="form-input search-input"
-                >
-                <div class="search-icon">
-                    <!-- Ícone de Lupa -->
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+                
+                <div th:if="${quizId != null}">
+                    <!-- Botão de Voltar/Cancelar -->
+                    <a th:href="@{/quiz/editar/questoes(id_quiz=${quizId})}"         
+                        class="btn btn-secondary ">
+                        ⬅️ Voltar para Edição de Quiz
+                    </a>
                 </div>
             </div>
+
+            
+
+            
+            <form th:action="@{/questao/listar/questoes}" method="get" class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center;">
+
+                <input type="hidden" th:name="id_prof" th:value="${professor.id_professor}" />
+                <input type="hidden" th:name="quizId" th:value="${quizId}" />
+
+                <div th:if="${quizId != null}" style="margin-right: 10px;">
+                    <select name="modoBusca" class="form-input form-select search-filter-select" style="width: 200px;">
+                        <option value="MEUS" th:selected="${modoBuscaSelecionado == 'MEUS'}">
+                            👤 Minhas Questões
+                        </option>
+                        <option value="COMPATIVEL" th:selected="${modoBuscaSelecionado == 'COMPATIVEL'}">
+                            🌎 Banco Público (Mesma Área/Nível)
+                        </option>
+                    </select>
+                </div>
+                
+                <select name="filtroTipo" class="form-input form-select search-filter-select" style="width: 200px;">
+                    <option value="">Todos os Tipos</option>
+
+                    <option th:each="tipo : ${tiposQuestao}" 
+                            th:value="${tipo.name()}" 
+                            th:text="${tipo.displayValue}" 
+                            th:selected="${tipo.name() == filtroTipoSelecionado}">
+                        Tipo Exemplo
+                    </option>
+                </select>
+
+                <div class="search-container" style="position: relative; flex-grow: 1;">
+                    <input type="text" 
+                           name="termoBusca" 
+                           th:value="${termoBuscaDigitado}" 
+                           placeholder="Buscar enunciado da questão..."
+                           class="form-input search-input" 
+                           style="width: 100%; padding-left: 25px;">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px; height: 42px;">
+                    🔍
+                </button>
+
+                <a th:href="@{/questao/listar/questoes(id_prof=${professor.id_professor}, quizId=${quizId})}" class="btn btn-secondary" style="padding: 10px 20px; text-decoration: none; display: flex; align-items: center;">
+                    Limpar
+                </a>
+
+            </form>
 
             <!-- Tabela Responsiva de Questões -->
             <div class="table-container">
@@ -78,21 +145,32 @@
                             <td th:text="${questao.nivel_dificuldade}" class="text-center text-accent" ></td>
 
                             <!-- Botões de ação  -->
-                            <td class="actions-cell"> 
+                            <td class="flex items-center space-y-1">
 
+                                <!-- Se vier do editar quiz, então aparece o botão de adicionar questão ao quiz  -->
                                 <div th:if="${quizId != null}" class="flex-column-buttons">
                                     <form th:action="@{/quiz/adicionar/questao}" method="post" class="inline-block"> 
                                         <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
                                         <input type="hidden" name="id_quiz" th:value="${quizId}" />
-                                        <button type="submit" class="table-action-btn btn-primary">
+                                        
+                                        <button type="submit" class="table-action-btn btn-primary" style="width:90px">
                                             ➕
                                         </button>
                                     </form>
+
+                                   <!-- inline-block é para pegar o style do flex-column -->
+                                    <form th:action="@{/questao/buscar}" class="inline-block" method="get">
+                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
+                                        <input type="hidden" name="quizId" th:value="${quizId}" />
+                                        <button type="submit" class="table-action-btn btn-details"> ℹ️ </button>
+                                    </form>
+                    
                                 </div>
 
+                                <!-- Se vier do banco de questoes do professor usuário  -->
                                 <div th:if="${quizId == null}" class="flex-column-buttons"> 
 
-                                    <a th:href="@{/questao/buscar/{id}(id=${questao.id_questao})}"
+                                    <a th:href="@{/questao/buscar(id_questao=${questao.id_questao})}"
                                        class="table-action-btn btn-details"
                                        data-toggle="page">
                                         Detalhes
@@ -103,43 +181,25 @@
                                         Editar
                                     </a>
 
-                                    <form th:action="@{/questao/excluir}" method="post" class="inline-block"> 
-                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
-                                        <button type="submit" class="table-action-btn btn-danger-table"> 
-                                            Excluir
-                                        </button>
-                                    </form>
+                
+                                    <button type="button" 
+                                            class="table-action-btn btn-danger-table"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalExclusao"
+                                            th:data-id="${questao.id_questao}">
+                                        Excluir
+                                    </button>
+                           
 
                                 </div>
                             </td>
-                            <!-- alguma dessas classes deve estar quebrando a tabela -->
-                            <!-- <td class="flex items-center space-x-1-2"> 
-                                <div class="flex-column-buttons">
+                        </tr>
 
-
-                                    <a th:if="history.back() = ''""></a>
-                                    <a th:href="@{/questao/buscar/{id}(id=${questao.id_questao})}"
-                                       class="table-action-btn btn-details"
-                                       data-toggle="page">
-                                        Detalhes
-                                    </a>
-  
-                                    <a th:href="@{/questao/editar/{id}(id=${questao.getId_questao()})}"
-                                       class="table-action-btn btn-edit">
-                                        Editar
-                                    </a>
-
-                                    <form th:action="@{/questao/excluir}" 
-                                          method="post"
-                                    >
-                                        <input type="hidden" name="id_questao" th:value="${questao.id_questao}" />
-                                        <button type="submit" class="btn btn-danger">
-                                            Excluir
-                                        </button>
-                                    </form>
-                                </div>
-                            </td> -->
-                            
+                        <!-- Linha de Mensagem de Filtro Vazio (Controlada pelo JS) -->
+                        <tr th:if="${#lists.isEmpty(questoes)}">
+                            <td colspan="6" class="text-center" style="color: var(--text-muted); padding: 2rem;">
+                                Nenhuma questão encontrada com este filtro.
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -149,429 +209,50 @@
         </div>
     </main>
 
-    <!-- Rodapé opcional -->
-    <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
-        &copy; 2024 Educatio Quiz. Todos os direitos reservados.
-    </footer>
-
-
-    <!-- ============================================== -->
-    <!-- MODAL DE DETALHES DA QUESTÃO (Mínimo JS) -->
-    <!-- ============================================== -->
-    <div id="details-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content">
-            <h3 class="font-bold">Detalhes da Questão <span id="detail-id"></span></h3>
-
-            <!-- CORPO DO FORMULÁRIO / INFORMAÇÕES BÁSICAS -->
-            <div class="modal-details-body">
-
-                <div class="modal-info-group">
-                    <strong>Tipo de Questão</strong>
-                    <p id="detail-tipo"></p>
+    <div class="modal fade" data-bs-theme="dark" id="modalExclusao" tabindex="-1" aria-labelledby="modalExclusaoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-danger" id="modalExclusaoLabel">Confirmar Exclusão</h1>
+                </div>
+                <div class="modal-body text-accent"> Tem certeza que deseja excluir esta questão do Quiz? <br><br>
+                    <span style="color: var(--danger);"> Esta ação: </span><br>
+                    <span style="color: var(--danger-light);"> - Excluirá todas as respostas dos alunos </span><br>
+                    <span style="color: var(--danger-light);"> - Excluirá a questão de todos os Quizzes em que estiver </span>
                 </div>
 
-                <div class="modal-info-group">
-                    <strong>Enunciado</strong>
-                    <p id="detail-enunciado"></p>
-                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
 
-                <div class="modal-info-group">
-                    <strong>Nível / Dificuldade</strong>
-                    <!-- Nível Educacional (ID NECESSÁRIO) -->
-                    <p>Nível: <span id="detail-nivel"></span></p> 
-                    <!-- Nível de Dificuldade (ID NECESSÁRIO) -->
-                    <p>Dificuldade: <span id="detail-dificuldade"></span></p> 
-                </div>
-
-                <div class="modal-info-group">
-                    <strong>Professor Criador</strong>
-                    <p id="detail-criador"></p>
-                </div>
-
-                <div class="modal-info-group">
-                    <strong>Resposta Correta</strong>
-                    <!-- ID NECESSÁRIO: Usado para tipos de questão estáticos (o JS tenta preencher isso) -->
-                    <p id="detail-resposta"></p> 
-                </div>
-
-                <!-- SEÇÃO DE ALTERNATIVAS (Carregada via AJAX) -->
-                <div id="detail-alternativas-container" class="modal-alternatives" style="margin-top: 1.5rem;">
-                    <!-- Título da seção, Carregamento e Dados injetados ficam aqui -->
-                    <h4 class="detail-subtitle" style="font-weight: 600; font-size: 1.1rem; color: var(--text-light); margin-bottom: 1rem;">Alternativas:</h4>
-                    <div id="alternativas-loading" style="text-align: center; color: var(--accent);">Carregando alternativas...</div>
-                    <div id="alternativas-data">
-                        <!-- Conteúdo injetado pelo JS (injectAlternatives) -->
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- RODAPÉ E BOTÕES DO MODAL -->
-            <div class="flex justify-between items-center" style="margin-top: 2rem;">
-                <button onclick="closeDetails()" class="btn btn-secondary">
-                    Fechar
-                </button>
-                <div class="flex space-x-1-2">
-                    <a href="#" class="btn-primary table-action-btn btn-edit" style="padding: 0.75rem 1.5rem;">
-                        Editar Questão
-                    </a>
+                    <form th:action="@{/questao/excluir}" method="post">
+                        <input type="hidden" name="id_questao" id="idQuestInputHidden" value="" />
+                        <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // ==============================================
-        // DADOS SIMULADOS (Minimal JS)
-        // ==============================================
-        // const questionsData = [
-        //     {
-        //         id: 1,
-        //         type: "Múltipla Escolha",
-        //         statement: "Qual é a função principal das mitocôndrias na célula?",
-        //         level: "Superior",
-        //         difficulty: "Fácil",
-        //         creator: "Prof. Alberto Santos",
-        //         answer: "Produção de ATP (energia).",
-        //         alternatives: [
-        //             "Síntese de proteínas.",
-        //             "Transporte de substâncias.",
-        //             "Produção de ATP (energia).", // Correta
-        //             "Armazenamento de água."
-        //         ]
-        //     },
-        //     {
-        //         id: 2,
-        //         type: "Preencher Lacuna",
-        //         statement: "O dobro de 10 é ___.",
-        //         level: "Fundamental I",
-        //         difficulty: "Fácil",
-        //         creator: "Prof. Julia Almeida",
-        //         answer: "20",
-        //         alternatives: null
-        //     },
-        //     {
-        //         id: 3,
-        //         type: "Dissertativa",
-        //         statement: "Explique a Segunda Lei da Termodinâmica em 100 palavras.",
-        //         level: "Superior",
-        //         difficulty: "Difícil",
-        //         creator: "Prof. Ana Carvalho",
-        //         answer: "A Segunda Lei da Termodinâmica afirma que a entropia total de um sistema isolado (e a sua vizinhança) nunca pode diminuir ao longo do tempo. Em outras palavras, processos naturais espontâneos tendem a mover-se em uma direção que aumenta o grau de desordem (entropia) do universo. É por isso que o calor flui espontaneamente de um corpo quente para um corpo frio, mas nunca o contrário.",
-        //         alternatives: null
-        //     }
-        // ];
-
-        // document.addEventListener('DOMContentLoaded', (event) => {
-        //     // Inicializa a visibilidade no carregamento da página
-        //     toggleAlternatives(); 
-        // });
-
-        // function toggleAlternatives() {
-        //     const typeSelect = document.getElementById('tipo_questao');
-        //     const alternativesSection = document.getElementById('alternatives-section');
-        //     const alternativeInputs = document.querySelectorAll('.alt-input');
-
-        //     // Simulação: Se o valor for '1' (Múltipla Escolha), exibe as alternativas.
-        //     const isMultipleChoice = typeSelect.value === '1';
-
-        //     if (isMultipleChoice) {
-        //         alternativesSection.style.display = 'block';
-        //         // Define os campos de alternativa como obrigatórios (required)
-        //         alternativeInputs.forEach(input => {
-        //             input.required = true;
-        //         });
-        //     } else {
-        //         alternativesSection.style.display = 'none';
-        //         // Remove a obrigatoriedade dos campos
-        //         alternativeInputs.forEach(input => {
-        //             input.required = false;
-        //         });
-        //     }
-        // }
-        
-        // ==============================================
-        // FUNÇÕES DE CONTROLE DO MODAL
-        // ==============================================
-
-        // const modal = document.getElementById('details-modal');
-        // const modalContent = document.querySelector('.modal-content');
-        // const altContainer = document.getElementById('detail-alternatives-container');
-        // const altList = document.getElementById('detail-alternatives');
-
-        // function showDetails(id) {
-        //     // 1. Encontra a linha da tabela correspondente ao ID
-        //     const row = document.querySelector(`tr[data-id="${id}"]`);
-        //     if (!row) {
-        //         console.error(`Questão com ID ${id} não encontrada na tabela.`);
-        //         return;
-        //     }
-
-        //     // 2. Extrai os dados dos atributos 'data-'
-        //     const enunciado = row.getAttribute('data-enunciado');
-        //     const tipo = row.getAttribute('data-tipo');
-        //     const nivel = row.getAttribute('data-nivel');
-        //     const dificuldade = row.getAttribute('data-dificuldade');
-        //     const criador = row.getAttribute('data-criador');
-
-        //     // O campo data-resposta-correta foi removido, agora focamos apenas nas alternativas
-        //     // Para Preencher Lacuna, a resposta é o próprio enunciado da alternativa correta.
-
-        //     const alternativesJson = row.getAttribute('data-alternativas'); 
-        //     let alternatives = null;
-
-        //     // Converte o JSON de alternativas em um objeto JavaScript (List<Alternativa>)
-        //     if (alternativesJson && alternativesJson !== '[]') {
-        //         try {
-        //             alternatives = JSON.parse(alternativesJson);
-        //         } catch (e) {
-        //             console.error("Erro ao parsear JSON de alternativas:", e);
-        //         }
-        //     }
-
-        //     // Elementos do Modal
-        //     const modal = document.getElementById('details-modal');
-        //     const altContainer = document.getElementById('alternatives-container');
-        //     const altList = document.getElementById('alternatives-list');
-
-        //     // 3. Preenche os campos principais do modal
-        //     document.getElementById('detail-id').textContent = `#${id}`;
-        //     document.getElementById('detail-type').textContent = tipo;
-        //     document.getElementById('detail-statement').textContent = enunciado;
-        //     document.getElementById('detail-level').textContent = nivel;
-        //     document.getElementById('detail-difficulty').textContent = dificuldade;
-        //     document.getElementById('detail-creator').textContent = criador;
-
-        //     // Variáveis para preencher a Resposta Correta (depende do tipo)
-        //     let respostaTexto = 'N/A'; 
-        //     let respostaLabel = ''; // A, B, C, D...
-
-        //     // Zera e esconde a seção de alternativas por padrão
-        //     altList.innerHTML = '';
-        //     altContainer.style.display = 'none';
-
-        //     // 4. Lógica das Alternativas
-        //     if (alternatives && alternatives.length > 0) {
-
-        //         const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-
-        //         if (tipo === 'Preencher Lacuna') {
-        //              // Para Lacuna, a resposta é o texto da única alternativa correta
-        //             const correctAlt = alternatives.find(alt => alt.flg_eh_correta === 'S');
-        //             if (correctAlt) {
-        //                 respostaTexto = correctAlt.texto_alternativa;
-        //             }
-        //             // Não listamos as alternativas para Lacuna
-        //             altContainer.style.display = 'none';
-
-        //         } else {
-        //             // Multipla Escolha ou Verdadeiro ou Falso
-        //             altContainer.style.display = 'block';
-
-        //             alternatives.forEach((alt, index) => {
-        //                 if (index >= labels.length) return; 
-
-        //                 const listItem = document.createElement('li');
-        //                 listItem.classList.remove('correct-answer');
-
-        //                 let altText = alt.texto_alternativa; 
-        //                 let isCorrect = alt.flg_eh_correta === 'S'; // Usa a flag 'S' ou 'N'
-
-        //                 if (tipo === 'Verdadeiro ou Falso') {
-        //                     // Adiciona o status Verdadeiro/Falso ao texto
-        //                     altText += isCorrect ? ' (VERDADEIRO)' : ' (FALSO)';
-        //                 }
-
-        //                 // Define o conteúdo da lista
-        //                 listItem.textContent = `${labels[index]}. ${altText}`;
-
-        //                 if (isCorrect) {
-        //                     listItem.classList.add('correct-answer');
-
-        //                     // Captura a label correta para exibir no campo "Resposta"
-        //                     respostaLabel = labels[index]; 
-
-        //                     // Se for V/F, a resposta é sempre 'VERDADEIRO' ou o texto da afirmação
-        //                     if (tipo === 'Verdadeiro ou Falso') {
-        //                          respostaTexto = 'VERDADEIRO (Item ' + respostaLabel + ')';
-        //                     } else {
-        //                          // Se for Múltipla Escolha, a resposta é a letra
-        //                          respostaTexto = respostaLabel;
-        //                     }
-        //                 }
-        //                 altList.appendChild(listItem);
-        //             });
-        //         }
-        //     }
-
-        //     // 5. Atualiza o campo de resposta final e torna o modal visível
-        //     document.getElementById('detail-answer').textContent = respostaTexto; 
-        //     modal.style.display = 'flex';
-        // }
-        // document.addEventListener('DOMContentLoaded', toggleAlternatives);
-
-        const modal = document.getElementById('details-modal');
-        const loadingContainer = document.getElementById('alternativas-loading');
-        const alternativesDataContainer = document.getElementById('alternativas-data');
-        
-        // Substitua sua função showDetails por esta:
-        function showDetails(element) {
-            // 1. LÊ OS DADOS BÁSICOS DIRETAMENTE DOS ATRIBUTOS DATA-* DO BOTÃO
-            const id_questao = element.dataset.id;
-            const tipo_questao = element.dataset.tipo;
-            const enunciado = element.dataset.enunciado;
-            const nivel_educacional = element.dataset.nivel;
-            const nivel_dificuldade = element.dataset.dificuldade;
-            const professor_criador = element.dataset.criador; // ID do Criador
-
-            // NENHUMA VERIFICAÇÃO COM questionsData É NECESSÁRIA, eliminando o ReferenceError.
-
-            // 2. Exibe o modal e os dados estáticos lidos
-            document.getElementById('detail-id').textContent = id_questao;
-            document.getElementById('detail-enunciado').textContent = enunciado;
-            document.getElementById('detail-tipo').textContent = tipo_questao;
-            document.getElementById('detail-nivel').textContent = nivel_educacional;
-            document.getElementById('detail-dificuldade').textContent = nivel_dificuldade;
-            document.getElementById('detail-criador').textContent = professor_criador; 
-
-           
-
-            alternativesDataContainer.innerHTML = ''; // Limpa conteúdo anterior
-            loadingContainer.style.display = 'block'; // Mostra "Carregando..."
-            modal.style.display = 'flex'; // Exibe o modal
-            
-            console.log("ID da questão:", id_questao);
-
-            // 3. REALIZA A CHAMADA FETCH PARA O BACKEND (para obter apenas as alternativas)
-            // const apiUrl = `/questao/${id_questao}/alternativas`;
-            // const apiUrl = `"/buscar/${id_questao}"`;
-
-            fetch(apiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        // Lança um erro se o status HTTP não for 200 (OK)
-                        throw new Error(`Falha no servidor (${response.status}) ao carregar alternativas.`);
-                    }
-                    return response.json();
-                })
-                .then(alternatives => {
-                    // Sucesso: Esconde loading e injeta os dados
-                    loadingContainer.style.display = 'none';
-                    // Chama a função de renderização com os dados recebidos
-                    injectAlternatives(alternatives, tipo_questao);
-                })
-                .catch(error => {
-                    // Erro: Exibe mensagem de erro e loga no console
-                    loadingContainer.innerHTML = `<p style="color: var(--danger); font-weight: 600;">Erro ao carregar alternativas: ${error.message}</p>`;
-                    console.error('Erro na chamada AJAX:', error);
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalExclusao = document.getElementById('modalExclusao');
+            if (modalExclusao) {
+                modalExclusao.addEventListener('show.bs.modal', event => {
+                    
+                    // Botão que acionou o modal
+                    const button = event.relatedTarget;
+                    
+                    // Extrai o ID do atributo data-id
+                    const id_questao = button.getAttribute('data-id');
+                    
+                    // Atualiza o input oculto no formulário do modal
+                    const hiddenInput = modalExclusao.querySelector('#idQuestInputHidden');
+                    hiddenInput.value = id_questao
                 });
-        }
-
-        /*
-         * Pega o array de alternativas do backend (JSON) e renderiza o HTML apropriado
-         * dentro do modal de detalhes (id="alternativas-data").
-         *
-         * O JSON de alternativa deve seguir o modelo:
-         * { texto_alternativa: '...', flg_eh_correta: 'S' | 'N' }
-         * * @param {Array<Object>} alternatives - A lista de objetos de alternativa (JSON).
-         * @param {string} tipo_questao - O tipo da questão (ex: "Multipla Escolha", "Verdadeiro ou Falso").
-         */
-        function injectAlternatives(alternatives, tipo_questao) {
-            const container = document.getElementById('alternativas-data');
-            let htmlContent = '';
-
-            // 1. Limpa o conteúdo anterior
-            container.innerHTML = ''; 
-
-            // Garante que haja alternativas para processar
-            if (!alternatives || alternatives.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-muted);">Nenhuma alternativa encontrada para esta questão.</p>';
-                return;
-            }
-
-            // --- Lógica de Renderização por Tipo de Questão ---
-
-            // ===================================================
-            // 1. MÚLTIPLA ESCOLHA
-            // ===================================================
-            if (tipo_questao === 'Multipla Escolha') {
-                const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-                htmlContent += '<h4 class="detail-subtitle" style="font-weight: 600; font-size: 1.1rem; color: var(--text-light); margin-bottom: 1rem;">Alternativas:</h4>';
-                htmlContent += '<ul>';
-
-                alternatives.forEach((alt, index) => {
-                    // Verifica se o flag é 'S' (Sim)
-                    const isCorrect = alt.flg_eh_correta === 'S'; 
-                    const statusText = isCorrect ? ' (CORRETA)' : '';
-                    const colorClass = isCorrect ? 'color: var(--accent); font-weight: 700; border-color: var(--accent);' : 'color: var(--text-light); border-color: transparent;';
-                    const bgColor = isCorrect ? '#1f271a' : '#161b22';
-
-                    htmlContent += `
-                        <li style="${colorClass} background-color: ${bgColor}; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.95rem; border-width: 1px; border-style: solid;">
-                            ${letters[index]}. ${alt.texto_alternativa}${statusText}
-                        </li>
-                    `;
-                });
-                htmlContent += '</ul>';
-            } 
-
-            // ===================================================
-            // 2. VERDADEIRO OU FALSO
-            // ===================================================
-            else if (tipo_questao === 'Verdadeiro ou Falso') {
-                htmlContent += '<h4 class="detail-subtitle" style="font-weight: 600; font-size: 1.1rem; color: var(--text-light); margin-bottom: 1rem;">Afirmações e Status:</h4>';
-                htmlContent += '<ul>';
-
-                alternatives.forEach((alt, index) => {
-                    // Verifica se o flag é 'S' (Sim)
-                    const isTrue = alt.flg_eh_correta === 'S';
-                    const statusText = isTrue ? 'VERDADEIRO' : 'FALSO';
-                    const statusColor = isTrue ? 'var(--accent)' : 'var(--danger)';
-                    const bgColor = isTrue ? '#1f271a' : '#271a1a';
-
-                    htmlContent += `
-                        <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; background-color: ${bgColor}; padding: 10px; border-radius: 6px; border: 1px solid ${isTrue ? 'var(--accent)' : 'var(--danger)'};">
-                            <span style="color: var(--text-light); flex-grow: 1;">Afirmação ${index + 1}: ${alt.texto_alternativa}</span>
-                            <span style="color: ${statusColor}; font-weight: 700; padding-left: 15px;">
-                                ${statusText}
-                            </span>
-                        </li>
-                    `;
-                });
-                htmlContent += '</ul>';
-            }
-
-            // ===================================================
-            // 3. PREENCHER LACUNA
-            // ===================================================
-            else if (tipo_questao === 'Preencher Lacuna') {
-                // Assume que a resposta correta (única) está no primeiro item da lista
-                const respostaEsperada = alternatives[0]?.texto_alternativa || 'Nenhuma resposta esperada definida.';
-
-                htmlContent += `
-                    <h4 class="detail-subtitle" style="font-weight: 600; font-size: 1.1rem; color: var(--text-light); margin-bottom: 1rem;">Resposta Esperada:</h4>
-                    <div style="background: #161b22; padding: 12px; border-radius: 8px; font-size: 1rem; color: var(--accent); border: 1px solid var(--accent);">
-                        ${respostaEsperada}
-                    </div>
-                `;
-            }
-            
-            // 4. Injeta o conteúdo final no DOM
-            container.innerHTML = htmlContent;
-        }
-
-        function closeDetails() {
-            modal.style.display = 'none';
-        }
-
-        // 4. Fechar o modal clicando fora
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeDetails();
             }
         });
-        
     </script>
 </body>
 </html>

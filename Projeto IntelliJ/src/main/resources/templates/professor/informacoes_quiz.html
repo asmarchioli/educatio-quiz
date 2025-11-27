@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- <!-- <link rel="stylesheet" th:href="@{/css/home_style.css}"> -->
     <link rel="stylesheet" th:href="@{/css/global.css}">
-    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">-->
+    <link rel="stylesheet" th:href="@{/css/fluxo_professor.css}">
     <title>Educatio Quiz - Criar Novo Quiz</title>
 </head>
     <body>
@@ -18,15 +18,25 @@
             </div>
         </nav>
 
-        <!-- CONTEÚDO PRINCIPAL: Formulário de Criação de Quiz -->
+
+        <div th:if="${error}" class="alert alert-danger" 
+             style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+            <span th:text="${error}"></span>
+        </div>
+
+
+        
+        <!-- Formulário de Criação de Quiz -->
         <main class="main-content" style="max-width: 800px; margin: 4rem auto;">
             <div class="content-card" style="padding: 3rem;">
 
-                <h2 class="text-center font-bold mb-10" style="color: var(--text-light); font-size: 2rem;">
-                    Criação de Novo Quiz
+                <h2 class="text-3xl font-bold mb-8 text-center" style="color: var(--accent);"
+                    th:text="${quiz.id_quiz == null} ? 'Criar Novo Quiz' : 'Editar Informações do Quiz'">
+                    Criar/Editar Questão
                 </h2>
 
-                <!-- Simulando a Ação de Envio para o Backend (URL de salvamento) -->
+
+                <!-- Simulando a Ação de Envio para o Backend -->
                 <form id="create-quiz-form" 
                       th:action="${quiz.id_quiz == null} 
                            ? @{/quiz/salvar} 
@@ -40,7 +50,6 @@
                     <input type="hidden" th:field="*{id_quiz}" th:value="${quiz.id_quiz}"/>
                     <input type="hidden" th:field="*{data_criacao}" th:value="${quiz.data_criacao}" />
                     
-                    <!-- CAMPO OCULTO: Professor Criador (Injetado pelo Backend) -->
                     <input type="hidden" th:field="*{professor_criador}" th:value="${professor.getId_professor()}" />
                     
 
@@ -64,9 +73,6 @@
                         <select id="quiz-visibility" th:field="*{visibilidade}" required class="form-input" onchange="togglePinAccess()">
                             <option value="" disabled selected>Defina a visibilidade </option>
                             <option th:each= "exibicao : ${exibicoes}" th:value="${exibicao}" th:text="${exibicao}"> </option>
-                            <!-- Valores simulando Enum Exibicao -->
-                            <!-- <option value="PUBLICO">Público (Não requer PIN)</option>
-                            <option value="PRIVADO">Privado (Requer PIN de Acesso)</option> -->
                         </select>
                     </div>
 
@@ -87,15 +93,10 @@
                         <label for="quiz-level" class="form-label">
                             Nível Educacional
                         </label>
+
                         <select id="quiz-level" th:field="*{nivel_educacional}" required class="form-input">
                             <option value="" disabled selected>Selecione o nível</option>
                             <option th:each= "nivel : ${escolaridades}" th:value="${nivel}" th:text="${nivel}"> </option>
-                            <!-- Valores simulando Enum Escolaridade -->
-                            <!-- <option value="Fundamental I">Fundamental I</option>
-                            <option value="Fundamental II">Fundamental II</option>
-                            <option value="Ensino Médio">Ensino Médio</option>
-                            <option value="Graduação">Graduação</option>
-                            <option value="Pós-Graduação">Pós-Graduação</option> -->
                         </select>
                     </div>
 
@@ -140,12 +141,8 @@
             </div>
         </main>
 
-        <!-- Rodapé opcional -->
-        <footer class="main-content" style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
-            &copy; 2024 Educatio Quiz. Todos os direitos reservados.
-        </footer>
         
-        <!-- Lógica JavaScript Mínima para Controle de Visibilidade do PIN -->
+        <!-- Lógica SavaScript para Controle de Visibilidade do PIN -->
         <script>
             document.addEventListener('DOMContentLoaded', (event) => {
                 // Inicializa a visibilidade do PIN no carregamento da página
@@ -164,7 +161,7 @@
                     // Se for PRIVADO, exibe o campo e torna obrigatório para validação do backend
                     pinGroup.style.display = 'block';
                     pinInput.required = true;
-                    pinInput.setAttribute('th:required', 'required'); // Ajuda na integração Thymeleaf/Spring
+                    pinInput.setAttribute('th:required', 'required'); 
                 } else {
                     // Se for PUBLICO, oculta o campo e remove a obrigatoriedade
                     pinGroup.style.display = 'none';

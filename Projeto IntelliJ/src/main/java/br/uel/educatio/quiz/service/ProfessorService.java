@@ -14,16 +14,14 @@ import java.util.Optional;
 @Service
 public class ProfessorService {
 
-    // --- Dependências Mescladas ---
+
     private final ProfessorDAO professorDAO;
     private final ProfessorAreaDAO professorAreaDAO;
-    private final AuthService authService; // Adicionado do Arquivo 1
-    private final QuestaoService questaoService; // Do Arquivo 2
-
-    // (QuizService foi mantido no construtor para consistência)
+    private final AuthService authService; 
+    private final QuestaoService questaoService; 
     private final QuizService quizService;
 
-    // Construtor Mesclado (Base do Arquivo 2 + AuthService do Arquivo 1)
+  
     @Autowired
     public ProfessorService(ProfessorDAO professorDAO, ProfessorAreaDAO professorAreaDAO,
                             AuthService authService, QuestaoService questaoService,
@@ -35,8 +33,7 @@ public class ProfessorService {
         this.quizService = quizService;
     }
 
-    // --- Métodos do Arquivo 1 (Salvar Professor + Áreas) ---
-    // (Atualizados para usar métodos DAO modernos)
+
 
     @Transactional
     public Professor cadastrar(Professor professor, List<Long> idsAreas) {
@@ -44,7 +41,7 @@ public class ProfessorService {
             throw new IllegalArgumentException("Email já cadastrado no sistema");
         }
 
-        // Usa o DAO moderno 'save' (do Arquivo 2)
+
         Professor professorSalvo = professorDAO.save(professor);
         Long idProfessor = professorSalvo.getId_professor();
 
@@ -56,7 +53,7 @@ public class ProfessorService {
 
     @Transactional
     public Professor atualizar(Professor professor, List<Long> novasIdsAreas) {
-        // Usa o DAO moderno 'findById' (do Arquivo 2)
+
         Optional<Professor> professorExistente = professorDAO.findById(professor.getId_professor());
         if (professorExistente.isEmpty()) {
             throw new IllegalArgumentException("Professor não encontrado");
@@ -68,7 +65,6 @@ public class ProfessorService {
             }
         }
 
-        // Usa o DAO moderno 'save' (do Arquivo 2)
         Professor professorAtualizado = professorDAO.save(professor);
 
         if (novasIdsAreas != null) {
@@ -80,12 +76,9 @@ public class ProfessorService {
         return professorAtualizado;
     }
 
-    // --- Métodos do Arquivo 2 (Salvar/Atualizar Perfil Básico) ---
 
     @Transactional
     public Professor salvar(Professor professor) throws RuntimeException {
-        // Validação de e-mail (note: esta só checa 'professor',
-        // a do 'cadastrar' checa 'authService' que é mais completa)
         Optional<Professor> existente = professorDAO.findByEmail(professor.getEmail());
         if (existente.isPresent() && existente.get().getId_professor() != professor.getId_professor()) {
             throw new RuntimeException("E-mail já cadastrado para outro professor.");
@@ -118,10 +111,10 @@ public class ProfessorService {
         return professorDAO.save(professorExistente);
     }
 
-    // --- Métodos de Busca Mesclados (de ambos os arquivos) ---
+
 
     public List<Professor> listarTodos() {
-        return professorDAO.findAll(); // Método DAO do Arquivo 2
+        return professorDAO.findAll(); 
     }
 
     public Professor buscarPorId(Long id) {
@@ -133,35 +126,32 @@ public class ProfessorService {
         return professorOpt.get();
     }
 
-    // Adicionado do Arquivo 1 (mas usando DAO do Arquivo 2)
+
     public Optional<Professor> buscarPorEmail(String email) {
         return professorDAO.findByEmail(email);
     }
 
     public boolean existePorId(Long id) {
-        return professorDAO.existsById(id); // Do Arquivo 2
+        return professorDAO.existsById(id); 
     }
 
-    // --- Métodos de Exclusão (Lógica do Arquivo 2 é mais segura) ---
+
 
     @Transactional
     public void deletarPorId(Long id) throws RuntimeException {
         if (!professorDAO.existsById(id)) {
             throw new RuntimeException("Professor não encontrado para exclusão.");
         }
-        // TODO: Adicionar lógica para verificar dependências (quizzes, questões) antes de excluir.
 
-        // (Lógica de exclusão de áreas - assumindo 'removeAllAreasFromProfessor' do DAO 2)
         professorAreaDAO.removeAllAreasFromProfessor(id);
         professorDAO.deleteById(id);
     }
 
-    // --- Métodos de Áreas Mesclados (de ambos os arquivos) ---
+
 
     @Transactional
     public void adicionarAreaProfessor(Long idArea, Long idProfessor) throws RuntimeException{
-        // if (!professorDAO.existsById(idProfessor)) throw new RuntimeException("Professor não existe");
-        // if (!areaDAO.existsById(idArea)) throw new RuntimeException("Área não existe");
+
         professorAreaDAO.addAreaToProfessor(idProfessor, idArea);
         
     }
@@ -176,7 +166,7 @@ public class ProfessorService {
         return professorAreaDAO.findAreasByProfessorId(idProfessor);
     }
 
-    // Retorna List<Area> (Adicionado do Arquivo 1)
+    // Retorna List<Area> 
     public List<Area> buscarAreasDoProfessor(Long idProfessor) {
         return professorAreaDAO.buscarAreasDoProfessor(idProfessor);
     }
@@ -186,7 +176,7 @@ public class ProfessorService {
         return professorDAO.findAllById(idsProfessores);
     }
 
-    // Adicionado do Arquivo 1
+
     public boolean professorPossuiArea(Long idProfessor, Long idArea) {
         return professorAreaDAO.professorPossuiArea(idProfessor, idArea);
     }

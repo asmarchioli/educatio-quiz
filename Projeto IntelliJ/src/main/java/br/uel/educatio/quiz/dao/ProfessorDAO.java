@@ -13,17 +13,14 @@ import java.util.*;
 
 @Repository
 public class ProfessorDAO {
-
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    // MELHOR PRÁTICA: Injeção por construtor (do Arquivo 2)
     public ProfessorDAO(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    // RowMapper (do Arquivo 2, é idêntico ao 1)
     private final RowMapper<Professor> rowMapper = (rs, rowNum) -> {
         Professor professor = new Professor();
         professor.setId_professor(rs.getLong("id_professor"));
@@ -35,8 +32,6 @@ public class ProfessorDAO {
         professor.setLattes(rs.getString("lattes"));
         return professor;
     };
-
-    // --- Métodos modernos (mantidos do Arquivo 2) ---
 
     public List<Professor> findAll() {
         String sql = "SELECT * FROM professor ORDER BY nome";
@@ -56,7 +51,6 @@ public class ProfessorDAO {
     public Professor save(Professor professor) {
         // Verifica se o ID é nulo ou igual a zero para decidir entre INSERT e UPDATE
         if (professor.getId_professor() == null || professor.getId_professor() == 0) {
-            // INSERIR: usa RETURNING para obter o novo ID
             String sql = "INSERT INTO professor (nome, email, senha, instituicao_ensino, descricao_profissional, lattes) " +
                     "VALUES (?, ?, ?, ?, ?, ?) RETURNING id_professor";
             Long newId = jdbcTemplate.queryForObject(sql, new Object[]{
@@ -69,7 +63,7 @@ public class ProfessorDAO {
             }, Long.class);
             professor.setId_professor(newId != null ? newId : 0L);
         } else {
-            // ATUALIZAR: atualiza os dados existentes
+            // atualiza os dados existentes
             String sql = "UPDATE professor SET nome = ?, email = ?, senha = ?, instituicao_ensino = ?, " +
                     "descricao_profissional = ?, lattes = ? WHERE id_professor = ?";
             jdbcTemplate.update(sql,
@@ -127,7 +121,6 @@ public class ProfessorDAO {
         return namedParameterJdbcTemplate.query(sql, params, rowMapper);
     }
 
-    // --- Método útil (adicionado do Arquivo 1) ---
 
     public boolean emailJaExiste(String email) {
         String sql = "SELECT COUNT(*) FROM professor WHERE email = ?";

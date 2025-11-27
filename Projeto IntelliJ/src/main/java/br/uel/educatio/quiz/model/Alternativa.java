@@ -15,10 +15,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Alternativa {
 
-    // @NotNull(message = "O ID da questão é obrigatório.")
     private Long id_questao;
 
-    // @NotNull(message = "O número da alternativa é obrigatório.")
+
     private Long num_alternativa;
 
     @NotBlank(message = "O texto da alternativa não pode estar em branco.")
@@ -28,6 +27,4 @@ public class Alternativa {
     @NotNull(message = "É obrigatório indicar se a alternativa é correta ('S' ou 'N').")
     @Pattern(regexp = "[SN]", message = "O indicador de correção deve ser 'S' ou 'N'.")
     private char flg_eh_correta;
-
-
 }

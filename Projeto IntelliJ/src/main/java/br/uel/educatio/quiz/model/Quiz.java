@@ -22,7 +22,7 @@ public class Quiz {
     @Size(max = 255, message = "O título deve ter no máximo 255 caracteres.")
     private String titulo;
 
-    // @NotBlank(message = "O PIN de acesso é obrigatório.") // É necessário?
+
     @Size(max = 50, message = "O PIN de acesso deve ter no máximo 50 caracteres.")
     private String pin_acesso;
 
@@ -34,14 +34,12 @@ public class Quiz {
     @NotNull(message = "O nível educacional é obrigatório.")
     private Escolaridade nivel_educacional;
 
-    // @NotNull(message = "O professor criador é obrigatório.")
     private Long professor_criador;
 
     @NotNull(message = "A área é obrigatória.")
     private Long area;
 
-    // @NotNull(message = "A data de criação é obrigatória.")
-    // @FutureOrPresent(message = "A data de criação não pode ser no passado.")
+   
     private LocalDate data_criacao;
 
     //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
@@ -55,5 +53,8 @@ public class Quiz {
     
     //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
     private String professor_criador_nome;
+
+    //CAMPO TRANSIENTE (não tem no banco, serve apenas para view)
+    private int qtd_resolucoes;
 
 }

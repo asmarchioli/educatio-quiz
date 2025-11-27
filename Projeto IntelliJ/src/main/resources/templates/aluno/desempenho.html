@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Desempenho</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Estilo para o container de scroll do gráfico */
+        .chart-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto; /* Habilita scroll horizontal */
+            padding-bottom: 15px; /* Espaço para a barra de rolagem */
+        }
+        
+        .chart-container-inner {
+            position: relative;
+            height: 350px; /* Altura fixa */
+            /* A largura será definida via JS */
+        }
+
+        /* Scrollbar bonita para o gráfico */
+        .chart-scroll-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        .chart-scroll-wrapper::-webkit-scrollbar-track {
+            background: #0e1116;
+            border-radius: 4px;
+        }
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>📊 Meu Desempenho</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${aluno.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="content-card">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+                <h2 class="text-xl font-bold text-accent">Dashboard do Aluno</h2>
+                
+                <form action="/aluno/desempenho" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    
+                    <select name="areaId" class="form-input" style="width: 180px; padding: 8px;" 
+                            onchange="this.form.submit()"> <option value="">Todas as Áreas</option>
+                        <option th:each="area : ${areas}" 
+                                th:value="${area.idArea}" 
+                                th:text="${area.nomeArea}"
+                                th:selected="${area.idArea == areaSelecionada}">
+                        </option>
+                    </select>
+
+                    <select name="periodo" class="form-input" style="width: 150px; padding: 8px;"
+                            onchange="this.form.submit()"> <option value="all" th:selected="${periodoSelecionado == 'all'}">Todo o Período</option>
+                        <option value="30d" th:selected="${periodoSelecionado == '30d'}">Últimos 30 dias</option>
+                        <option value="7d" th:selected="${periodoSelecionado == '7d'}">Última Semana</option>
+                        <option value="3d" th:selected="${periodoSelecionado == '3d'}">Últimos 3 dias</option>
+                    </select>
+
+                    </form>
+            </div>
+
+            <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 0; margin-bottom: 2rem;">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <div class="card-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
+                    <h3 class="text-muted" style="font-size: 0.9rem;">Quizzes Realizados</h3>
+                    <p class="text-accent" style="font-size: 2rem; font-weight: bold; margin: 0;" th:text="${totalQuizzes}">0</p>
+                </div>
+                <div class="card-body" style="padding: 1.5rem;">
+                    <div class="card-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+                    <h3 class="text-muted" style="font-size: 0.9rem;">Média de Aproveitamento</h3>
+                    <p class="text-accent" style="font-size: 2rem; font-weight: bold; margin: 0;" th:text="${mediaGeral} + '%'">0%</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+                
+                <div style="background: #161b22; padding: 1.5rem; border-radius: 16px;">
+                    <h3 style="color: var(--text-light); margin-bottom: 1rem;">Evolução de Notas (Cronológico)</h3>
+                    
+                    <div class="chart-scroll-wrapper">
+                        <div class="chart-container-inner" id="lineChartContainer">
+                            <canvas id="chartEvolucao"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #161b22; padding: 1.5rem; border-radius: 16px;">
+                    <h3 style="color: var(--text-light); margin-bottom: 1rem;">Desempenho por Dificuldade</h3>
+                    <div style="height: 250px;">
+                        <canvas id="chartDificuldade"></canvas>
+                    </div>
+                    <p class="text-muted text-center" style="font-size: 0.85rem; margin-top: 10px;">
+                        * Porcentagem de acertos em questões de cada nível.
+                    </p>
+                </div>
+
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="/aluno/home" class="btn btn-secondary">← Voltar para Home</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const historico = /*[[${dadosGraficoLinha}]]*/ [];
+        const statsDificuldade = /*[[${dadosGraficoDificuldade}]]*/ [];
+
+        // === LÓGICA DE SCROLL E TAMANHO ===
+        const minWidthPerPoint = 60; // Largura mínima em pixels por ponto no gráfico
+        const totalPoints = historico.length;
+        // Calcula a largura total necessária
+        const dynamicWidth = Math.max(100, totalPoints * minWidthPerPoint); 
+        
+        // Aplica a largura ao container interno (força o scroll se for maior que a tela)
+        const lineContainer = document.getElementById('lineChartContainer');
+        if (totalPoints > 10) { // Só expande se tiver muitos pontos
+            lineContainer.style.width = dynamicWidth + 'px';
+        } else {
+            lineContainer.style.width = '100%';
+        }
+
+        // === DADOS DO GRÁFICO LINHA ===
+        // Trunca o nome se for muito grande para não quebrar o layout
+        const labelsEvolucao = historico.map(h => {
+            let nome = h.quizTitulo;
+            if (nome.length > 15) nome = nome.substring(0, 15) + '...';
+            return h.labelData + ' - ' + nome;
+        });
+        const dataEvolucao = historico.map(h => h.porcentagem > 100 ? 100 : h.porcentagem); // Trava visual em 100
+
+        new Chart(document.getElementById('chartEvolucao'), {
+            type: 'line',
+            data: {
+                labels: labelsEvolucao,
+                datasets: [{
+                    label: 'Nota (%)',
+                    data: dataEvolucao,
+                    borderColor: '#00c26e',
+                    backgroundColor: 'rgba(0, 194, 110, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#161b22',
+                    pointBorderColor: '#00c26e',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Permite que o gráfico estique na div com scroll
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: '#2e3542' },
+                        ticks: { color: '#9da5b4' }
+                    },
+                    x: {
+                        grid: { color: '#2e3542' },
+                        ticks: { 
+                            color: '#9da5b4', 
+                            maxRotation: 45, 
+                            minRotation: 45,
+                            font: { size: 11 }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const index = tooltipItems[0].dataIndex;
+                                const item = historico[index];
+                                return item.labelData + ' | ' + item.quizTitulo + ' (' + item.tentativa + 'ª Tentativa)';
+                            },
+                            label: function(context) {
+                                return `Nota: ${context.raw.toFixed(1)}%`; // Mostra uma casa decimal
+                            }
+                        },
+                        backgroundColor: 'rgba(26, 31, 39, 0.95)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 10,
+                        borderColor: '#00c26e',
+                        borderWidth: 1,
+                        displayColors: false
+                    }
+                }
+            }
+        });
+
+        // === GRÁFICO DIFICULDADE (BARRA) ===
+        const corDificuldade = { 'FÁCIL': '#00c26e', 'MÉDIO': '#ffc107', 'DIFICIL': '#EF4444', 'DIFÍCIL': '#EF4444' };
+        const ordemDificuldade = ['FÁCIL', 'MÉDIO', 'DIFICIL', 'DIFÍCIL'];
+        
+        statsDificuldade.sort((a, b) => ordemDificuldade.indexOf(a.label.toUpperCase()) - ordemDificuldade.indexOf(b.label.toUpperCase()));
+
+        const labelsDif = statsDificuldade.map(s => s.label);
+        const dataDif = statsDificuldade.map(s => s.valor);
+        const colorsDif = statsDificuldade.map(s => corDificuldade[s.label.toUpperCase()] || '#374151');
+
+        new Chart(document.getElementById('chartDificuldade'), {
+            type: 'bar',
+            data: {
+                labels: labelsDif,
+                datasets: [{
+                    label: '% de Acertos',
+                    data: dataDif,
+                    backgroundColor: colorsDif,
+                    borderRadius: 6,
+                    barThickness: 30
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: '#2e3542' },
+                        ticks: { color: '#9da5b4' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#f5f5f5', font: { weight: 'bold' } }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

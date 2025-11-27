@@ -44,6 +44,10 @@ public class RespostaDAO {
             r.setResposta_aluno_num(respostaNum);
         }
 
+        if (rs.getTimestamp("data_realizacao") != null) {
+            r.setData_realizacao(rs.getTimestamp("data_realizacao").toLocalDateTime());
+        }
+
         return r;
     };
 
@@ -90,8 +94,8 @@ public class RespostaDAO {
     }
 
     public void saveBatch(List<Resposta> respostas) {
-        String sql = "INSERT INTO RESPOSTA (id_questao, id_quiz, id_aluno, tentativa, pontuacao_aluno, flg_acertou, resposta_aluno_texto, resposta_aluno_num)" +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO RESPOSTA (id_questao, id_quiz, id_aluno, tentativa, pontuacao_aluno, flg_acertou, resposta_aluno_texto, resposta_aluno_num, data_realizacao)" +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -115,6 +119,7 @@ public class RespostaDAO {
                 } else {
                     ps.setNull(8, Types.INTEGER);
                 }
+                ps.setTimestamp(9, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
             }
 
             @Override

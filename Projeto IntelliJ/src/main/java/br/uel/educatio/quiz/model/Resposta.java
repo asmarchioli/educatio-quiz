@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -37,10 +38,7 @@ public class Resposta {
     @Pattern(regexp = "[SNsn]", message = "O indicador de acerto deve ser 'S' ou 'N'.")
     private char flg_acertou;
 
-    // -----------------------------------------------------------------
-    // CAMPOS PARA ARMAZENAR A RESPOSTA DO ALUNO NO BANCO
-    // (Mapeados pelas colunas do ALTER TABLE)
-    // -----------------------------------------------------------------
+    private LocalDateTime data_realizacao;
     private String resposta_aluno_texto; // Para 'Preencher Lacuna'
     private Integer resposta_aluno_num;  // Para 'Multipla Escolha' e 'V/F'
 

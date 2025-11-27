@@ -2,275 +2,138 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Revisar Quiz</title>
-    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <title>Revisar Respostas | Educatio</title>
+    <link rel="stylesheet" th:href="@{/css/global2.css}">
     <style>
-        .questao-card-revisao {
-            background: #161b22;
-            padding: 2rem;
+        .q-review-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
-            border-left: 4px solid;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
+            border-left: 5px solid #30363d;
         }
-        
-        .questao-card-revisao:hover {
-            transform: translateX(4px);
-        }
-        
-        .questao-card-revisao.correta {
-            border-color: #00c26e;
-            background: linear-gradient(to right, rgba(0, 194, 110, 0.05), #161b22);
-        }
-        
-        .questao-card-revisao.errada {
-            border-color: #dc2626;
-            background: linear-gradient(to right, rgba(220, 38, 38, 0.05), #161b22);
-        }
-        
-        .questao-header {
+        .q-review-box.correct { border-left-color: var(--primary); }
+        .q-review-box.incorrect { border-left-color: var(--danger); }
+
+        .q-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
-        
-        .questao-numero {
-            color: var(--text-muted);
-            font-weight: 600;
+
+        .q-text {
+            font-size: 1.1rem;
+            color: var(--text-white);
+            margin-bottom: 1rem;
+        }
+
+        .answer-box {
+            padding: 10px;
+            border-radius: var(--radius);
+            background: rgba(255,255,255,0.05);
+            margin-top: 0.5rem;
             font-size: 0.95rem;
         }
-        
-        .status-badge {
-            padding: 0.4rem 0.9rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
+        .answer-correct { color: var(--primary-hover); }
+        .answer-wrong { color: var(--danger-hover); text-decoration: line-through; }
+
+        .attempt-nav {
+            display: flex;
             gap: 0.5rem;
-        }
-        
-        .status-badge.correta {
-            background: rgba(0, 194, 110, 0.2);
-            color: #00c26e;
-        }
-        
-        .status-badge.errada {
-            background: rgba(220, 38, 38, 0.2);
-            color: #dc2626;
-        }
-        
-        .questao-enunciado {
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-            color: var(--text-light);
-        }
-        
-        .alternativa-item-revisao {
-            background: var(--card-color);
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .alternativa-item-revisao:hover {
-            transform: translateX(4px);
-        }
-        
-        .alternativa-item-revisao.correta {
-            background: rgba(0, 194, 110, 0.1);
-            border-color: #00c26e;
-        }
-        
-        .alternativa-item-revisao.selecionada-errada {
-            background: rgba(220, 38, 38, 0.1);
-            border-color: #dc2626;
-        }
-
-        .alternativa-texto {
-            flex: 1;
-        }
-
-        .alternativa-badge {
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .resposta-texto {
-            background: var(--card-color);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 0.5rem;
-            border: 2px solid transparent;
-        }
-
-        .resposta-texto.correta {
-            border-color: #00c26e;
-            background: rgba(0, 194, 110, 0.1);
-        }
-
-        .resposta-texto.selecionada-errada {
-            border-color: #dc2626;
-            background: rgba(220, 38, 38, 0.1);
-        }
-        
-        .resposta-label {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .tentativas-selector {
-            background: #161b22;
-            padding: 1.5rem;
-            border-radius: var(--radius);
             margin-bottom: 2rem;
-        }
-
-        .tentativas-selector h3 {
-            color: var(--accent);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .tentativas-grid {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .tentativa-btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-
-        .tentativa-btn.btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .tentativa-btn.btn-secondary {
-            background: #374151;
-            color: var(--text-light);
-        }
-
-        .tentativa-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .back-link {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #2a2f36;
-        }
-
-        .back-link a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .back-link a:hover {
-            text-decoration: underline;
+            overflow-x: auto;
+            padding-bottom: 5px;
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <h1>📚 Revisão do Quiz</h1>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span th:text="${aluno.nome}"></span>
-            <a href="/logout" class="btn-logout">Sair</a>
+        <div class="navbar-brand">🎓 Educatio</div>
+        <div class="navbar-user">
+            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
+            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
         </div>
     </nav>
-    
-    <div class="container">
-        <div class="welcome">
-            <h2 th:text="${quiz.titulo}" style="color: var(--accent);"></h2>
-            <p style="color: var(--text-muted);">Revisão de Respostas - Veja onde acertou e onde pode melhorar</p>
+
+    <div class="main-container" style="max-width: 900px;">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Revisão: <span th:text="${quiz.titulo}">Quiz</span></h1>
+                <p style="color: var(--text-muted);">Veja seus acertos e erros.</p>
+            </div>
+            <a href="/aluno/historico" class="btn btn-secondary">⬅ Voltar</a>
         </div>
 
-        <div th:if="${tentativas.size() > 1}" class="tentativas-selector">
-            <h3>🔄 Selecionar Tentativa</h3>
-            <div class="tentativas-grid">
+        <!-- Navegação entre tentativas -->
+        <div th:if="${tentativas.size() > 1}" class="card" style="margin-bottom: 2rem;">
+            <h4 style="margin-bottom: 10px; color: var(--text-white);">Selecionar Tentativa:</h4>
+            <div class="attempt-nav">
                 <a th:each="t : ${tentativas}" 
                    th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz}, tentativa=${t})}"
-                   th:classappend="${t == tentativaAtual} ? 'tentativa-btn btn-primary' : 'tentativa-btn btn-secondary'"
-                   th:text="'Tentativa ' + ${t}">
+                   th:classappend="${t == tentativaAtual} ? 'btn btn-primary' : 'btn btn-secondary'"
+                   th:text="${t} + 'ª Tentativa'">
                 </a>
             </div>
         </div>
-        
-        <div th:each="questao, qStat : ${quiz.questoes}">
-            <div class="questao-card-revisao" 
-                 th:classappend="${#strings.toString(respostas[qStat.index].flg_acertou) == 'S'} ? 'correta' : 'errada'">
-                <div class="questao-header">
-                    <span class="questao-numero" th:text="'Questão ' + (${qStat.index} + 1)"></span>
-                    <span class="status-badge" 
-                          th:classappend="${#strings.toString(respostas[qStat.index].flg_acertou) == 'S'} ? 'correta' : 'errada'"
-                          th:text="${#strings.toString(respostas[qStat.index].flg_acertou) == 'S'} ? '✓ Correta' : '✗ Errada'">
-                    </span>
+
+        <!-- Lista de Questões -->
+        <div th:each="questao, stat : ${quiz.questoes}">
+            <div class="q-review-box" 
+                 th:classappend="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'} ? 'correct' : 'incorrect'">
+                
+                <div class="q-header">
+                    <span th:text="'Questão ' + ${stat.count}">01</span>
+                    <span th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'}" style="color: var(--primary);">✅ Correta</span>
+                    <span th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'N'}" style="color: var(--danger);">❌ Incorreta</span>
                 </div>
-                
-                <p class="questao-enunciado" th:text="${questao.enunciado}"></p>
-                
-                <!-- Para Múltipla Escolha e Verdadeiro/Falso -->
-                <div th:if="${questao.tipo_questao.toString() != 'Preencher Lacuna'}">
-                    <div th:each="alt : ${questao.alternativas}">
-                        <div class="alternativa-item-revisao"
-                             th:classappend="${#strings.toString(alt.flg_eh_correta) == 'S'} ? 'correta' : 
-                                            (${respostas[qStat.index].resposta_aluno_num != null and 
-                                               respostas[qStat.index].resposta_aluno_num == alt.num_alternativa} ? 'selecionada-errada' : '')">
-                            <span class="alternativa-texto" th:text="${alt.texto_alternativa}"></span>
-                            <span th:if="${#strings.toString(alt.flg_eh_correta) == 'S'}" class="alternativa-badge" style="color: #00c26e;">✓ Resposta Correta</span>
-                            <span th:if="${respostas[qStat.index].resposta_aluno_num != null and 
-                                          respostas[qStat.index].resposta_aluno_num == alt.num_alternativa and 
-                                          #strings.toString(alt.flg_eh_correta) == 'N'}" class="alternativa-badge" style="color: #dc2626;">✗ Sua Resposta</span>
-                        </div>
+
+                <p class="q-text" th:text="${questao.enunciado}"></p>
+
+                <!-- Múltipla Escolha / V ou F -->
+                <div th:if="${questao.tipo_questao.name() != 'PREENCHER_LACUNA'}">
+                    <div th:each="alt : ${questao.alternativas}" class="answer-box"
+                         style="display: flex; justify-content: space-between;">
+                        
+                        <span th:text="${alt.texto_alternativa}" 
+                              th:classappend="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa && #strings.toString(alt.flg_eh_correta) == 'N'} ? 'answer-wrong' : ''">
+                        </span>
+
+                        <span th:if="${#strings.toString(alt.flg_eh_correta) == 'S'}" style="font-weight: bold; color: var(--primary);">
+                            (Correta)
+                        </span>
+                        <span th:if="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa && #strings.toString(alt.flg_eh_correta) == 'N'}" 
+                              style="font-weight: bold; color: var(--danger);">
+                            (Sua Resposta)
+                        </span>
+                        <span th:if="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa && #strings.toString(alt.flg_eh_correta) == 'S'}" 
+                              style="font-weight: bold; color: var(--primary);">
+                            (Sua Resposta)
+                        </span>
                     </div>
                 </div>
-                
-                <!-- Para Preencher Lacuna -->
-                <div th:if="${questao.tipo_questao.toString() == 'Preencher Lacuna'}">
-                    <div class="resposta-texto" 
-                         th:classappend="${#strings.toString(respostas[qStat.index].flg_acertou) == 'S'} ? 'correta' : 'selecionada-errada'">
-                        <div class="resposta-label">Sua resposta:</div>
-                        <div th:text="${respostas[qStat.index].resposta_aluno_texto}"></div>
+
+                <!-- Preencher Lacuna -->
+                <div th:if="${questao.tipo_questao.name() == 'PREENCHER_LACUNA'}">
+                    <div class="answer-box">
+                        <strong>Sua Resposta:</strong> 
+                        <span th:text="${respostas[stat.index].resposta_aluno_texto}" 
+                              th:style="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'} ? 'color: var(--primary);' : 'color: var(--danger);'">
+                        </span>
                     </div>
-                    <div class="resposta-texto correta" style="margin-top: 0.75rem;">
-                        <div class="resposta-label">Resposta correta:</div>
-                        <div th:text="${questao.alternativas[0].texto_alternativa}"></div>
+                    <div th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'N'}" class="answer-box" style="border: 1px solid var(--primary);">
+                        <strong style="color: var(--primary);">Resposta Esperada:</strong> 
+                        <span th:text="${questao.alternativas[0].texto_alternativa}" style="color: var(--text-white);"></span>
                     </div>
                 </div>
+
             </div>
         </div>
-        
-        <div class="back-link">
-            <a href="/aluno/historico">← Voltar ao Histórico</a>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/aluno/historico" class="btn btn-secondary">Voltar ao Histórico</a>
         </div>
     </div>
 </body>

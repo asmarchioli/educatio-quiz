@@ -2,147 +2,45 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Histórico de Quizzes</title>
-    <link rel="stylesheet" th:href="@{/css/home_style.css}">
-    <style>
-        .quiz-card-historico {
-            background: #161b22;
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            transition: all 0.3s;
-        }
-
-        .quiz-card-historico:hover {
-            background: #1d232d;
-            transform: translateY(-2px);
-        }
-
-        .quiz-info h3 {
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .quiz-info p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .quiz-actions {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-
-        .btn-resultado {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-resultado:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-        }
-
-        .btn-revisar {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-revisar:hover {
-            background: #1d4ed8;
-            transform: translateY(-2px);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: #161b22;
-            border-radius: var(--radius);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .quiz-card-historico {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .quiz-actions {
-                width: 100%;
-            }
-
-            .btn-action {
-                flex: 1;
-                text-align: center;
-            }
-        }
-    </style>
+    <title>Meu Histórico | Educatio</title>
+    <link rel="stylesheet" th:href="@{/css/global2.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno2.css}">
 </head>
 <body>
     <nav class="navbar">
-        <h1>📚 Meu Histórico</h1>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span th:text="${aluno.nome}"></span>
-            <a href="/logout" class="btn-logout">Sair</a>
+        <div class="navbar-brand">🎓 Educatio</div>
+        <div class="navbar-user">
+            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
+            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="welcome">
-            <h2>Quizzes Realizados</h2>
-            <p style="color: var(--text-muted);">Acompanhe seu progresso e revise suas respostas</p>
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">Meu Histórico</h1>
+            <a href="/aluno/home" class="btn btn-secondary">⬅ Voltar</a>
         </div>
 
-        <div th:if="${!quizzes.isEmpty()}">
-            <div class="quiz-card-historico" th:each="quiz : ${quizzes}">
-                <div class="quiz-info">
-                    <h3 th:text="${quiz.titulo}"></h3>
-                    <p th:text="${quiz.descricao}"></p>
-                </div>
-
-                <div class="quiz-actions">
-                    <a th:href="@{/aluno/quizzes/{id}/resultado(id=${quiz.id_quiz})}" class="btn-action btn-resultado">
-                        📊 Ver Resultado
+        <div th:if="${!quizzes.isEmpty()}" class="quiz-list-grid">
+            <div th:each="quiz : ${quizzes}" class="card" style="display: flex; flex-direction: column;">
+                <h3 style="color: var(--text-white); margin-bottom: 0.5rem;" th:text="${quiz.titulo}">Título</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; flex-grow: 1;" th:text="${quiz.descricao}"></p>
+                
+                <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
+                    <a th:href="@{/aluno/quizzes/{id}/resultado(id=${quiz.id_quiz})}" class="btn btn-primary btn-sm" style="flex: 1;">
+                        📊 Resultado
                     </a>
-                    <a th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz})}" class="btn-action btn-revisar">
+                    <a th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz})}" class="btn btn-secondary btn-sm" style="flex: 1;">
                         🔍 Revisar
                     </a>
                 </div>
             </div>
         </div>
 
-        <div th:if="${quizzes.isEmpty()}" class="empty-state">
-            <div class="empty-state-icon">📭</div>
-            <h3 style="color: var(--text-light); margin-bottom: 0.5rem;">Você ainda não realizou nenhum quiz</h3>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comece a fazer quizzes para acompanhar seu progresso!</p>
-            <a href="/aluno/quizzes" class="card-btn">
-                Ver Quizzes Disponíveis
-            </a>
-        </div>
-
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="/aluno/home" style="color: var(--accent); text-decoration: none; font-weight: 600;">← Voltar para Home</a>
+        <div th:if="${quizzes.isEmpty()}" style="text-align: center; padding: 4rem;">
+            <h3>📭 Nenhum histórico encontrado.</h3>
+            <p style="color: var(--text-muted);">Você ainda não realizou nenhum quiz.</p>
+            <a href="/aluno/quizzes" class="btn btn-primary" style="margin-top: 1rem;">Ir para Quizzes</a>
         </div>
     </div>
 </body>

@@ -2,174 +2,101 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Realizar Quiz</title>
-    <link rel="stylesheet" th:href="@{/css/home_style.css}">
+    <title>Respondendo... | Educatio</title>
+    <link rel="stylesheet" th:href="@{/css/global2.css}">
     <style>
-        .questao-card {
-            background: #161b22;
+        .question-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 2rem;
-            border-radius: var(--radius);
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--accent);
+            margin-bottom: 2rem;
+            position: relative;
         }
-
-        .questao-numero {
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .questao-pontos {
-            background: rgba(0, 194, 110, 0.1);
-            padding: 0.25rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-
-        .questao-enunciado {
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-            color: var(--text-light);
-        }
-
-        .alternativas {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .alternativa-item {
-            background: var(--card-color);
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .alternativa-item:hover {
-            background: #1d232d;
-            border-color: var(--accent);
-            transform: translateX(4px);
-        }
-
-        .alternativa-item input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--accent);
-        }
-
-        .alternativa-item label {
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .input-text {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: var(--card-color);
-            border: 2px solid #2a2f36;
-            border-radius: 8px;
-            color: var(--text-light);
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .input-text:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 1rem;
-            background: var(--accent);
+        .q-number {
+            position: absolute;
+            top: -15px; left: 20px;
+            background: var(--primary);
             color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 2rem;
-            transition: all 0.3s;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-
-        .btn-submit:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-        }
-
-        .progress-indicator {
-            background: #161b22;
-            padding: 1rem;
-            border-radius: var(--radius);
+        .q-enunciado {
+            font-size: 1.2rem;
+            color: var(--text-white);
             margin-bottom: 1.5rem;
-            text-align: center;
-            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-label:hover {
+            background-color: rgba(255,255,255,0.03);
+            border-color: var(--text-muted);
+        }
+        input[type="radio"]:checked + span {
+            color: var(--primary-hover);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <h1>📝 Realizando Quiz</h1>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span th:text="${aluno.nome}"></span>
-            <a href="/logout" class="btn-logout">Sair</a>
-        </div>
+        <div class="navbar-brand">🎓 Educatio</div>
+        <!-- Sem botão de sair para evitar acidentes durante o quiz -->
     </nav>
 
-    <div class="container">
-        <div class="welcome">
-            <h2 th:text="${quiz.titulo}" style="color: var(--accent);"></h2>
-            <p th:text="${quiz.descricao}" style="color: var(--text-muted);"></p>
-        </div>
-
-        <div class="progress-indicator">
-            <span th:text="${quiz.questoes.size()} + ' questões no total'"></span>
+    <div class="main-container" style="max-width: 800px;">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title" th:text="${quiz.titulo}">Título do Quiz</h1>
+                <p style="color: var(--text-muted);" th:text="${quiz.descricao}"></p>
+            </div>
+            <a href="/aluno/quizzes" class="btn btn-secondary" onclick="return confirm('Tem certeza? Seu progresso será perdido.')">Cancelar</a>
         </div>
 
         <form th:action="@{/aluno/quizzes/{id}/submeter(id=${quiz.id_quiz})}" method="post">
-            <div class="questao-card" th:each="questao, stat : ${quiz.questoes}">
-                <div class="questao-numero">
-                    <span th:text="'Questão ' + (${stat.index} + 1)"></span>
-                    <span class="questao-pontos" th:text="${questao.pontuacao} + ' pontos'"></span>
-                </div>
-                <p class="questao-enunciado" th:text="${questao.enunciado}"></p>
+            
+            <div th:each="questao, stat : ${quiz.questoes}" class="question-box">
+                <div class="q-number" th:text="'Questão ' + ${stat.count}">01</div>
+                
+                <p class="q-enunciado" th:text="${questao.enunciado}"></p>
 
-                <div th:if="${questao.tipo_questao.toString() == 'Multipla Escolha' or questao.tipo_questao.toString() == 'Verdadeiro ou Falso'}">
-                    <div class="alternativas">
-                        <div class="alternativa-item" th:each="alt : ${questao.alternativas}">
-                            <input type="radio" 
-                                   th:name="'questao_' + ${questao.id_questao}" 
-                                   th:value="${alt.num_alternativa}" 
-                                   th:id="'alt_' + ${questao.id_questao} + '_' + ${alt.num_alternativa}"
-                                   required>
-                            <label th:for="'alt_' + ${questao.id_questao} + '_' + ${alt.num_alternativa}" 
-                                   th:text="${alt.texto_alternativa}"></label>
-                        </div>
-                    </div>
+                <!-- Múltipla Escolha / V ou F -->
+                <div th:if="${questao.tipo_questao.name() != 'PREENCHER_LACUNA'}">
+                    <label th:each="alt : ${questao.alternativas}" class="option-label">
+                        <input type="radio" 
+                               th:name="'questao_' + ${questao.id_questao}" 
+                               th:value="${alt.num_alternativa}" 
+                               required>
+                        <span th:text="${alt.texto_alternativa}">Opção</span>
+                    </label>
                 </div>
 
-                <div th:if="${questao.tipo_questao.toString() == 'Preencher Lacuna'}">
-                    <input type="text" 
-                           class="input-text" 
+                <!-- Preencher Lacuna -->
+                <div th:if="${questao.tipo_questao.name() == 'PREENCHER_LACUNA'}">
+                    <input type="text" class="form-control" 
                            th:name="'questao_' + ${questao.id_questao}" 
-                           placeholder="Digite sua resposta" 
-                           required>
+                           placeholder="Digite sua resposta aqui..." required>
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">✅ Finalizar Quiz</button>
+            <div style="text-align: right; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.1rem;">
+                    ✅ Finalizar e Enviar
+                </button>
+            </div>
         </form>
     </div>
 </body>

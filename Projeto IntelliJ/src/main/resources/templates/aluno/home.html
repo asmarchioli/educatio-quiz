@@ -2,48 +2,55 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Aluno</title>
-    <!-- <link rel="stylesheet" th:href="@{/css/home_style.css}"> -->
-    <link rel="stylesheet" th:href="@{/css/global.css}">
-    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
+    <title>Área do Aluno | Educatio</title>
+    <link rel="stylesheet" th:href="@{/css/global2.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno2.css}">
 </head>
 <body>
+    <!-- Navbar Padronizada -->
     <nav class="navbar">
-        <h1>🎓 Educatio Quiz - Área do Aluno</h1>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span th:text="${aluno.nome}"></span>
-            <a href="/logout" class="btn-logout">Sair</a>
+        <div class="navbar-brand">
+            <span>🎓 Educatio</span>
+        </div>
+        <div class="navbar-user">
+            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
+            <span class="badge" th:text="${aluno.nivel_educacional.displayValue}">Nível</span>
+            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
         </div>
     </nav>
-    
-    <div class="container">
-        <div class="welcome">
-            <h2 th:text="'Bem-vindo(a), ' + ${aluno.nome} + '!'"></h2>
-            <p th:text="'Nível: ' + ${aluno.nivel_educacional.displayValue}" style="color: var(--text-muted);"></p>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">Bem-vindo, <span th:text="${#strings.arraySplit(aluno.nome, ' ')[0]}">Aluno</span>!</h1>
         </div>
-        
-        <div class="cards">
-            <div class="card-body">
-                <div class="card-icon">📝</div>
-                <h3 style="color: var(--text-light); margin-bottom: 1rem;">Realizar Quiz</h3>
-                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Acesse quizzes públicos ou insira um código PIN para quizzes privados</p>
-                <a href="/aluno/quizzes" class="card-btn">Iniciar</a>
-            </div>
-            
-            <div class="card-body">
-                <div class="card-icon">📚</div>
-                <h3 style="color: var(--text-light); margin-bottom: 1rem;">Meu Histórico</h3>
-                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Veja todos os quizzes que você já realizou</p>
-                <a href="/aluno/historico" class="card-btn">Ver Histórico</a>
-            </div>
-            
-            <div class="card-body">
-                <div class="card-icon">📊</div>
-                <h3 style="color: var(--text-light); margin-bottom: 1rem;">Meu Desempenho</h3>
-                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Acompanhe sua evolução e estatísticas</p>
-                <a href="/aluno/desempenho" class="card-btn">Ver Estatísticas</a>
-            </div>
+
+        <div class="dashboard-grid">
+            <!-- Card 1: Realizar Quiz -->
+            <a href="/aluno/quizzes" class="dash-card">
+                <div class="dash-icon">📝</div>
+                <h3 style="color: var(--text-white);">Realizar Quiz</h3>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">
+                    Navegue pelos quizzes públicos ou acesse via PIN.
+                </p>
+            </a>
+
+            <!-- Card 2: Histórico -->
+            <a href="/aluno/historico" class="dash-card">
+                <div class="dash-icon">📚</div>
+                <h3 style="color: var(--text-white);">Meu Histórico</h3>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">
+                    Revise suas tentativas e veja seu progresso.
+                </p>
+            </a>
+
+            <!-- Card 3: Desempenho -->
+            <a href="/aluno/desempenho" class="dash-card">
+                <div class="dash-icon">📊</div>
+                <h3 style="color: var(--text-white);">Desempenho</h3>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">
+                    Gráficos e estatísticas da sua jornada.
+                </p>
+            </a>
         </div>
     </div>
 </body>

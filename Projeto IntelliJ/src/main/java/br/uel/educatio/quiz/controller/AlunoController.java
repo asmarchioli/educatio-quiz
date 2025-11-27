@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class AlunoController {
     public String listarQuizzes(HttpSession session, Model model) {
         Aluno aluno = (Aluno) session.getAttribute("usuarioLogado");
         if (aluno == null) {
-            return "redirect:/login";  //o man, essas verificações de se o aluno/professor está logado são necessárias? O interceptor já faz isso, não? E essa IA do Replit é boa em 
+            return "redirect:/login";  //o man, essas verificações de se o aluno/professor está logado são necessárias? O interceptor já faz isso, não? E essa IA do Replit é boa em ->>> VERIFICAR
         }
         List<Quiz> quizzes = quizService.buscarQuizzesPublicosPorNivel(
             aluno.getNivel_educacional().getDisplayValue()
@@ -249,28 +249,24 @@ public class AlunoController {
         Aluno aluno = (Aluno) session.getAttribute("usuarioLogado");
         if (aluno == null) return "redirect:/login";
 
-        // Calcula Data de Corte
+        // 1. Lógica de Data para o carregamento inicial da página
         LocalDate dataCorte = null;
         if ("3d".equals(periodo)) dataCorte = LocalDate.now().minusDays(3);
         else if ("7d".equals(periodo)) dataCorte = LocalDate.now().minusWeeks(1);
         else if ("30d".equals(periodo)) dataCorte = LocalDate.now().minusMonths(1);
 
-        // Busca Historico com Filtros (DAO atualizado)
+        // 2. Buscas no DAO
         List<DesempenhoDTO> historico = desempenhoDAO.buscarHistorico(aluno.getId_aluno(), areaId, dataCorte);
+        List<EstatisticaDTO> statsDificuldade = desempenhoDAO.buscarDesempenhoPorDificuldade(aluno.getId_aluno(), areaId);
 
-        // Cálculo CORRETO da Média Geral (Soma Pontos Obtidos / Soma Pontos Possíveis)
+        // 3. Média Geral
         double totalPontosObtidos = historico.stream().mapToDouble(DesempenhoDTO::getNotaObtida).sum();
         double totalPontosPossiveis = historico.stream().mapToDouble(DesempenhoDTO::getNotaMaxima).sum();
-
         double mediaGeral = 0.0;
         if (totalPontosPossiveis > 0) {
             mediaGeral = (totalPontosObtidos / totalPontosPossiveis) * 100.0;
         }
-        // Trava visual em 100% caso haja algum erro de dados legado
         if (mediaGeral > 100.0) mediaGeral = 100.0; 
-
-        // Busca Dados Dificuldade (Com filtro de área)
-        List<EstatisticaDTO> statsDificuldade = desempenhoDAO.buscarDesempenhoPorDificuldade(aluno.getId_aluno(), areaId);
 
         model.addAttribute("aluno", aluno);
         model.addAttribute("areas", areaService.listarTodas());
@@ -279,14 +275,54 @@ public class AlunoController {
         model.addAttribute("areaSelecionada", areaId);
         model.addAttribute("periodoSelecionado", periodo);
 
-        model.addAttribute("historico", historico);
         model.addAttribute("totalQuizzes", historico.size());
         model.addAttribute("mediaGeral", String.format("%.1f", mediaGeral));
 
+        // Dados JSON para o JS renderizar inicialmente
         model.addAttribute("dadosGraficoLinha", historico);
         model.addAttribute("dadosGraficoDificuldade", statsDificuldade);
 
         return "aluno/desempenho";
+    }
+
+    @GetMapping("/api/desempenho-dados")
+    @ResponseBody
+    public Map<String, Object> getDadosDesempenho(
+            @RequestParam(required = false) Long areaId,
+            @RequestParam(required = false, defaultValue = "all") String periodo,
+            HttpSession session) {
+
+        Aluno aluno = (Aluno) session.getAttribute("usuarioLogado");
+        if (aluno == null) return null;
+
+        // 1. Lógica de Data
+        LocalDate dataCorte = null;
+        if ("3d".equals(periodo)) dataCorte = LocalDate.now().minusDays(3);
+        else if ("7d".equals(periodo)) dataCorte = LocalDate.now().minusWeeks(1);
+        else if ("30d".equals(periodo)) dataCorte = LocalDate.now().minusMonths(1);
+
+        // 2. Busca Dados
+        List<DesempenhoDTO> historico = desempenhoDAO.buscarHistorico(aluno.getId_aluno(), areaId, dataCorte);
+        List<EstatisticaDTO> statsDificuldade = desempenhoDAO.buscarDesempenhoPorDificuldade(aluno.getId_aluno(), areaId);
+
+        // 3. Recalcula KPIs
+        double totalPontosObtidos = historico.stream().mapToDouble(DesempenhoDTO::getNotaObtida).sum();
+        double totalPontosPossiveis = historico.stream().mapToDouble(DesempenhoDTO::getNotaMaxima).sum();
+        double mediaGeral = 0.0;
+        if (totalPontosPossiveis > 0) {
+            mediaGeral = (totalPontosObtidos / totalPontosPossiveis) * 100.0;
+        }
+        if (mediaGeral > 100.0) mediaGeral = 100.0;
+
+        // 4. Monta o JSON de resposta
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalQuizzes", historico.size());
+        // Formata com ponto para garantir compatibilidade com JS
+        response.put("mediaGeral", String.format("%.1f", mediaGeral).replace(",", ".")); 
+        response.put("historico", historico);
+        response.put("dificuldade", statsDificuldade);
+
+        return response;
     }
 
 }

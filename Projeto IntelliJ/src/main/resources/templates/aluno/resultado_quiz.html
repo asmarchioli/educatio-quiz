@@ -58,17 +58,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="rank, stat : ${ranking}" 
-                        th:style="${rank.nomeAluno == aluno.nome} ? 'background: rgba(35, 134, 54, 0.15);' : ''"
-                        style="border-bottom: 1px solid var(--border);">
+                    <tr th:each="rank : ${ranking}" 
+                        th:style="${rank.nomeAluno == aluno.nome} ? 'background: rgba(35, 134, 54, 0.15); border-left: 3px solid var(--primary);' : 'border-bottom: 1px solid var(--border);'">
+
                         <td style="padding: 10px;">
-                            <span th:if="${stat.count == 1}">🥇</span>
-                            <span th:if="${stat.count == 2}">🥈</span>
-                            <span th:if="${stat.count == 3}">🥉</span>
-                            <span th:if="${stat.count > 3}" th:text="${stat.count} + 'º'"></span>
+                            <span th:if="${rank.posicao == 1}">🥇</span>
+                            <span th:if="${rank.posicao == 2}">🥈</span>
+                            <span th:if="${rank.posicao == 3}">🥉</span>
+                            <span th:if="${rank.posicao > 3}" th:text="${rank.posicao} + 'º'"></span>
                         </td>
-                        <td style="padding: 10px; font-weight: 500;" th:text="${rank.nomeAluno}"></td>
-                        <td style="padding: 10px; text-align: right; color: var(--primary);" th:text="${rank.ultimaNota}"></td>
+
+                        <td style="padding: 10px; font-weight: 500;">
+                            <span th:text="${rank.nomeAluno}">Aluno</span>
+                            <span th:if="${rank.nomeAluno == aluno.nome}" style="font-size: 0.8em; color: var(--primary); margin-left: 5px;">(Você)</span>
+                        </td>
+
+                        <td style="padding: 10px; text-align: right; color: var(--primary); font-weight: bold;" th:text="${rank.pontuacaoTotal}">0</td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(ranking)}">
+                        <td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            Ainda não há ranking para este quiz.
+                        </td>
                     </tr>
                 </tbody>
             </table>

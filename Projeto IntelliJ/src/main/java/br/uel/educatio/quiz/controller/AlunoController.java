@@ -21,6 +21,7 @@ import br.uel.educatio.quiz.model.dto.DesempenhoDTO;
 import br.uel.educatio.quiz.model.dto.EstatisticaDTO;
 import br.uel.educatio.quiz.dao.DesempenhoAlunoDAO;
 import br.uel.educatio.quiz.service.AreaService;
+import br.uel.educatio.quiz.model.dto.RankingDTO;
 
 @Controller
 @RequestMapping("/aluno")
@@ -61,6 +62,15 @@ public class AlunoController {
         List<Quiz> quizzes = quizService.buscarQuizzesPublicosPorNivel(
             aluno.getNivel_educacional().getDisplayValue()
         );
+
+        for (Quiz quiz : quizzes) {
+            try {
+                Area areaObj = areaService.buscarPorId(quiz.getArea());
+                quiz.setNome_area(areaObj.getNomeArea());
+            } catch (Exception e) {
+                quiz.setNome_area("Área Desconhecida");
+            }
+        }
 
         model.addAttribute("quizzes", quizzes);
         model.addAttribute("aluno", aluno);
@@ -151,7 +161,7 @@ public class AlunoController {
     }
 
     @GetMapping("/quizzes/{id}/resultado")
-    public String verResultado(@PathVariable long id, HttpSession session, Model model) {
+    public String verResultado(@PathVariable long id, HttpSession session, Model model) {       
         Aluno aluno = (Aluno) session.getAttribute("usuarioLogado");
         if (aluno == null) {
             return "redirect:/login";
@@ -163,7 +173,6 @@ public class AlunoController {
         }
 
         int ultimaTentativa = respostaService.buscarUltimaTentativa(aluno.getId_aluno(), id);
-  
         int pontuacaoTotal = respostaService.calcularPontuacaoTotal(aluno.getId_aluno(), id, ultimaTentativa);
         int acertos = respostaService.contarAcertos(aluno.getId_aluno(), id, ultimaTentativa);
         int totalQuestoes = quizService.contarQuestoes(id);
@@ -171,7 +180,10 @@ public class AlunoController {
 
         //Busca todas as tentativas do aluno no quiz (para o histórico)
         List<Integer> tentativas = respostaService.buscarTodasTentativas(aluno.getId_aluno(), id);
-        
+
+        List<RankingDTO> ranking = quizService.buscarRankingQuiz(id);
+        model.addAttribute("ranking", ranking);
+
         model.addAttribute("quiz", quiz);
         model.addAttribute("pontuacaoTotal", pontuacaoTotal);
         model.addAttribute("acertos", acertos);

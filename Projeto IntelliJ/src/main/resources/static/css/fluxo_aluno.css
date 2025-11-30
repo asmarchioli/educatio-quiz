@@ -1,105 +1,204 @@
 /* ======================================================= */
-/* ESTILOS ESPECÍFICOS DO FLUXO DO ALUNO */
+/* ESTILOS ESPECÍFICOS DO FLUXO DO ALUNO (Padronizado) */
 /* ======================================================= */
 
 /* ------------------------------------------------------- */
-/* ESTILOS DE PESQUISA E TABELA */
+/* CARDS DE QUIZ (Listagem) - Igual ao Professor */
 /* ------------------------------------------------------- */
 
-/* Pesquisa Centralizada do Aluno */
-.search-container.aluno {
-    position: relative;
-    max-width: 500px;
-    margin: 0 auto 2rem auto;
-}
-.search-container.aluno .search-icon {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-}
-.search-container.aluno .search-input {
-    padding-left: 35px;
-}
-
-/* Efeito de Hover nas Linhas - Fluxo Aluno (Sugere clique na linha) */
-.dark-table tbody tr:hover td {
-    background-color: #1d232d;
-    cursor: pointer;
-}
-
-/* Ajuste para a célula de Ações na Tabela */
-.dark-table tbody td.actions {
-    min-width: 180px; /* Garante espaço mínimo para os 3 botões */
-    padding: 10px 15px; /* Padding ajustado para a célula de ação */
-}
-
-/* Ajuste do botão de ação na tabela do Aluno */
-.table-action-btn.aluno {
-    /* CRÍTICO: Define largura máxima e mínima igual para uniformizar */
-    width: 100%; 
-    min-width: 80px; 
-    max-width: 80px; 
-}
-
-/* Botão Excluir na Tabela (Apenas para o contexto da tabela do aluno) */
-.dark-table .btn-danger { 
-    color: var(--card-color);
-    font-weight: 500;
-}
-
-
-/* ------------------------------------------------------- */
-/* ESTILOS DE MODAL */
-/* ------------------------------------------------------- */
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px);
-    padding: 20px;
-}
-
-.modal-content {
-    background: var(--card-color);
-    padding: 30px;
+.quiz-card-aluno {
+    background: #161b22;
+    padding: 2rem;
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-}
-
-/* Alternativas no Modal */
-.modal-alternatives {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px dashed #2e3542;
-}
-.modal-alternatives ul {
-    list-style: none;
-    padding: 0;
-}
-.modal-alternatives li {
-    background-color: #161b22;
-    padding: 10px;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
+    transition: transform 0.3s, background 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
     border: 1px solid transparent;
 }
-.correct-answer {
-    border-color: var(--accent);
-    background-color: #1f271a;
+
+.quiz-card-aluno:hover {
+    transform: translateY(-4px);
+    background: #1d232d;
+    border-color: var(--border);
+}
+
+.quiz-card-header h3 {
+    color: var(--text-light);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.quiz-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-nivel {
+    background: rgba(56, 139, 253, 0.15);
+    color: #58a6ff;
+    border: 1px solid rgba(56, 139, 253, 0.4);
+}
+
+.badge-area {
+    background: rgba(0, 194, 110, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(0, 194, 110, 0.4);
+}
+
+/* ------------------------------------------------------- */
+/* TELA DE REALIZAÇÃO DE QUIZ */
+/* ------------------------------------------------------- */
+
+.question-container {
+    background-color: #161b22;
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    border: 1px solid #2e3542;
+    position: relative;
+}
+
+.question-number {
+    display: inline-block;
+    background-color: var(--accent);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.question-text {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+/* Opções de Resposta (Radio) */
+.option-label {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.option-label:hover {
+    background-color: #21262d;
+    border-color: var(--text-muted);
+}
+
+.option-label input[type="radio"] {
+    margin-right: 12px;
+    accent-color: var(--accent);
+    width: 18px;
+    height: 18px;
+}
+
+.option-text {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.option-label input:checked + .option-text {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------- */
+/* RESULTADO E REVISÃO */
+/* ------------------------------------------------------- */
+
+.result-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #30363d;
+}
+
+.score-display {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--accent);
+    margin: 1rem 0;
+}
+
+.review-item {
+    border-left: 4px solid transparent;
+    padding-left: 1.5rem;
+}
+
+.review-item.correct {
+    border-left-color: var(--accent);
+}
+
+.review-item.incorrect {
+    border-left-color: var(--danger);
+}
+
+.answer-feedback {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.text-correct { color: var(--accent); font-weight: bold; }
+.text-wrong { color: var(--danger); text-decoration: line-through; margin-right: 8px;}
+
+/* ------------------------------------------------------- */
+/* DASHBOARD (KPIs) */
+/* ------------------------------------------------------- */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.kpi-box {
+    background: #161b22;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    text-align: center;
+    border: 1px solid #30363d;
+}
+
+.kpi-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent);
+    margin-top: 0.5rem;
+}
+
+/* Container do gráfico com scroll (para muitos dados) */
+.chart-scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.chart-wrapper {
+    height: 350px;
+    min-width: 600px; /* Garante largura mínima */
 }

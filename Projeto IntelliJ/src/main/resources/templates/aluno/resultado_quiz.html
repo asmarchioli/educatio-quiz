@@ -2,89 +2,79 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Resultado | Educatio</title>
-    <link rel="stylesheet" th:href="@{/css/global2.css}">
+    <title>Resultado</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
 </head>
 <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎓 Educatio</div>
-        <div class="navbar-user">
-            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
+        <h1>🎓 Educatio Quiz</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${aluno.nome}"></span>
         </div>
     </nav>
 
-    <div class="main-container" style="max-width: 700px; text-align: center;">
-        
-        <div class="card" style="margin-top: 3rem; padding: 3rem;">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-            <h1 style="color: var(--text-white); margin-bottom: 0.5rem;">Quiz Finalizado!</h1>
-            <p style="color: var(--text-muted);" th:text="${quiz.titulo}"></p>
+    <main class="main-content" style="max-width: 800px;">
+        <div class="content-card">
+            
+            <div class="result-header">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+                <h1 style="color: var(--text-light); margin-bottom: 0.5rem;">Quiz Finalizado!</h1>
+                <p style="color: var(--text-muted);" th:text="${quiz.titulo}"></p>
 
-            <div style="display: flex; justify-content: center; gap: 2rem; margin: 2rem 0;">
-                <div>
-                    <div style="font-size: 0.9rem; color: var(--text-muted);">Sua Nota</div>
-                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--primary);" th:text="${pontuacaoTotal}">0</div>
+                <div class="score-display">
+                    <span th:text="${pontuacaoTotal}">0</span>
+                    <span style="font-size: 1.5rem; color: var(--text-muted); font-weight: normal;"> / <span th:text="${pontuacaoMaxima}">100</span> pts</span>
                 </div>
-                <div>
-                    <div style="font-size: 0.9rem; color: var(--text-muted);">Acertos</div>
-                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--text-white);">
-                        <span th:text="${acertos}">0</span> / <span th:text="${totalQuestoes}">0</span>
-                    </div>
+
+                <div style="color: var(--text-light); font-size: 1.1rem;">
+                    Você acertou <strong style="color: var(--accent);" th:text="${acertos}">0</strong> de <span th:text="${totalQuestoes}">0</span> questões.
+                </div>
+                
+                <div class="progress-wrapper" style="margin-top: 1.5rem; height: 10px; background: #30363d; border-radius: 5px;">
+                    <div class="progress-fill" 
+                         th:style="'width: ' + ${(pontuacaoTotal * 100.0) / pontuacaoMaxima} + '%; background: var(--accent); height: 100%; border-radius: 5px;'"></div>
                 </div>
             </div>
 
-            <!-- Barra de Progresso -->
-            <div style="background: #30363d; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 2rem;">
-                <div th:style="'width: ' + ${(pontuacaoTotal * 100.0) / pontuacaoMaxima} + '%; background: var(--primary); height: 100%;'"></div>
-            </div>
-
-            <div style="display: flex; gap: 1rem; justify-content: center;">
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 3rem;">
                 <a th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz})}" class="btn btn-secondary">🔍 Revisar Respostas</a>
-                <a href="/aluno/quizzes" class="btn btn-primary">🏠 Voltar ao Início</a>
+                <a href="/aluno/quizzes" class="btn btn-primary">🏠 Voltar aos Quizzes</a>
             </div>
+
+            <div style="background: #161b22; padding: 1.5rem; border-radius: var(--radius); border: 1px solid #2e3542;">
+                <h3 style="color: var(--text-light); margin-bottom: 1rem; border-bottom: 1px solid #30363d; padding-bottom: 10px;">
+                    🏆 Ranking da Turma
+                </h3>
+                
+                <table class="dark-table" style="box-shadow: none; margin-top: 0; padding: 0;">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%; text-align: left;">Pos</th>
+                            <th style="text-align: left;">Aluno</th>
+                            <th style="text-align: right;">Nota</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${ranking != null}" th:each="rank, stat : ${ranking}" 
+                            th:style="${rank.nomeAluno == aluno.nome} ? 'background: rgba(0, 194, 110, 0.15);' : ''">
+                            <td style="text-align: left;">
+                                <span th:if="${stat.count == 1}">🥇</span>
+                                <span th:if="${stat.count == 2}">🥈</span>
+                                <span th:if="${stat.count == 3}">🥉</span>
+                                <span th:if="${stat.count > 3}" th:text="${stat.count} + 'º'"></span>
+                            </td>
+                            <td style="text-align: left;" th:text="${rank.nomeAluno}"></td>
+                            <td style="text-align: right; color: var(--accent); font-weight: bold;" th:text="${rank.pontuacaoTotal}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${ranking == null}" style="text-align: center; color: var(--text-muted); padding: 1rem;">
+                    Ranking indisponível no momento.
+                </div>
+            </div>
+
         </div>
-
-        <!-- Ranking -->
-        <div class="card" style="margin-top: 2rem; text-align: left;">
-            <h3 style="color: var(--text-white); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
-                🏆 Ranking da Turma
-            </h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="color: var(--text-muted); font-size: 0.9rem;">
-                        <th style="text-align: left; padding: 8px;">Pos</th>
-                        <th style="text-align: left; padding: 8px;">Aluno</th>
-                        <th style="text-align: right; padding: 8px;">Nota</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="rank : ${ranking}" 
-                        th:style="${rank.nomeAluno == aluno.nome} ? 'background: rgba(35, 134, 54, 0.15); border-left: 3px solid var(--primary);' : 'border-bottom: 1px solid var(--border);'">
-
-                        <td style="padding: 10px;">
-                            <span th:if="${rank.posicao == 1}">🥇</span>
-                            <span th:if="${rank.posicao == 2}">🥈</span>
-                            <span th:if="${rank.posicao == 3}">🥉</span>
-                            <span th:if="${rank.posicao > 3}" th:text="${rank.posicao} + 'º'"></span>
-                        </td>
-
-                        <td style="padding: 10px; font-weight: 500;">
-                            <span th:text="${rank.nomeAluno}">Aluno</span>
-                            <span th:if="${rank.nomeAluno == aluno.nome}" style="font-size: 0.8em; color: var(--primary); margin-left: 5px;">(Você)</span>
-                        </td>
-
-                        <td style="padding: 10px; text-align: right; color: var(--primary); font-weight: bold;" th:text="${rank.pontuacaoTotal}">0</td>
-                    </tr>
-
-                    <tr th:if="${#lists.isEmpty(ranking)}">
-                        <td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">
-                            Ainda não há ranking para este quiz.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-    </div>
+    </main>
 </body>
 </html>

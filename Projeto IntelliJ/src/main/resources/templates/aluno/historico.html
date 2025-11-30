@@ -2,46 +2,53 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Meu Histórico | Educatio</title>
-    <link rel="stylesheet" th:href="@{/css/global2.css}">
-    <link rel="stylesheet" th:href="@{/css/fluxo_aluno2.css}">
+    <title>Histórico</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
 </head>
 <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎓 Educatio</div>
-        <div class="navbar-user">
-            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
-            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
+        <h1>🎓 Educatio Quiz - Aluno</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${aluno.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
         </div>
     </nav>
 
-    <div class="main-container">
-        <div class="page-header">
-            <h1 class="page-title">Meu Histórico</h1>
-            <a href="/aluno/home" class="btn btn-secondary">⬅ Voltar</a>
-        </div>
-
-        <div th:if="${!quizzes.isEmpty()}" class="quiz-list-grid">
-            <div th:each="quiz : ${quizzes}" class="card" style="display: flex; flex-direction: column;">
-                <h3 style="color: var(--text-white); margin-bottom: 0.5rem;" th:text="${quiz.titulo}">Título</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; flex-grow: 1;" th:text="${quiz.descricao}"></p>
-                
-                <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
-                    <a th:href="@{/aluno/quizzes/{id}/resultado(id=${quiz.id_quiz})}" class="btn btn-primary btn-sm" style="flex: 1;">
-                        📊 Resultado
-                    </a>
-                    <a th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz})}" class="btn btn-secondary btn-sm" style="flex: 1;">
-                        🔍 Revisar
-                    </a>
-                </div>
+    <main class="main-content">
+        <div class="content-card">
+            
+            <div class="quiz-header">
+                <h2 class="text-xl font-semibold" style="color: var(--text-light);">
+                    Meu Histórico
+                </h2>
+                <a href="/aluno/home" class="btn btn-secondary">⬅️ Voltar</a>
             </div>
-        </div>
 
-        <div th:if="${quizzes.isEmpty()}" style="text-align: center; padding: 4rem;">
-            <h3>📭 Nenhum histórico encontrado.</h3>
-            <p style="color: var(--text-muted);">Você ainda não realizou nenhum quiz.</p>
-            <a href="/aluno/quizzes" class="btn btn-primary" style="margin-top: 1rem;">Ir para Quizzes</a>
+            <div class="cards" style="grid-template-columns: 1fr;"> <div th:each="quiz : ${quizzes}" class="quiz-card-aluno" style="flex-direction: row; align-items: center; min-height: auto;">
+                    <div style="flex-grow: 1;">
+                        <h3 th:text="${quiz.titulo}" style="margin-bottom: 0.5rem; color: var(--text-light);"></h3>
+                        <p style="color: var(--text-muted); margin-bottom: 0.5rem;" th:text="${quiz.descricao}"></p>
+                        <small style="color: var(--text-muted);">Realizado em: <span th:text="${#temporals.format(quiz.data_criacao, 'dd/MM/yyyy')}">Data</span></small> </div>
+                    
+                    <div style="display: flex; gap: 10px; min-width: 250px; justify-content: flex-end;">
+                        <a th:href="@{/aluno/quizzes/{id}/resultado(id=${quiz.id_quiz})}" class="btn btn-primary">
+                            📊 Ver Resultado
+                        </a>
+                        <a th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz})}" class="btn btn-secondary">
+                            🔍 Revisar
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:if="${quizzes.isEmpty()}" style="text-align: center; padding: 4rem;">
+                <h3 style="color: var(--text-muted);">Você ainda não realizou nenhum quiz.</h3>
+                <a href="/aluno/quizzes" class="btn btn-primary" style="margin-top: 1rem;">Ir para Quizzes</a>
+            </div>
+
         </div>
-    </div>
+    </main>
 </body>
 </html>

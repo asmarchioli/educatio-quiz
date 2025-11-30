@@ -2,139 +2,100 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Revisar Respostas | Educatio</title>
-    <link rel="stylesheet" th:href="@{/css/global2.css}">
-    <style>
-        .q-review-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-left: 5px solid #30363d;
-        }
-        .q-review-box.correct { border-left-color: var(--primary); }
-        .q-review-box.incorrect { border-left-color: var(--danger); }
-
-        .q-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        .q-text {
-            font-size: 1.1rem;
-            color: var(--text-white);
-            margin-bottom: 1rem;
-        }
-
-        .answer-box {
-            padding: 10px;
-            border-radius: var(--radius);
-            background: rgba(255,255,255,0.05);
-            margin-top: 0.5rem;
-            font-size: 0.95rem;
-        }
-        .answer-correct { color: var(--primary-hover); }
-        .answer-wrong { color: var(--danger-hover); text-decoration: line-through; }
-
-        .attempt-nav {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-    </style>
+    <title>Revisão</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
 </head>
 <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎓 Educatio</div>
-        <div class="navbar-user">
-            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
-            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
+        <h1>🎓 Educatio Quiz</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${aluno.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
         </div>
     </nav>
 
-    <div class="main-container" style="max-width: 900px;">
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Revisão: <span th:text="${quiz.titulo}">Quiz</span></h1>
-                <p style="color: var(--text-muted);">Veja seus acertos e erros.</p>
+    <main class="main-content" style="max-width: 900px;">
+        <div class="content-card">
+            
+            <div class="quiz-header">
+                <div>
+                    <h2 class="text-xl font-bold" style="color: var(--text-light);">
+                        Revisão: <span th:text="${quiz.titulo}" class="text-accent"></span>
+                    </h2>
+                    <p class="text-muted">Confira suas respostas e o gabarito.</p>
+                </div>
+                <a href="/aluno/historico" class="btn btn-secondary">⬅️ Voltar</a>
             </div>
-            <a href="/aluno/historico" class="btn btn-secondary">⬅ Voltar</a>
-        </div>
 
-        <!-- Navegação entre tentativas -->
-        <div th:if="${tentativas.size() > 1}" class="card" style="margin-bottom: 2rem;">
-            <h4 style="margin-bottom: 10px; color: var(--text-white);">Selecionar Tentativa:</h4>
-            <div class="attempt-nav">
-                <a th:each="t : ${tentativas}" 
-                   th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz}, tentativa=${t})}"
-                   th:classappend="${t == tentativaAtual} ? 'btn btn-primary' : 'btn btn-secondary'"
-                   th:text="${t} + 'ª Tentativa'">
-                </a>
+            <div th:if="${tentativas.size() > 1}" style="background: #161b22; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+                <strong style="color: var(--text-light);">Tentativa:</strong>
+                <div style="display: flex; gap: 0.5rem; overflow-x: auto;">
+                    <a th:each="t : ${tentativas}" 
+                       th:href="@{/aluno/quizzes/{id}/revisar(id=${quiz.id_quiz}, tentativa=${t})}"
+                       class="btn"
+                       th:classappend="${t == tentativaAtual} ? 'btn-primary' : 'btn-secondary'"
+                       th:text="${t} + 'ª'">
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <!-- Lista de Questões -->
-        <div th:each="questao, stat : ${quiz.questoes}">
-            <div class="q-review-box" 
+            <div th:each="questao, stat : ${quiz.questoes}" 
+                 class="question-container review-item"
                  th:classappend="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'} ? 'correct' : 'incorrect'">
                 
-                <div class="q-header">
-                    <span th:text="'Questão ' + ${stat.count}">01</span>
-                    <span th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'}" style="color: var(--primary);">✅ Correta</span>
-                    <span th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'N'}" style="color: var(--danger);">❌ Incorreta</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span class="question-number" th:text="'Questão ' + ${stat.count}">01</span>
+                    
+                    <span th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'}" style="color: var(--accent); font-weight: bold;">
+                        ✅ Acertou
+                    </span>
+                    <span th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'N'}" style="color: var(--danger); font-weight: bold;">
+                        ❌ Errou
+                    </span>
                 </div>
 
-                <p class="q-text" th:text="${questao.enunciado}"></p>
+                <p class="question-text" th:text="${questao.enunciado}"></p>
 
-                <!-- Múltipla Escolha / V ou F -->
                 <div th:if="${questao.tipo_questao.name() != 'PREENCHER_LACUNA'}">
-                    <div th:each="alt : ${questao.alternativas}" class="answer-box"
-                         style="display: flex; justify-content: space-between;">
+                    <div th:each="alt : ${questao.alternativas}" 
+                         style="display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #30363d;">
                         
                         <span th:text="${alt.texto_alternativa}" 
-                              th:classappend="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa && #strings.toString(alt.flg_eh_correta) == 'N'} ? 'answer-wrong' : ''">
+                              th:classappend="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa && #strings.toString(alt.flg_eh_correta) == 'N'} ? 'text-wrong' : ''"
+                              style="color: var(--text-muted);">
                         </span>
 
-                        <span th:if="${#strings.toString(alt.flg_eh_correta) == 'S'}" style="font-weight: bold; color: var(--primary);">
-                            (Correta)
-                        </span>
-                        <span th:if="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa && #strings.toString(alt.flg_eh_correta) == 'N'}" 
-                              style="font-weight: bold; color: var(--danger);">
-                            (Sua Resposta)
-                        </span>
-                        <span th:if="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa && #strings.toString(alt.flg_eh_correta) == 'S'}" 
-                              style="font-weight: bold; color: var(--primary);">
-                            (Sua Resposta)
-                        </span>
+                        <div>
+                            <span th:if="${#strings.toString(alt.flg_eh_correta) == 'S'}" class="text-correct">
+                                (Gabarito)
+                            </span>
+                            <span th:if="${respostas[stat.index].resposta_aluno_num == alt.num_alternativa}" 
+                                  style="font-weight: bold; color: var(--text-light); margin-left: 10px;">
+                                👈 Sua escolha
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Preencher Lacuna -->
                 <div th:if="${questao.tipo_questao.name() == 'PREENCHER_LACUNA'}">
-                    <div class="answer-box">
-                        <strong>Sua Resposta:</strong> 
-                        <span th:text="${respostas[stat.index].resposta_aluno_texto}" 
-                              th:style="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'} ? 'color: var(--primary);' : 'color: var(--danger);'">
-                        </span>
-                    </div>
-                    <div th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'N'}" class="answer-box" style="border: 1px solid var(--primary);">
-                        <strong style="color: var(--primary);">Resposta Esperada:</strong> 
-                        <span th:text="${questao.alternativas[0].texto_alternativa}" style="color: var(--text-white);"></span>
+                    <div class="answer-feedback">
+                        <div style="margin-bottom: 5px;">
+                            <strong>Sua Resposta:</strong> 
+                            <span th:text="${respostas[stat.index].resposta_aluno_texto}" 
+                                  th:style="${#strings.toString(respostas[stat.index].flg_acertou) == 'S'} ? 'color: var(--accent);' : 'color: var(--danger);'">
+                            </span>
+                        </div>
+                        <div th:if="${#strings.toString(respostas[stat.index].flg_acertou) == 'N'}">
+                            <strong style="color: var(--accent);">Resposta Esperada:</strong> 
+                            <span th:text="${questao.alternativas[0].texto_alternativa}" style="color: var(--text-light);"></span>
+                        </div>
                     </div>
                 </div>
 
             </div>
-        </div>
 
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="/aluno/historico" class="btn btn-secondary">Voltar ao Histórico</a>
         </div>
-    </div>
+    </main>
 </body>
 </html>

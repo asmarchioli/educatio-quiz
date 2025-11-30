@@ -2,131 +2,76 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Desempenho | Educatio</title>
-    <link rel="stylesheet" th:href="@{/css/global2.css}">
+    <title>Desempenho</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Estilos Gerais */
-        .chart-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .kpi-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            text-align: center;
-        }
-        
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        /* --- CORREÇÃO DO GRÁFICO (Scroll Horizontal Estável) --- */
-        .chart-scroll-wrapper {
-            width: 100%;
-            overflow-x: auto; 
-            padding-bottom: 15px; /* Espaço para a barra de rolagem */
-            display: block;
-        }
-        
-        .chart-container-inner {
-            height: 350px; /* Altura FIXA para evitar pulos */
-            position: relative;
-            /* A largura será definida dinamicamente pelo JS */
-        }
-        
-        /* Força o canvas a preencher o container interno (que tem altura fixa) */
-        .chart-container-inner canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* Scrollbar bonita (opcional) */
-        .chart-scroll-wrapper::-webkit-scrollbar { height: 8px; }
-        .chart-scroll-wrapper::-webkit-scrollbar-track { background: #1a1f27; }
-        .chart-scroll-wrapper::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-    </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎓 Educatio</div>
-        <div class="navbar-user">
-            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
-            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
+        <h1>🎓 Educatio Quiz - Aluno</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${aluno.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
         </div>
     </nav>
 
-    <div class="main-container">
-        <div class="page-header">
-            <h1 class="page-title">Dashboard de Desempenho</h1>
-            <a href="/aluno/home" class="btn btn-secondary">⬅ Voltar</a>
-        </div>
-
-        <!-- Filtros -->
-        <div class="card" style="margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-            <span style="font-weight: 600; color: var(--text-white);">Filtrar por:</span>
+    <main class="main-content">
+        <div class="content-card">
             
-            <select name="areaId" class="form-control" style="width: 200px;" onchange="atualizarDashboard()">
-                <option value="">Todas as Áreas</option>
-                <option th:each="area : ${areas}" 
-                        th:value="${area.idArea}" 
-                        th:text="${area.nomeArea}"
-                        th:selected="${area.idArea == areaSelecionada}">
-                </option>
-            </select>
-
-            <select name="periodo" class="form-control" style="width: 180px;" onchange="atualizarDashboard()">
-                <option value="all">Todo o Período</option>
-                <option value="30d">Últimos 30 Dias</option>
-                <option value="7d">Última Semana</option>
-            </select>
-        </div>
-
-        <!-- KPIs -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div style="color: var(--text-muted); margin-bottom: 0.5rem;">Quizzes Realizados</div>
-                <div class="kpi-value" id="kpiTotalQuizzes" th:text="${totalQuizzes}">0</div>
+            <div class="quiz-header">
+                <h2 class="text-xl font-bold" style="color: var(--text-light);">Dashboard de Desempenho</h2>
+                <a href="/aluno/home" class="btn btn-secondary">⬅️ Voltar</a>
             </div>
-            <div class="kpi-card">
-                <div style="color: var(--text-muted); margin-bottom: 0.5rem;">Média de Aproveitamento</div>
-                <div class="kpi-value" id="kpiMediaGeral" th:text="${mediaGeral} + '%'">0%</div>
-            </div>
-        </div>
 
-        <!-- Gráfico Evolução -->
-        <div class="chart-container">
-            <h3 style="color: var(--text-white); margin-bottom: 1rem;">Evolução de Notas</h3>
-            <div class="chart-scroll-wrapper">
-                <div class="chart-container-inner" id="lineChartContainer">
-                    <canvas id="chartEvolucao"></canvas>
+            <div class="filter-bar" style="margin-bottom: 2rem;">
+                <label style="color: var(--text-muted); font-weight: 600; margin-right: 10px;">Filtrar:</label>
+                
+                <select name="areaId" class="form-select search-filter-select" onchange="atualizarDashboard()">
+                    <option value="">Todas as Áreas</option>
+                    <option th:each="area : ${areas}" 
+                            th:value="${area.idArea}" 
+                            th:text="${area.nomeArea}"
+                            th:selected="${area.idArea == areaSelecionada}">
+                    </option>
+                </select>
+
+                <select name="periodo" class="form-select search-filter-select" onchange="atualizarDashboard()">
+                    <option value="all">Todo o Período</option>
+                    <option value="30d">Últimos 30 Dias</option>
+                    <option value="7d">Última Semana</option>
+                </select>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-box">
+                    <div style="color: var(--text-muted);">Quizzes Realizados</div>
+                    <div class="kpi-number" id="kpiTotalQuizzes" th:text="${totalQuizzes}">0</div>
+                </div>
+                <div class="kpi-box">
+                    <div style="color: var(--text-muted);">Média Geral</div>
+                    <div class="kpi-number" id="kpiMediaGeral" th:text="${mediaGeral} + '%'">0%</div>
                 </div>
             </div>
-        </div>
 
-        <!-- Gráfico Dificuldade -->
-        <div class="chart-container">
-            <h3 style="color: var(--text-white); margin-bottom: 1rem;">Desempenho por Dificuldade</h3>
-            <div style="height: 300px;">
-                <canvas id="chartDificuldade"></canvas>
+            <div class="content-card" style="background: #161b22; margin-bottom: 2rem; box-shadow: none; border: 1px solid #30363d;">
+                <h3 style="color: var(--text-light); margin-bottom: 1rem;">📈 Evolução de Notas</h3>
+                <div class="chart-scroll-container">
+                    <div class="chart-wrapper" id="lineChartWrapper">
+                        <canvas id="chartEvolucao"></canvas>
+                    </div>
+                </div>
             </div>
+
+            <div class="content-card" style="background: #161b22; box-shadow: none; border: 1px solid #30363d;">
+                <h3 style="color: var(--text-light); margin-bottom: 1rem;">📊 Desempenho por Dificuldade</h3>
+                <div style="height: 300px; width: 100%;">
+                    <canvas id="chartDificuldade"></canvas>
+                </div>
+            </div>
+
         </div>
-    </div>
+    </main>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
@@ -138,26 +83,14 @@
 
         function renderizarGraficoEvolucao(historico) {
             const ctx = document.getElementById('chartEvolucao');
-            const container = document.getElementById('lineChartContainer');
+            const wrapper = document.getElementById('lineChartWrapper');
             
-            // === LÓGICA DE LARGURA FIXA E SUAVE ===
-            const minWidthPerPoint = 80; 
-            const scrollWrapper = document.querySelector('.chart-scroll-wrapper');
-            // Usa a largura disponível da tela como base mínima
-            const containerWidth = scrollWrapper ? scrollWrapper.clientWidth : 800; 
-            
-            // A largura será o MAIOR valor entre: "Largura da Tela" E "Total de Pontos * 80px"
-            // Isso garante que com poucos pontos ele preencha a tela, e com muitos ele ative o scroll.
-            const newWidth = Math.max(containerWidth, historico.length * minWidthPerPoint);
-            
-            container.style.width = newWidth + 'px';
+            // Largura dinâmica para scroll
+            const minWidth = 800;
+            const dynamicWidth = Math.max(minWidth, historico.length * 70);
+            wrapper.style.width = dynamicWidth + 'px';
 
-            const labels = historico.map(h => {
-                let titulo = h.quizTitulo;
-                if (titulo.length > 20) titulo = titulo.substring(0, 20) + '...';
-                return h.labelData + ' - ' + titulo;
-            });
-            
+            const labels = historico.map(h => h.labelData + ' - ' + (h.quizTitulo.length > 15 ? h.quizTitulo.substring(0,15)+'...' : h.quizTitulo));
             const valores = historico.map(h => h.porcentagem > 100 ? 100 : h.porcentagem);
 
             if (chartEvolucao) chartEvolucao.destroy();
@@ -169,60 +102,24 @@
                     datasets: [{
                         label: 'Nota (%)',
                         data: valores,
-                        borderColor: '#238636',
-                        backgroundColor: 'rgba(35, 134, 54, 0.1)',
+                        borderColor: '#00c26e',
+                        backgroundColor: 'rgba(0, 194, 110, 0.1)',
                         borderWidth: 2,
                         tension: 0.3,
                         fill: true,
                         pointBackgroundColor: '#161b22',
-                        pointBorderColor: '#238636',
-                        pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointBorderColor: '#00c26e',
+                        pointRadius: 5
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // CRUCIAL para o scroll funcionar sem achatar
-                    layout: {
-                        padding: { top: 10, right: 20, bottom: 10, left: 10 }
-                    },
+                    maintainAspectRatio: false,
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: 100, 
-                            grid: { color: '#30363d' }, 
-                            ticks: { color: '#8b949e' } 
-                        },
-                        x: { 
-                            grid: { color: '#30363d' }, 
-                            ticks: { 
-                                color: '#8b949e', 
-                                maxRotation: 45, 
-                                minRotation: 45 
-                            } 
-                        }
+                        y: { beginAtZero: true, max: 100, grid: { color: '#30363d' }, ticks: { color: '#9da5b4' } },
+                        x: { grid: { color: '#30363d' }, ticks: { color: '#9da5b4' } }
                     },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                title: (items) => {
-                                    const i = items[0].dataIndex;
-                                    const item = historico[i];
-                                    // Tooltip completo
-                                    return item.labelData + ' | ' + item.quizTitulo + ' (' + item.tentativa + 'ª Tentativa)';
-                                },
-                                label: (ctx) => `Nota: ${ctx.raw.toFixed(1)}%`
-                            },
-                            backgroundColor: 'rgba(22, 27, 34, 0.95)',
-                            titleFont: { size: 13 },
-                            bodyFont: { size: 13 },
-                            padding: 10,
-                            borderColor: '#238636',
-                            borderWidth: 1,
-                            displayColors: false
-                        }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
@@ -230,7 +127,7 @@
         function renderizarGraficoDificuldade(dadosDif) {
             const ctx = document.getElementById('chartDificuldade');
             const ordem = ['FÁCIL', 'MÉDIO', 'DIFICIL', 'DIFÍCIL'];
-            const cores = { 'FÁCIL': '#238636', 'MÉDIO': '#d29922', 'DIFICIL': '#da3633', 'DIFÍCIL': '#da3633' };
+            const cores = { 'FÁCIL': '#00c26e', 'MÉDIO': '#ffc107', 'DIFICIL': '#da3633', 'DIFÍCIL': '#da3633' };
             
             dadosDif.sort((a, b) => ordem.indexOf(a.label.toUpperCase()) - ordem.indexOf(b.label.toUpperCase()));
             const labels = dadosDif.map(s => s.label);
@@ -250,8 +147,8 @@
                     maintainAspectRatio: false,
                     indexAxis: 'y',
                     scales: {
-                        x: { beginAtZero: true, max: 100, grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
-                        y: { grid: { display: false }, ticks: { color: '#c9d1d9', font: {weight:'bold'} } }
+                        x: { beginAtZero: true, max: 100, grid: { color: '#30363d' }, ticks: { color: '#9da5b4' } },
+                        y: { grid: { display: false }, ticks: { color: '#f5f5f5', font: {weight:'bold'} } }
                     },
                     plugins: { legend: { display: false } }
                 }
@@ -272,10 +169,8 @@
                 });
         }
 
-        // Renderiza inicial com dados do thymeleaf
         renderizarGraficoEvolucao(dadosIniciaisH);
         renderizarGraficoDificuldade(dadosIniciaisD);
-
         /*]]>*/
     </script>
 </body>

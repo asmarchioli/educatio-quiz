@@ -2,73 +2,81 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quizzes Disponíveis | Educatio</title>
-    <link rel="stylesheet" th:href="@{/css/global2.css}">
-    <link rel="stylesheet" th:href="@{/css/fluxo_aluno2.css}">
+    <title>Quizzes Disponíveis</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
 </head>
 <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎓 Educatio</div>
-        <div class="navbar-user">
-            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
-            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
+        <h1>🎓 Educatio Quiz - Aluno</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${aluno.nome}"></span>
+            <a href="/logout" class="btn-logout">Sair</a>
         </div>
     </nav>
 
-    <div class="main-container">
-        <!-- Cabeçalho com Voltar -->
-        <div class="page-header">
-            <h1 class="page-title">Quizzes Disponíveis</h1>
-            <a href="/aluno/home" class="btn btn-secondary">⬅ Voltar</a>
-        </div>
-
-        <!-- Área de Acesso por PIN -->
-        <div class="card" style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <h3 style="color: var(--text-white);">🔐 Quiz Privado</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Tem um código PIN? Digite ao lado.</p>
+    <main class="main-content">
+        <div class="content-card">
+            
+            <div class="quiz-header">
+                <h2 class="text-xl font-semibold" style="color: var(--text-light);">
+                    Quizzes Disponíveis
+                </h2>
+                <a href="/aluno/home" class="btn btn-secondary">⬅️ Voltar</a>
             </div>
-            <form action="/aluno/quizzes/buscar-pin" method="get" style="display: flex; gap: 10px;">
-                <input type="text" name="pin" class="form-control" placeholder="Digite o PIN (Ex: X9A2)" required style="width: 200px;">
-                <button type="submit" class="btn btn-primary">Acessar</button>
-            </form>
-        </div>
 
-        <!-- Mensagem de Erro -->
-        <div th:if="${erro}" class="card" style="border-color: var(--danger); color: var(--danger); margin-bottom: 1.5rem;">
-            <span th:text="${erro}"></span>
-        </div>
+            <div class="filter-bar" style="background: #161b22; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                    <strong style="color: var(--text-light); white-space: nowrap;">🔐 Acesso Privado:</strong>
+                    
+                    <form action="/aluno/quizzes/buscar-pin" method="get" style="display: flex; gap: 10px; flex-grow: 1;">
+                        <input type="text" name="pin" class="form-input" placeholder="Digite o código PIN (Ex: X9A2)..." required>
+                        <button type="submit" class="btn btn-primary">Acessar Quiz</button>
+                    </form>
+                </div>
+            </div>
 
-        <h2 style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 1.2rem; border-left: 4px solid var(--primary); padding-left: 10px;">
-            Quizzes Públicos (Recomendados para seu nível)
-        </h2>
+            <div th:if="${erro}" class="alert alert-danger" style="margin-bottom: 1.5rem;">
+                <span th:text="${erro}"></span>
+            </div>
 
-        <!-- Lista de Cards -->
-        <div class="quiz-list-grid">
-            <div th:each="quiz : ${quizzes}" class="card quiz-card">
-                <div class="quiz-card-header">
-                    <div class="quiz-badges">
-                        <span class="badge" th:text="${quiz.nivel_educacional}">Nível</span>
-                        <span class="badge" th:text="${quiz.nome_area}">Área</span>
+            <h3 style="color: var(--text-muted); margin-bottom: 1.5rem; border-left: 4px solid var(--accent); padding-left: 10px;">
+                Recomendados para seu nível
+            </h3>
+
+            <div class="cards">
+                <div th:each="quiz : ${quizzes}" class="quiz-card-aluno">
+                    <div>
+                        <div class="quiz-meta">
+                            <span class="badge badge-nivel" th:text="${quiz.nivel_educacional}">Nível</span>
+                            <span class="badge badge-area" th:text="${quiz.nome_area != null ? quiz.nome_area : 'Geral'}">Área</span>
+                        </div>
+                        
+                        <h3 th:text="${quiz.titulo}">Título do Quiz</h3>
+                        
+                        <p style="color: var(--text-muted); font-size: 0.9rem; min-height: 40px; margin-bottom: 1rem;" 
+                           th:text="${quiz.descricao ?: 'Sem descrição disponível.'}">
+                        </p>
+                        
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">
+                            <span>Criado por: </span>
+                            <strong th:text="${quiz.professor_criador_nome ?: 'Professor'}"></strong>
+                        </div>
                     </div>
-                    <h3 style="color: var(--text-white); margin-bottom: 0.5rem;" th:text="${quiz.titulo}">Título</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; min-height: 40px;" 
-                       th:text="${quiz.descricao ?: 'Sem descrição disponível.'}"></p>
-                </div>
-                
-                <div class="quiz-footer">
-                    <a th:href="@{/aluno/quizzes/{id}/realizar(id=${quiz.id_quiz})}" class="btn btn-primary" style="width: 100%;">
-                        Começar Quiz
-                    </a>
+                    
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #2e3542;">
+                        <a th:href="@{/aluno/quizzes/{id}/realizar(id=${quiz.id_quiz})}" class="btn btn-primary" style="width: 100%;">
+                            ▶️ Começar Quiz
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Estado Vazio -->
-        <div th:if="${quizzes.isEmpty()}" style="text-align: center; padding: 4rem; color: var(--text-muted);">
-            <h3>📭 Nenhum quiz público encontrado.</h3>
-            <p>Tente usar um PIN ou volte mais tarde.</p>
+            <div th:if="${quizzes.isEmpty()}" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                <h3>📭 Nenhum quiz público encontrado.</h3>
+            </div>
+
         </div>
-    </div>
+    </main>
 </body>
 </html>

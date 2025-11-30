@@ -2,102 +2,60 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Respondendo... | Educatio</title>
-    <link rel="stylesheet" th:href="@{/css/global2.css}">
-    <style>
-        .question-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-        .q-number {
-            position: absolute;
-            top: -15px; left: 20px;
-            background: var(--primary);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .q-enunciado {
-            font-size: 1.2rem;
-            color: var(--text-white);
-            margin-bottom: 1.5rem;
-            margin-top: 0.5rem;
-        }
-        .option-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .option-label:hover {
-            background-color: rgba(255,255,255,0.03);
-            border-color: var(--text-muted);
-        }
-        input[type="radio"]:checked + span {
-            color: var(--primary-hover);
-            font-weight: bold;
-        }
-    </style>
+    <title>Respondendo Quiz</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
 </head>
 <body>
     <nav class="navbar">
-        <div class="navbar-brand">🎓 Educatio</div>
-        <!-- Sem botão de sair para evitar acidentes durante o quiz -->
+        <h1>🎓 Educatio Quiz</h1>
     </nav>
 
-    <div class="main-container" style="max-width: 800px;">
-        <div class="page-header">
-            <div>
-                <h1 class="page-title" th:text="${quiz.titulo}">Título do Quiz</h1>
-                <p style="color: var(--text-muted);" th:text="${quiz.descricao}"></p>
-            </div>
-            <a href="/aluno/quizzes" class="btn btn-secondary" onclick="return confirm('Tem certeza? Seu progresso será perdido.')">Cancelar</a>
-        </div>
-
-        <form th:action="@{/aluno/quizzes/{id}/submeter(id=${quiz.id_quiz})}" method="post">
+    <main class="main-content" style="max-width: 900px;">
+        <div class="content-card">
             
-            <div th:each="questao, stat : ${quiz.questoes}" class="question-box">
-                <div class="q-number" th:text="'Questão ' + ${stat.count}">01</div>
+            <div class="quiz-header">
+                <div>
+                    <h2 class="text-xl font-bold" style="color: var(--text-light); margin-bottom: 0.5rem;" th:text="${quiz.titulo}"></h2>
+                    <p class="text-muted" th:text="${quiz.descricao}"></p>
+                </div>
+                <a href="/aluno/quizzes" class="btn btn-secondary" onclick="return confirm('Tem certeza? Seu progresso será perdido.')">Cancelar</a>
+            </div>
+
+            <form th:action="@{/aluno/quizzes/{id}/submeter(id=${quiz.id_quiz})}" method="post">
                 
-                <p class="q-enunciado" th:text="${questao.enunciado}"></p>
+                <div th:each="questao, stat : ${quiz.questoes}" class="question-container">
+                    <span class="question-number" th:text="'Questão ' + ${stat.count}">01</span>
+                    
+                    <div class="question-text" th:text="${questao.enunciado}">Enunciado...</div>
 
-                <!-- Múltipla Escolha / V ou F -->
-                <div th:if="${questao.tipo_questao.name() != 'PREENCHER_LACUNA'}">
-                    <label th:each="alt : ${questao.alternativas}" class="option-label">
-                        <input type="radio" 
+                    <div th:if="${questao.tipo_questao.name() != 'PREENCHER_LACUNA'}">
+                        <label th:each="alt : ${questao.alternativas}" class="option-label">
+                            <input type="radio" 
+                                   th:name="'questao_' + ${questao.id_questao}" 
+                                   th:value="${alt.num_alternativa}" 
+                                   required>
+                            <span class="option-text" th:text="${alt.texto_alternativa}">Opção</span>
+                        </label>
+                    </div>
+
+                    <div th:if="${questao.tipo_questao.name() == 'PREENCHER_LACUNA'}">
+                        <input type="text" class="form-input" 
                                th:name="'questao_' + ${questao.id_questao}" 
-                               th:value="${alt.num_alternativa}" 
+                               placeholder="Digite sua resposta aqui..." 
+                               autocomplete="off"
                                required>
-                        <span th:text="${alt.texto_alternativa}">Opção</span>
-                    </label>
+                    </div>
                 </div>
 
-                <!-- Preencher Lacuna -->
-                <div th:if="${questao.tipo_questao.name() == 'PREENCHER_LACUNA'}">
-                    <input type="text" class="form-control" 
-                           th:name="'questao_' + ${questao.id_questao}" 
-                           placeholder="Digite sua resposta aqui..." required>
+                <div style="text-align: right; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                        ✅ Finalizar e Enviar
+                    </button>
                 </div>
-            </div>
+            </form>
 
-            <div style="text-align: right; margin-top: 2rem;">
-                <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.1rem;">
-                    ✅ Finalizar e Enviar
-                </button>
-            </div>
-        </form>
-    </div>
+        </div>
+    </main>
 </body>
 </html>

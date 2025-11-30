@@ -2,55 +2,48 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Área do Aluno | Educatio</title>
-    <link rel="stylesheet" th:href="@{/css/global2.css}">
-    <link rel="stylesheet" th:href="@{/css/fluxo_aluno2.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Aluno</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/fluxo_aluno.css}">
 </head>
 <body>
-    <!-- Navbar Padronizada -->
     <nav class="navbar">
-        <div class="navbar-brand">
-            <span>🎓 Educatio</span>
-        </div>
-        <div class="navbar-user">
-            <span class="user-name" th:text="${aluno.nome}">Aluno</span>
-            <span class="badge" th:text="${aluno.nivel_educacional.displayValue}">Nível</span>
-            <a href="/logout" class="btn btn-sm btn-danger">Sair</a>
+        <h1>🎓 Educatio Quiz - Aluno</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span th:text="${aluno.nome}">Aluno</span>
+            <span class="badge badge-nivel" th:text="${aluno.nivel_educacional}">Nível</span>
+            <a href="/logout" class="btn-logout">Sair</a>
         </div>
     </nav>
 
-    <div class="main-container">
-        <div class="page-header">
-            <h1 class="page-title">Bem-vindo, <span th:text="${#strings.arraySplit(aluno.nome, ' ')[0]}">Aluno</span>!</h1>
+    <div class="container">
+        <div class="welcome">
+            <h2 th:text="'Olá, ' + ${#strings.arraySplit(aluno.nome, ' ')[0]} + '!'"></h2>
+            <p>Bem-vindo ao seu ambiente de aprendizado.</p>
         </div>
 
-        <div class="dashboard-grid">
-            <!-- Card 1: Realizar Quiz -->
-            <a href="/aluno/quizzes" class="dash-card">
-                <div class="dash-icon">📝</div>
-                <h3 style="color: var(--text-white);">Realizar Quiz</h3>
-                <p style="color: var(--text-muted); margin-top: 0.5rem;">
-                    Navegue pelos quizzes públicos ou acesse via PIN.
-                </p>
-            </a>
+        <div class="cards">
+            <div class="card-body">
+                <div class="card-icon">📝</div>
+                <h3>Realizar Quiz</h3>
+                <p>Navegue pelos quizzes disponíveis ou acesse via PIN.</p>
+                <a href="/aluno/quizzes" class="card-btn">Acessar</a>
+            </div>
 
-            <!-- Card 2: Histórico -->
-            <a href="/aluno/historico" class="dash-card">
-                <div class="dash-icon">📚</div>
-                <h3 style="color: var(--text-white);">Meu Histórico</h3>
-                <p style="color: var(--text-muted); margin-top: 0.5rem;">
-                    Revise suas tentativas e veja seu progresso.
-                </p>
-            </a>
+            <div class="card-body">
+                <div class="card-icon">📚</div>
+                <h3>Meu Histórico</h3>
+                <p>Revise suas tentativas passadas e veja seu progresso.</p>
+                <a href="/aluno/historico" class="card-btn">Ver Histórico</a>
+            </div>
 
-            <!-- Card 3: Desempenho -->
-            <a href="/aluno/desempenho" class="dash-card">
-                <div class="dash-icon">📊</div>
-                <h3 style="color: var(--text-white);">Desempenho</h3>
-                <p style="color: var(--text-muted); margin-top: 0.5rem;">
-                    Gráficos e estatísticas da sua jornada.
-                </p>
-            </a>
+            <div class="card-body">
+                <div class="card-icon">📊</div>
+                <h3>Desempenho</h3>
+                <p>Analise estatísticas e gráficos da sua jornada.</p>
+                <a href="/aluno/desempenho" class="card-btn">Ver Gráficos</a>
+            </div>
         </div>
     </div>
 </body>
